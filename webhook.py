@@ -19,28 +19,31 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, Response
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-p', help='server port (listening)',type=int)
-parser.add_argument('-a', help='server IP address (listening)',type=str)
-parser.add_argument('-w', help='webhook URL', default=None,type=str)
+parser.add_argument('-p', help='server port (listening)', type=int)
+parser.add_argument('-a', help='server IP address (listening)', type=str)
+parser.add_argument('-w', help='webhook URL', default=None, type=str)
 args = parser.parse_args()
 webhook_url = args.w or os.getenv('webhook_url') or None
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     """Handles application startup and shutdown events."""
     app.state.bot_app = acrobot.bot_builder()
-    if webhook_url: 
+    if webhook_url:
         await app.state.bot_app.bot.setWebhook(webhook_url)
     async with app.state.bot_app:
         await app.state.bot_app.start()
         yield
-        await app.state.bot_app.stop()    
+        await app.state.bot_app.stop()
 
 # Initialize the FastAPI application with the lifespan handler.
 app = FastAPI(lifespan=lifespan)
 
 # This is the endpoint that Telegram will hit with updates.
 # We're listening for POST requests on the path we defined.
+
+
 @app.post('/')
 async def webhook_handler(request: Request) -> Response:
     """Processes incoming Telegram updates from the webhook."""
@@ -51,4 +54,3 @@ async def webhook_handler(request: Request) -> Response:
 
 if __name__ == "__main__":
     uvicorn.run(app, host=args.a, port=args.p)
-    
