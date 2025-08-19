@@ -29,9 +29,9 @@ GEMINI_API_KEY = os.environ.get("genai_key")
 
 
 TEMPERATURE = 1.1
-MAX_HISTORY = 6
-MAX_CALLS = 50
-MAX_WORD_LENGTH = 12
+MAX_HISTORY = 6 # length of conversation history
+MAX_CALLS = 50 # max allowable calls to the model API
+MAX_WORD_LENGTH = 12 # max length of acronym word in characters
 THROTTLE_INTERVAL = 7  # seconds
 
 SYSTEM_INSTRUCTION = """
@@ -72,7 +72,8 @@ state = BotState()
 
 async def queue_processor() -> None:
     '''
-    Async loop for throttling and processing acronym requests.
+    Async loop implementing a leaky bucket rate limiter. Acro requests 
+    get added to the event queue and processed every THROTTLE_INTERVAL seconds.
     '''
     while True:
         if not state.event_queue:
