@@ -10,7 +10,7 @@ import random
 import logging
 import asyncio
 from collections import deque
-from collections.abc import Callable, Awaitable
+from collections.abc import Callable
 from typing import Deque
 from telegram import Update
 import google.generativeai as genai
@@ -147,9 +147,10 @@ async def info(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     Relays info about the state of the bot.        
     '''
     logger.info("Chat History:\n" + "\n".join(f"{u}: {m}" for u, m in state.history))
+    logger.info(f"Keywords: {state.keywords}\n")
     logger.info(f"Queue length: {len(state.event_queue)} | API calls: {state.call_count}")
     if update.message: await update.message.reply_text(
-        f"Queue length: {len(state.event_queue)} | API calls: {state.call_count}"
+        f"Queue length: {len(state.event_queue)} | API calls: {state.call_count} | KW: {state.keywords}"
     )
 
 
