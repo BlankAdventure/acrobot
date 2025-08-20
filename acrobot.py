@@ -65,9 +65,9 @@ class BotState:
     def __init__(self):
         self.event_queue: Deque[tuple[Callable,Update,any]] = deque()
         self.queue_event: asyncio.Event = asyncio.Event()
-        self.history: list[str] = []
+        self.history: list = []
         self.call_count: int = 0
-        self.keywords: list[str] = []
+        self.keywords: list = []
 
 state = BotState()
 
