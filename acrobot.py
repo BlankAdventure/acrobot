@@ -10,6 +10,7 @@ import random
 import logging
 import asyncio
 from collections import deque
+from collections.abc import Callable
 from typing import Deque
 from telegram import Update
 import google.generativeai as genai
@@ -62,10 +63,11 @@ logger = logging.getLogger(__name__)
 
 class BotState:
     def __init__(self):
-        self.event_queue: Deque[tuple[Update,str]] = deque()
+        self.event_queue: Deque[tuple[Callable,Update,any]] = deque()
         self.queue_event: asyncio.Event = asyncio.Event()
-        self.history: list = []
+        self.history: list[str] = []
         self.call_count: int = 0
+        self.keywords: list[str] = []
 
 state = BotState()
 
@@ -79,18 +81,58 @@ async def queue_processor() -> None:
         if not state.event_queue:
             state.queue_event.clear()
             await state.queue_event.wait()
-
-        if state.event_queue:
-            update, prompt = state.event_queue.popleft()
-            try:
-                response = await asyncio.to_thread(model.generate_content, 
-                                                   prompt,
-                                                   generation_config=generation_config)                
-                if update.message: await update.message.reply_text(response.text.strip())
-            except Exception as e:
-                logger.error(f"Model error: {e}")
-                if update.message: await update.message.reply_text("Dammit you broke something")
+        else:
+            func, *args = state.event_queue.popleft()
+            await func(*args)
             await asyncio.sleep(THROTTLE_INTERVAL)
+
+
+# === BOT TASKS ===
+async def keyword_task(update: Update, word: str) -> None:
+    '''
+    Form the bot's reply to a keyword hit.
+    '''    
+    response = await generate_acro(word)
+    if update.message and response:
+        await update.message.reply_text(f"Did someone say {word}!?\n" + response,do_quote=False)
+    elif update.message:
+        await update.message.reply_text("Dammit you broke something")    
+
+async def acro_task(update: Update, word: str) -> None:
+    '''
+    Form the bot's reply to an acronym request.    
+    '''    
+    response = await generate_acro(word)    
+    if update.message and response:
+        await update.message.reply_text(response,do_quote=False)
+    elif update.message:
+        await update.message.reply_text("Dammit you broke something")
+
+async def generate_acro(word: str) -> None|str:
+    '''
+    Forms the complete acronym prompt and gets the model's response.
+    '''
+    
+    convo = "\n".join(f"{u}: {m}" for u, m in state.history)
+    prompt = PROMPT_TEMPLATE.format(convo=convo, word=word)    
+    response = await model_response(prompt)    
+    return response
+
+async def model_response(prompt: str) -> None|str:
+    '''
+    Send the model a prompt and get a response.
+    '''
+    
+    text = None
+    try:
+        response = await asyncio.to_thread(model.generate_content, 
+                                           prompt,
+                                           generation_config=generation_config)
+        text = response.text.strip()
+        state.call_count += 1
+    except Exception as e:
+        logger.error(f"Model error: {e}")
+    return text
 
 
 # === COMMAND HANDLERS ===
@@ -105,19 +147,32 @@ async def info(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     Relays info about the state of the bot.        
     '''
     logger.info("Chat History:\n" + "\n".join(f"{u}: {m}" for u, m in state.history))
+    logger.info(f"Keywords: {state.keywords}\n")
     logger.info(f"Queue length: {len(state.event_queue)} | API calls: {state.call_count}")
     if update.message: await update.message.reply_text(
-        f"Queue length: {len(state.event_queue)} | API calls: {state.call_count}"
+        f"Queue length: {len(state.event_queue)} | API calls: {state.call_count} | KW: {state.keywords}"
     )
 
 
-async def add(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def add_keyword(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    '''
+    Manually add new keywords to the trigger list.
+    Usage: /add_keyword kw1 kw2 kw3 ...
+    '''
+    if context.args is None or len(context.args) < 1:
+        if update.message: await update.message.reply_text("Usage: /add_keyword kw1 kw2 kw3 ...")
+        return
+    state.keywords.extend(context.args)
+    
+    
+    
+async def add_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     '''
     Manually add a new message to the chat history.
-    Usage: /add username add this message!
+    Usage: /add_message username add this message!
     '''
     if context.args is None or len(context.args) < 2:
-        if update.message: await update.message.reply_text("Usage: /add username add this message!")
+        if update.message: await update.message.reply_text("Usage: /add_message username add this message!")
         return
 
     username, message = context.args[0], " ".join(context.args[1:])
@@ -138,8 +193,13 @@ async def handle_message(update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
 
     state.history.append((sender, message))
     state.history = state.history[-MAX_HISTORY:]
+    
+    word = next((w for w in state.keywords if w in message), None)    
+    if word:
+        state.event_queue.append((keyword_task, update, word))
+        state.queue_event.set()        
 
-async def generate_acronym(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def handle_acro(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     '''
     Generates a new acronym and posts it in the chat. If no word is specified
     it will pick at random from the last message.
@@ -153,13 +213,9 @@ async def generate_acronym(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         state.history[-1][1].split()
     )
     word = word[:MAX_WORD_LENGTH]
-
-    convo = "\n".join(f"{u}: {m}" for u, m in state.history)
-    prompt = PROMPT_TEMPLATE.format(convo=convo, word=word)
-
-    state.event_queue.append((update, prompt))
+    state.event_queue.append((acro_task, update, word))
     state.queue_event.set()
-    state.call_count += 1
+
 
 def bot_builder() -> Application:
     '''
@@ -177,8 +233,9 @@ def bot_builder() -> Application:
     app = ApplicationBuilder().token(TELEGRAM_BOT_TOKEN).build()    
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("info", info))    
-    app.add_handler(CommandHandler("add", add))
-    app.add_handler(CommandHandler("acro", generate_acronym))
+    app.add_handler(CommandHandler("add_message", add_message))
+    app.add_handler(CommandHandler("add_keyword", add_keyword))
+    app.add_handler(CommandHandler("acro", handle_acro))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     
     return app
