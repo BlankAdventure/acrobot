@@ -9,6 +9,7 @@ import os
 import random
 import logging
 import asyncio
+from typing import Any
 from collections import deque
 from collections.abc import Callable
 from typing import Deque
@@ -62,8 +63,8 @@ logger = logging.getLogger(__name__)
 
 
 class BotState:
-    def __init__(self):
-        self.event_queue: Deque[tuple[Callable,Update,any]] = deque()
+    def __init__(self) -> None:
+        self.event_queue: Deque[tuple[Callable,Update,Any]] = deque()
         self.queue_event: asyncio.Event = asyncio.Event()
         self.history: list = []
         self.call_count: int = 0
@@ -191,13 +192,14 @@ async def handle_message(update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
     sender = user.username or user.first_name or user.last_name or "Unknown"
     message = update.message.text
 
-    state.history.append((sender, message))
-    state.history = state.history[-MAX_HISTORY:]
-    
-    word = next((w for w in state.keywords if w in message), None)    
-    if word:
-        state.event_queue.append((keyword_task, update, word))
-        state.queue_event.set()        
+    if message:
+        state.history.append((sender, message))
+        state.history = state.history[-MAX_HISTORY:]
+        
+        word = next((w for w in state.keywords if w in message), None)    
+        if word:
+            state.event_queue.append((keyword_task, update, word))
+            state.queue_event.set()        
 
 async def handle_acro(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     '''
