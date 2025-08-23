@@ -62,7 +62,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-class BotState:
+class Acrobot:
     def __init__(self) -> None:
         self.event_queue: Deque[tuple[Callable,Update,Any]] = deque()
         self.queue_event: asyncio.Event = asyncio.Event()
@@ -70,153 +70,154 @@ class BotState:
         self.call_count: int = 0
         self.keywords: list = []
 
-state = BotState()
 
 
-async def queue_processor() -> None:
-    '''
-    Async loop implementing a leaky bucket rate limiter. Acro requests 
-    get added to the event queue and processed every THROTTLE_INTERVAL seconds.
-    '''
-    while True:
-        if not state.event_queue:
-            state.queue_event.clear()
-            await state.queue_event.wait()
-        else:
-            func, *args = state.event_queue.popleft()
-            await func(*args)
-            await asyncio.sleep(THROTTLE_INTERVAL)
 
-
-# === BOT TASKS ===
-async def keyword_task(update: Update, word: str) -> None:
-    '''
-    Form the bot's reply to a keyword hit.
-    '''    
-    response = await generate_acro(word)
-    if update.message and response:
-        await update.message.reply_text(f"Did someone say {word}!?\n" + response,do_quote=False)
-    elif update.message:
-        await update.message.reply_text("Dammit you broke something")    
-
-async def acro_task(update: Update, word: str) -> None:
-    '''
-    Form the bot's reply to an acronym request.    
-    '''    
-    response = await generate_acro(word)    
-    if update.message and response:
-        await update.message.reply_text(response,do_quote=False)
-    elif update.message:
-        await update.message.reply_text("Dammit you broke something")
-
-async def generate_acro(word: str) -> None|str:
-    '''
-    Forms the complete acronym prompt and gets the model's response.
-    '''
-    
-    convo = "\n".join(f"{u}: {m}" for u, m in state.history)
-    prompt = PROMPT_TEMPLATE.format(convo=convo, word=word)    
-    response = await model_response(prompt)    
-    return response
-
-async def model_response(prompt: str) -> None|str:
-    '''
-    Send the model a prompt and get a response.
-    '''
-    
-    text = None
-    try:
-        response = await asyncio.to_thread(model.generate_content, 
-                                           prompt,
-                                           generation_config=generation_config)
-        text = response.text.strip()
-        state.call_count += 1
-    except Exception as e:
-        logger.error(f"Model error: {e}")
-    return text
-
-
-# === COMMAND HANDLERS ===
-async def start(update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
-    '''
-    Posts an introduction message to the chat.        
-    '''
-    if update.message: await update.message.reply_text("Hi, I'm Acrobot. Use /acro WORD to generate an acronym.")
-
-async def info(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    '''
-    Relays info about the state of the bot.        
-    '''
-    logger.info("Chat History:\n" + "\n".join(f"{u}: {m}" for u, m in state.history))
-    logger.info(f"Keywords: {state.keywords}\n")
-    logger.info(f"Queue length: {len(state.event_queue)} | API calls: {state.call_count}")
-    if update.message: await update.message.reply_text(
-        f"Queue length: {len(state.event_queue)} | API calls: {state.call_count} | KW: {state.keywords}"
-    )
-
-
-async def add_keyword(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    '''
-    Manually add new keywords to the trigger list.
-    Usage: /add_keyword kw1 kw2 kw3 ...
-    '''
-    if context.args is None or len(context.args) < 1:
-        if update.message: await update.message.reply_text("Usage: /add_keyword kw1 kw2 kw3 ...")
-        return
-    state.keywords.extend(context.args)
+    async def queue_processor(self) -> None:
+        '''
+        Async loop implementing a leaky bucket rate limiter. Acro requests 
+        get added to the event queue and processed every THROTTLE_INTERVAL seconds.
+        '''
+        while True:
+            if not self.event_queue:
+                self.queue_event.clear()
+                await self.queue_event.wait()
+            else:
+                func, *args = self.event_queue.popleft()
+                await func(*args)
+                await asyncio.sleep(THROTTLE_INTERVAL)
     
     
+    # === BOT TASKS ===
+    async def keyword_task(self, update: Update, word: str) -> None:
+        '''
+        Form the bot's reply to a keyword hit.
+        '''    
+        response = await self.generate_acro(word)
+        if update.message and response:
+            await update.message.reply_text(f"Did someone say {word}!?\n" + response,do_quote=False)
+        elif update.message:
+            await update.message.reply_text("Dammit you broke something")    
     
-async def add_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    '''
-    Manually add a new message to the chat history.
-    Usage: /add_message username add this message!
-    '''
-    if context.args is None or len(context.args) < 2:
-        if update.message: await update.message.reply_text("Usage: /add_message username add this message!")
-        return
-
-    username, message = context.args[0], " ".join(context.args[1:])
-    state.history.append((username, message))
-    state.history = state.history[-MAX_HISTORY:]
-    if update.message: await update.message.reply_text("Message added.")
-
-async def handle_message(update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
-    '''
-    Automatically adds new chat messages to the history.
-    '''
-    if not update.message or not update.message.from_user:
-        return
+    async def acro_task(self, update: Update, word: str) -> None:
+        '''
+        Form the bot's reply to an acronym request.    
+        '''    
+        response = await self.generate_acro(word)    
+        if update.message and response:
+            await update.message.reply_text(response,do_quote=False)
+        elif update.message:
+            await update.message.reply_text("Dammit you broke something")
     
-    user = update.message.from_user
-    sender = user.username or user.first_name or user.last_name or "Unknown"
-    message = update.message.text
-
-    if message:
-        state.history.append((sender, message))
-        state.history = state.history[-MAX_HISTORY:]
+    async def generate_acro(self, word: str) -> None|str:
+        '''
+        Forms the complete acronym prompt and gets the model's response.
+        '''
         
-        word = next((w for w in state.keywords if w in message), None)    
-        if word:
-            state.event_queue.append((keyword_task, update, word))
-            state.queue_event.set()        
-
-async def handle_acro(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    '''
-    Generates a new acronym and posts it in the chat. If no word is specified
-    it will pick at random from the last message.
-    '''
+        convo = "\n".join(f"{u}: {m}" for u, m in self.history)
+        prompt = PROMPT_TEMPLATE.format(convo=convo, word=word)    
+        response = await self.model_response(prompt)    
+        return response
     
-    if state.call_count >= MAX_CALLS:
-        if update.message: await update.message.reply_text("No more! You're wasting my precious tokens!")
-        return
-
-    word = context.args[0] if context.args else random.choice(
-        state.history[-1][1].split()
-    )
-    word = word[:MAX_WORD_LENGTH]
-    state.event_queue.append((acro_task, update, word))
-    state.queue_event.set()
+    
+    async def model_response(self, prompt: str) -> None|str:
+        '''
+        Send the model a prompt and get a response.
+        '''
+        
+        text = None
+        try:
+            response = await asyncio.to_thread(model.generate_content, 
+                                               prompt,
+                                               generation_config=generation_config)
+            text = response.text.strip()
+            self.call_count += 1
+        except Exception as e:
+            logger.error(f"Model error: {e}")
+        return text
+    
+    
+    # === COMMAND HANDLERS ===
+    async def start(self, update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
+        '''
+        Posts an introduction message to the chat.        
+        '''
+        if update.message: await update.message.reply_text("Hi, I'm Acrobot. Use /acro WORD to generate an acronym.")
+    
+    async def info(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+        '''
+        Relays info about the self of the bot.        
+        '''
+        logger.info("Chat History:\n" + "\n".join(f"{u}: {m}" for u, m in self.history))
+        logger.info(f"Keywords: {self.keywords}\n")
+        logger.info(f"Queue length: {len(self.event_queue)} | API calls: {self.call_count}")
+        if update.message: await update.message.reply_text(
+            f"Queue length: {len(self.event_queue)} | API calls: {self.call_count} | KW: {self.keywords}"
+        )
+    
+    
+    async def add_keyword(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+        '''
+        Manually add new keywords to the trigger list.
+        Usage: /add_keyword kw1 kw2 kw3 ...
+        '''
+        if context.args is None or len(context.args) < 1:
+            if update.message: await update.message.reply_text("Usage: /add_keyword kw1 kw2 kw3 ...")
+            return
+        self.keywords.extend(context.args)
+        
+        
+        
+    async def add_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+        '''
+        Manually add a new message to the chat history.
+        Usage: /add_message username add this message!
+        '''
+        if context.args is None or len(context.args) < 2:
+            if update.message: await update.message.reply_text("Usage: /add_message username add this message!")
+            return
+    
+        username, message = context.args[0], " ".join(context.args[1:])
+        self.history.append((username, message))
+        self.history = self.history[-MAX_HISTORY:]
+        if update.message: await update.message.reply_text("Message added.")
+    
+    async def handle_message(self, update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
+        '''
+        Automatically adds new chat messages to the history.
+        '''
+        if not update.message or not update.message.from_user:
+            return
+        
+        user = update.message.from_user
+        sender = user.username or user.first_name or user.last_name or "Unknown"
+        message = update.message.text
+    
+        if message:
+            self.history.append((sender, message))
+            self.history = self.history[-MAX_HISTORY:]
+            
+            word = next((w for w in self.keywords if w in message), None)    
+            if word:
+                self.event_queue.append((self.keyword_task, update, word))
+                self.queue_event.set()        
+    
+    async def handle_acro(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+        '''
+        Generates a new acronym and posts it in the chat. If no word is specified
+        it will pick at random from the last message.
+        '''
+        
+        if self.call_count >= MAX_CALLS:
+            if update.message: await update.message.reply_text("No more! You're wasting my precious tokens!")
+            return
+    
+        word = context.args[0] if context.args else random.choice(
+            self.history[-1][1].split()
+        )
+        word = word[:MAX_WORD_LENGTH]
+        self.event_queue.append((self.acro_task, update, word))
+        self.queue_event.set()
 
 
 def bot_builder() -> Application:
