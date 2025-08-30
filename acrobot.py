@@ -54,7 +54,6 @@ Now generate an acronym for the word "{word}".
 """
 
 # === SETUP ===
-generation_config = GenerationConfig(temperature=TEMPERATURE)
 genai.configure(api_key=GEMINI_API_KEY)
 model = genai.GenerativeModel("gemini-2.5-flash", system_instruction=SYSTEM_INSTRUCTION)
 
@@ -66,10 +65,17 @@ class Acrobot:
     def __init__(self) -> None:
         self.event_queue: Deque[tuple[Callable,Update,Any]] = deque()
         self.queue_event: asyncio.Event = asyncio.Event()
-        self.history: list = []
+        self.history: list[tuple[str,str]] = []
         self.call_count: int = 0
-        self.keywords: list = []
+        self.keywords: set[str] = set()
 
+        self.app = ApplicationBuilder().token(TELEGRAM_BOT_TOKEN).build()    
+        self.app.add_handler(CommandHandler("start", self.start))
+        self.app.add_handler(CommandHandler("info", self.info))    
+        self.app.add_handler(CommandHandler("add_message", self.add_message))
+        self.app.add_handler(CommandHandler("add_keyword", self.add_keyword))
+        self.app.add_handler(CommandHandler("acro", self.handle_acro))
+        self.app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, self.handle_message))
 
 
 
@@ -95,7 +101,7 @@ class Acrobot:
         '''    
         response = await self.generate_acro(word)
         if update.message and response:
-            await update.message.reply_text(f"Did someone say {word}!?\n" + response,do_quote=False)
+            await update.message.reply_text(f"{word}? Who said {word}!?\n" + response,do_quote=False)
         elif update.message:
             await update.message.reply_text("Dammit you broke something")    
     
@@ -126,6 +132,8 @@ class Acrobot:
         '''
         
         text = None
+        generation_config = GenerationConfig(temperature=TEMPERATURE)
+        print(TEMPERATURE)
         try:
             response = await asyncio.to_thread(model.generate_content, 
                                                prompt,
@@ -164,7 +172,7 @@ class Acrobot:
         if context.args is None or len(context.args) < 1:
             if update.message: await update.message.reply_text("Usage: /add_keyword kw1 kw2 kw3 ...")
             return
-        self.keywords.extend(context.args)
+        self.keywords.update(context.args)
         
         
         
@@ -197,9 +205,9 @@ class Acrobot:
             self.history.append((sender, message))
             self.history = self.history[-MAX_HISTORY:]
             
-            word = next((w for w in self.keywords if w in message), None)    
-            if word:
-                self.event_queue.append((self.keyword_task, update, word))
+            found = [w for w in self.keywords if w in message]
+            if len(found) > 0:
+                self.event_queue.append((self.keyword_task, update, random.choice(found)))
                 self.queue_event.set()        
     
     async def handle_acro(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -218,38 +226,52 @@ class Acrobot:
         word = word[:MAX_WORD_LENGTH]
         self.event_queue.append((self.acro_task, update, word))
         self.queue_event.set()
-
-
-def bot_builder() -> Application:
-    '''
-    Builds the telegram bot object and adds the callback functions.
-    '''
-
-    if not TELEGRAM_BOT_TOKEN:
-        raise ValueError("TELEGRAM_BOT_TOKEN environment variable not set.")
-    if not GEMINI_API_KEY:
-        raise ValueError("GEMINI_API_KEY environment variable not set.")
-
-    loop = asyncio.get_event_loop()
-    loop.create_task(queue_processor())
-
-    app = ApplicationBuilder().token(TELEGRAM_BOT_TOKEN).build()    
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(CommandHandler("info", info))    
-    app.add_handler(CommandHandler("add_message", add_message))
-    app.add_handler(CommandHandler("add_keyword", add_keyword))
-    app.add_handler(CommandHandler("acro", handle_acro))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     
-    return app
+    def start_loop(self):
+        self.loop = asyncio.get_event_loop()
+        self.loop.create_task(self.queue_processor())
+    
+    def run_polling(self):
+        self.app.run_polling()
+        
+        
+    def test(self):
+        self.loop = asyncio.new_event_loop()  # Create a new event loop
+        asyncio.set_event_loop(self.loop)
+        #self.loop = asyncio.get_event_loop()
+        self.loop.create_task(self.queue_processor())
+        self.app.run_polling()
+
+# def bot_builder() -> Application:
+#     '''
+#     Builds the telegram bot object and adds the callback functions.
+#     '''
+
+#     if not TELEGRAM_BOT_TOKEN:
+#         raise ValueError("TELEGRAM_BOT_TOKEN environment variable not set.")
+#     if not GEMINI_API_KEY:
+#         raise ValueError("GEMINI_API_KEY environment variable not set.")
+
+#     loop = asyncio.get_event_loop()
+#     loop.create_task(queue_processor())
+
+#     app = ApplicationBuilder().token(TELEGRAM_BOT_TOKEN).build()    
+#     app.add_handler(CommandHandler("start", start))
+#     app.add_handler(CommandHandler("info", info))    
+#     app.add_handler(CommandHandler("add_message", add_message))
+#     app.add_handler(CommandHandler("add_keyword", add_keyword))
+#     app.add_handler(CommandHandler("acro", handle_acro))
+#     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+    
+#     return app
 
 
-def run_polling() -> None:
-    '''
-    Runs the bot in polling mode - no need for a server.
-    '''
-    app = bot_builder()    
-    app.run_polling()
+# def run_polling() -> None:
+#     '''
+#     Runs the bot in polling mode - no need for a server.
+#     '''
+#     app = bot_builder()    
+#     app.run_polling()
 
-if __name__ == "__main__":
-    run_polling()
+# if __name__ == "__main__":
+#     run_polling()
