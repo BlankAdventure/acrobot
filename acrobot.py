@@ -73,7 +73,8 @@ class Acrobot:
         self.app.add_handler(CommandHandler("start", self.command_start))
         self.app.add_handler(CommandHandler("info", self.command_info))    
         self.app.add_handler(CommandHandler("add_message", self.add_message))
-        self.app.add_handler(CommandHandler("add_keyword", self.add_keyword))
+        self.app.add_handler(CommandHandler("add_keywords", self.add_keywords))
+        self.app.add_handler(CommandHandler("del_keywords", self.del_keywords))
         self.app.add_handler(CommandHandler("acro", self.handle_acro))
         self.app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, self.handle_message))
 
@@ -162,7 +163,7 @@ class Acrobot:
         )
     
     
-    async def add_keyword(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    async def add_keywords(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         '''
         Manually add new keywords to the trigger list.
         Usage: /add_keyword kw1 kw2 kw3 ...
@@ -170,10 +171,26 @@ class Acrobot:
         if context.args is None or len(context.args) < 1:
             if update.message: await update.message.reply_text("Usage: /add_keyword kw1 kw2 kw3 ...")
             return
-        self.keywords.update(context.args)
+        self._add_keywords(context.args)
         
+    def _add_keywords (self, keyword_list:list[str]) -> None:
+        if keyword_list is not None:
+            self.keywords = self.keywords.union(keyword_list)
+
+    async def del_keywords(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+        '''
+        Remove keywords from the trigger list.
+        Usage: /del_keyword kw1 kw2 kw3 ...
+        '''
+        if context.args is None or len(context.args) < 1:
+            if update.message: await update.message.reply_text("Usage: /del_keyword kw1 kw2 kw3 ...")
+            return
+        self._del_keywords(context.args)
         
-        
+    def _del_keywords (self, keyword_list:list[str]) -> None:
+        if keyword_list is not None:
+            self.keywords = self.keywords.difference(keyword_list)    
+    
     async def add_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         '''
         Manually add a new message to the chat history.
@@ -184,8 +201,7 @@ class Acrobot:
             return
     
         username, message = context.args[0], " ".join(context.args[1:])
-        self.history.append((username, message))
-        self.history = self.history[-MAX_HISTORY:]
+        self._update_history(username, message)
         if update.message: await update.message.reply_text("Message added.")
     
     async def handle_message(self, update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
@@ -200,13 +216,16 @@ class Acrobot:
         message = update.message.text
     
         if message:
-            self.history.append((sender, message))
-            self.history = self.history[-MAX_HISTORY:]
-            
+            self._update_history(sender, message)            
             found = [w for w in self.keywords if w in message]
             if len(found) > 0:
                 self.event_queue.append((self.keyword_task, update, random.choice(found)))
                 self.queue_event.set()        
+    
+    def _update_history(self, sender: str, message: str) -> None:
+        self.history = self.history + [(sender, message)]
+        self.history = self.history[-MAX_HISTORY:]
+
     
     async def handle_acro(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         '''
@@ -228,9 +247,11 @@ class Acrobot:
 
     def start_loop(self) -> None:
         try:
-            self.loop = asyncio.get_running_loop()               
+            self.loop = asyncio.get_running_loop()
+            logger.info("using running loop")               
         except:
             self.loop = asyncio.new_event_loop()
+            logger.info("using existing loop")
         asyncio.set_event_loop(self.loop)
         self.loop.create_task(self.queue_processor())
 

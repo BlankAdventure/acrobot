@@ -6,6 +6,8 @@ Created on Sat Aug 16 13:45:53 2025
 
 Run acrobot in webhook mode. This requires launching a server to handle post
 requests sent from telegram to the specified webhook address.
+
+python webhook.py -a 0.0.0.0 -p 8443 -w https://ef732f0e99c5.ngrok-free.app
 """
 
 import os
@@ -55,7 +57,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('-p', help='server port (listening)',type=int)
     parser.add_argument('-a', help='server IP address (listening)',type=str)
-    parser.add_argument('-w', help='webhook URL', default=None,type=str)
+    parser.add_argument('-w', help='webhook URL', default="0.0.0.0",type=str)
     args = parser.parse_args()    
     webhook_url = args.w or os.getenv('webhook_url') or None
     

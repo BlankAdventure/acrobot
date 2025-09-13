@@ -10,7 +10,7 @@ requests sent from telegram to the specified webhook address.
 webhook2 -> subclasses from Acrobot and FastAPI to provide 'single' interface
 
 ngrok http 8443 
-python webhook2.py -a 0.0.0.0 -p 8443 -w https://4ef0d431c158.ngrok-free.app
+python webhook2.py -a 0.0.0.0 -p 8443 -w https://3a2892b5f5aa.ngrok-free.app
 """
 
 import os
@@ -60,7 +60,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('-p', help='server port (listening)',type=int)
     parser.add_argument('-a', help='server IP address (listening)',type=str)
-    parser.add_argument('-w', help='webhook URL', default=None,type=str)
+    parser.add_argument('-w', help='webhook URL', default="0.0.0.0",type=str)
     args = parser.parse_args()    
     webhook_url = args.w or os.getenv('webhook_url') or None
     
