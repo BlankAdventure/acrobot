@@ -77,8 +77,6 @@ class Acrobot:
         self.app.add_handler(CommandHandler("acro", self.handle_acro))
         self.app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, self.handle_message))
 
-
-
     async def queue_processor(self) -> None:
         '''
         Async loop implementing a leaky bucket rate limiter. Acro requests 
@@ -194,6 +192,9 @@ class Acrobot:
         '''
         Automatically adds new chat messages to the history.
         '''
+        
+        
+        
         if not update.message or not update.message.from_user:
             return
         
@@ -224,24 +225,25 @@ class Acrobot:
             self.history[-1][1].split()
         )
         word = word[:MAX_WORD_LENGTH]
+        print(f'handle_acro called: {word}')
         self.event_queue.append((self.acro_task, update, word))
         self.queue_event.set()
-    
+
     def start_loop(self):
-        self.loop = asyncio.get_event_loop()
-        self.loop.create_task(self.queue_processor())
-    
-    def run_polling(self):
-        self.app.run_polling()
-        
-        
-    def test(self):
-        self.loop = asyncio.new_event_loop()  # Create a new event loop
+        try:
+            self.loop = asyncio.get_running_loop()               
+        except:
+            self.loop = asyncio.new_event_loop()
         asyncio.set_event_loop(self.loop)
-        #self.loop = asyncio.get_event_loop()
         self.loop.create_task(self.queue_processor())
+
+    def start_polling(self):
+        self.start_loop()
         self.app.run_polling()
 
+
+
+        
 # def bot_builder() -> Application:
 #     '''
 #     Builds the telegram bot object and adds the callback functions.
@@ -266,12 +268,12 @@ class Acrobot:
 #     return app
 
 
-# def run_polling() -> None:
-#     '''
-#     Runs the bot in polling mode - no need for a server.
-#     '''
-#     app = bot_builder()    
-#     app.run_polling()
+def run_polling() -> None:
+    '''
+    Runs the bot in polling mode - no need for a server.
+    '''
+    app = Acrobot()
+    app.start_polling()
 
-# if __name__ == "__main__":
-#     run_polling()
+if __name__ == "__main__":
+     run_polling()
