@@ -70,8 +70,8 @@ class Acrobot:
         self.keywords: set[str] = set()
 
         self.app = ApplicationBuilder().token(TELEGRAM_BOT_TOKEN).build()    
-        self.app.add_handler(CommandHandler("start", self.start))
-        self.app.add_handler(CommandHandler("info", self.info))    
+        self.app.add_handler(CommandHandler("start", self.command_start))
+        self.app.add_handler(CommandHandler("info", self.command_info))    
         self.app.add_handler(CommandHandler("add_message", self.add_message))
         self.app.add_handler(CommandHandler("add_keyword", self.add_keyword))
         self.app.add_handler(CommandHandler("acro", self.handle_acro))
@@ -144,13 +144,13 @@ class Acrobot:
     
     
     # === COMMAND HANDLERS ===
-    async def start(self, update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
+    async def command_start(self, update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
         '''
         Posts an introduction message to the chat.        
         '''
         if update.message: await update.message.reply_text("Hi, I'm Acrobot. Use /acro WORD to generate an acronym.")
     
-    async def info(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    async def command_info(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         '''
         Relays info about the self of the bot.        
         '''
@@ -192,9 +192,6 @@ class Acrobot:
         '''
         Automatically adds new chat messages to the history.
         '''
-        
-        
-        
         if not update.message or not update.message.from_user:
             return
         
@@ -225,11 +222,11 @@ class Acrobot:
             self.history[-1][1].split()
         )
         word = word[:MAX_WORD_LENGTH]
-        print(f'handle_acro called: {word}')
+
         self.event_queue.append((self.acro_task, update, word))
         self.queue_event.set()
 
-    def start_loop(self):
+    def start_loop(self) -> None:
         try:
             self.loop = asyncio.get_running_loop()               
         except:
@@ -237,7 +234,7 @@ class Acrobot:
         asyncio.set_event_loop(self.loop)
         self.loop.create_task(self.queue_processor())
 
-    def start_polling(self):
+    def start_polling(self) -> None:
         self.start_loop()
         self.app.run_polling()
 

@@ -21,18 +21,16 @@ from fastapi import FastAPI, Request, Response, APIRouter
 
 class Acrowebhook(acrobot.Acrobot):
 
-    def __init__(self, webhook_url:str = None) -> None:     
+    def __init__(self, webhook_url: str|None = None) -> None:     
         self.router = APIRouter()
         self.router.add_api_route("/", self.webhook_handler, methods=["POST"])
         self.webhook_url = webhook_url        
         super().__init__()
-        print('init done') #(2)
 
     @asynccontextmanager
     async def lifespan(self, _: FastAPI) -> AsyncIterator[None]:
         """Handles application startup and shutdown events."""        
         self.start_loop()
-        print('loop started') # (5)
         if self.webhook_url: 
             await self.app.bot.setWebhook(self.webhook_url)            
         async with self.app: 
@@ -47,8 +45,7 @@ class Acrowebhook(acrobot.Acrobot):
         await self.app.process_update(update)
         return Response(status_code=HTTPStatus.OK)
 
-    def start(self):
-        print('getting fastapi app') # (4)
+    def start(self) -> FastAPI:
         self.fastapi_app = FastAPI(lifespan=self.lifespan)
         self.fastapi_app.include_router(self.router)        
         return self.fastapi_app
@@ -59,12 +56,10 @@ if __name__ == "__main__":
     parser.add_argument('-p', help='server port (listening)',type=int)
     parser.add_argument('-a', help='server IP address (listening)',type=str)
     parser.add_argument('-w', help='webhook URL', default=None,type=str)
-    args = parser.parse_args()
-    
+    args = parser.parse_args()    
     webhook_url = args.w or os.getenv('webhook_url') or None
-    print('about to get acrowebhook instance...') # (1)
-    bot = Acrowebhook(webhook_url=webhook_url)
-    print('instance created') # (3)
+    
+    bot = Acrowebhook(webhook_url=webhook_url)    
     app = bot.start()
     uvicorn.run(app, host=args.a, port=args.p)
     
