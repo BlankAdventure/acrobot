@@ -14,8 +14,10 @@ from collections import deque
 from collections.abc import Callable
 from typing import Deque
 from telegram import Update
-import google.generativeai as genai
-from google.generativeai.types import GenerationConfig
+from google import genai
+from google.genai import types
+#import google.generativeai as genai
+#from google.generativeai.types import GenerationConfig
 from telegram.ext import (
     Application,
     ApplicationBuilder,
@@ -31,10 +33,11 @@ GEMINI_API_KEY = os.environ.get("genai_key")
 
 
 TEMPERATURE = 1.1
+THINKING_TOKENS = 512
 MAX_HISTORY = 6 # length of conversation history
 MAX_CALLS = 50 # max allowable calls to the model API
 MAX_WORD_LENGTH = 12 # max length of acronym word in characters
-THROTTLE_INTERVAL = 7  # seconds
+THROTTLE_INTERVAL = 5  # seconds
 
 SYSTEM_INSTRUCTION = """
 You are in a hash house harriers chat group. You like sending creative, dirty acronyms inspired by the conversation.
@@ -54,8 +57,9 @@ Now generate an acronym for the word "{word}".
 """
 
 # === SETUP ===
-genai.configure(api_key=GEMINI_API_KEY)
-model = genai.GenerativeModel("gemini-2.5-flash", system_instruction=SYSTEM_INSTRUCTION)
+client = genai.Client(api_key=GEMINI_API_KEY)
+#genai.configure(api_key=GEMINI_API_KEY)
+#model = genai.GenerativeModel("gemini-2.5-flash", system_instruction=SYSTEM_INSTRUCTION)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -129,14 +133,19 @@ class Acrobot:
         '''
         Send the model a prompt and get a response.
         '''
-        
+        #thinking_config=types.ThinkingConfig(thinking_budget=1024)
         text = None
-        generation_config = GenerationConfig(temperature=TEMPERATURE)
-        print(TEMPERATURE)
+        config = types.GenerateContentConfig(
+                system_instruction=SYSTEM_INSTRUCTION,
+                temperature=TEMPERATURE,
+                thinking_config=types.ThinkingConfig(thinking_budget=THINKING_TOKENS, include_thoughts=False),
+                automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True)
+            )
         try:
-            response = await asyncio.to_thread(model.generate_content, 
-                                               prompt,
-                                               generation_config=generation_config)
+            response = await asyncio.to_thread(client.models.generate_content,
+                                               model='gemini-2.5-flash',
+                                               contents=prompt,
+                                               config=config)
             text = response.text.strip()
             self.call_count += 1
         except Exception as e:
@@ -259,31 +268,13 @@ class Acrobot:
         self.start_loop()
         self.app.run_polling()
 
-
-
         
-# def bot_builder() -> Application:
-#     '''
-#     Builds the telegram bot object and adds the callback functions.
-#     '''
 
 #     if not TELEGRAM_BOT_TOKEN:
 #         raise ValueError("TELEGRAM_BOT_TOKEN environment variable not set.")
 #     if not GEMINI_API_KEY:
 #         raise ValueError("GEMINI_API_KEY environment variable not set.")
 
-#     loop = asyncio.get_event_loop()
-#     loop.create_task(queue_processor())
-
-#     app = ApplicationBuilder().token(TELEGRAM_BOT_TOKEN).build()    
-#     app.add_handler(CommandHandler("start", start))
-#     app.add_handler(CommandHandler("info", info))    
-#     app.add_handler(CommandHandler("add_message", add_message))
-#     app.add_handler(CommandHandler("add_keyword", add_keyword))
-#     app.add_handler(CommandHandler("acro", handle_acro))
-#     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
-    
-#     return app
 
 
 def run_polling() -> None:
