@@ -16,10 +16,7 @@ from typing import Deque
 from telegram import Update
 from google import genai
 from google.genai import types
-#import google.generativeai as genai
-#from google.generativeai.types import GenerationConfig
 from telegram.ext import (
-    Application,
     ApplicationBuilder,
     CommandHandler,
     MessageHandler,
@@ -58,8 +55,6 @@ Now generate an acronym for the word "{word}".
 
 # === SETUP ===
 client = genai.Client(api_key=GEMINI_API_KEY)
-#genai.configure(api_key=GEMINI_API_KEY)
-#model = genai.GenerativeModel("gemini-2.5-flash", system_instruction=SYSTEM_INSTRUCTION)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -133,7 +128,6 @@ class Acrobot:
         '''
         Send the model a prompt and get a response.
         '''
-        #thinking_config=types.ThinkingConfig(thinking_budget=1024)
         text = None
         config = types.GenerateContentConfig(
                 system_instruction=SYSTEM_INSTRUCTION,
@@ -183,6 +177,11 @@ class Acrobot:
         self._add_keywords(context.args)
         
     def _add_keywords (self, keyword_list:list[str]) -> None:
+        '''
+        Helper function for adding new keywords. We use a reassignment
+        technique rather than in-place assignment in order to trigger a 
+        descriptor update.        
+        '''
         if keyword_list is not None:
             self.keywords = self.keywords.union(keyword_list)
 
@@ -197,6 +196,12 @@ class Acrobot:
         self._del_keywords(context.args)
         
     def _del_keywords (self, keyword_list:list[str]) -> None:
+        '''
+        Helper function for removing keywords. We use a reassignment
+        technique rather than in-place assignment in order to trigger a 
+        descriptor update.        
+        '''
+
         if keyword_list is not None:
             self.keywords = self.keywords.difference(keyword_list)    
     
