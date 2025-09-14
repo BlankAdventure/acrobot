@@ -68,14 +68,14 @@ class Acrobot:
         self.call_count: int = 0
         self.keywords: set[str] = set()
 
-        self.app = ApplicationBuilder().token(TELEGRAM_BOT_TOKEN).build()    
-        self.app.add_handler(CommandHandler("start", self.command_start))
-        self.app.add_handler(CommandHandler("info", self.command_info))    
-        self.app.add_handler(CommandHandler("add_message", self.add_message))
-        self.app.add_handler(CommandHandler("add_keywords", self.add_keywords))
-        self.app.add_handler(CommandHandler("del_keywords", self.del_keywords))
-        self.app.add_handler(CommandHandler("acro", self.handle_acro))
-        self.app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, self.handle_message))
+        self.telegram_app = ApplicationBuilder().token(TELEGRAM_BOT_TOKEN).build()    
+        self.telegram_app.add_handler(CommandHandler("start", self.command_start))
+        self.telegram_app.add_handler(CommandHandler("info", self.command_info))    
+        self.telegram_app.add_handler(CommandHandler("add_message", self.add_message))
+        self.telegram_app.add_handler(CommandHandler("add_keywords", self.add_keywords))
+        self.telegram_app.add_handler(CommandHandler("del_keywords", self.del_keywords))
+        self.telegram_app.add_handler(CommandHandler("acro", self.handle_acro))
+        self.telegram_app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, self.handle_message))
 
     async def queue_processor(self) -> None:
         '''
@@ -271,7 +271,7 @@ class Acrobot:
 
     def start_polling(self) -> None:
         self.start_loop()
-        self.app.run_polling()
+        self.telegram_app.run_polling()
 
         
 

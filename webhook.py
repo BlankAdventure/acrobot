@@ -34,17 +34,17 @@ class Acrowebhook(acrobot.Acrobot):
         """Handles application startup and shutdown events."""        
         self.start_loop()
         if self.webhook_url: 
-            await self.app.bot.setWebhook(self.webhook_url)            
-        async with self.app: 
-            await self.app.start()
+            await self.telegram_app.bot.setWebhook(self.webhook_url)            
+        async with self.telegram_app: 
+            await self.telegram_app.start()
             yield
-            await self.app.stop()
+            await self.telegram_app.stop()
     
     async def webhook_handler(self, request: Request) -> Response:
         """Processes incoming Telegram updates from the webhook."""        
         json_string = await request.json()
-        update = Update.de_json(json_string, self.app.bot)
-        await self.app.process_update(update)
+        update = Update.de_json(json_string, self.telegram_app.bot)
+        await self.telegram_app.process_update(update)
         return Response(status_code=HTTPStatus.OK)
 
     def start(self) -> FastAPI:
