@@ -39,7 +39,7 @@ GEMINI_API_KEY = os.environ.get("genai_key")
 
 
 TEMPERATURE = 1.1
-THINKING_TOKENS = 512
+THINKING_TOKENS = 0 # No thinking
 MAX_HISTORY = 6 # length of conversation history
 MAX_CALLS = 50 # max allowable calls to the model API
 MAX_WORD_LENGTH = 12 # max length of acronym word in characters
@@ -68,7 +68,12 @@ client = genai.Client(api_key=GEMINI_API_KEY)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-
+#************************************************************
+# ACROBOT (BASE) CLASS
+# -----------------------------------------------------------
+# Wraps a telegram app with desired chat functionality. 
+# Can be run 'standalone' by invoking polling mode.
+#************************************************************
 class Acrobot:
     def __init__(self) -> None:
         self.event_queue: Deque[tuple[Callable,Update,Any]] = deque()
@@ -160,7 +165,7 @@ class Acrobot:
     
     
     # === COMMAND HANDLERS ===
-    # These are the callback functions that get invoked when the associted
+    # These are the callback functions that get invoked when the associated
     # command is issued in a chat.
     
     async def command_start(self, update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
@@ -301,6 +306,7 @@ class Acrobot:
 # the necessary functionality for responding to post requests
 # issued from telegram to the webhook URL address.
 #************************************************************
+
 class Acrowebhook(Acrobot, FastAPI):
     def __init__(self, webhook_url: str|None = None) -> None:        
         Acrobot.__init__(self)        
@@ -334,8 +340,8 @@ def run_webhook(webhook_url: str|None, ip_addr: str, port: int):
     Runs the bot in webhook mode. This requires fastAPI and uvicorn.
     
     A basic setup might proceed as follows:
-    RUN: ngrok http 8443 
-    RUN: python acrobot.py -a 0.0.0.0 -p 8443 -w https://xxx.ngrok-free.app    
+    > ngrok http 8443 
+    > python acrobot.py -a 0.0.0.0 -p 8443 -w https://xxx.ngrok-free.app    
     '''
     
     logger.info(f"Invoking webhook mode with: {webhook_url=} | {ip_addr=} | {port=}")
