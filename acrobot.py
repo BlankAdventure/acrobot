@@ -6,14 +6,19 @@ Created on Fri Aug  8 21:39:33 2025
 """
 
 import os
+import sys
 import random
 import logging
 import asyncio
+import argparse
 from typing import Any
 from collections import deque
 from collections.abc import Callable
 from typing import Deque
-from telegram import Update
+from http import HTTPStatus
+from typing import AsyncIterator
+from contextlib import asynccontextmanager
+
 from google import genai
 from google.genai import types
 from telegram.ext import (
@@ -23,6 +28,10 @@ from telegram.ext import (
     ContextTypes,
     filters,
 )
+import uvicorn
+from telegram import Update
+from fastapi import FastAPI, Request, Response, APIRouter
+
 
 # === CONFIGURATION ===
 TELEGRAM_BOT_TOKEN = os.environ.get("telegram_bot")
@@ -93,6 +102,9 @@ class Acrobot:
     
     
     # === BOT TASKS ===
+    # These are the tasks arise from command requests and get added to
+    # the processing queue for execution.
+    
     async def keyword_task(self, update: Update, word: str) -> None:
         '''
         Form the bot's reply to a keyword hit.
@@ -140,7 +152,7 @@ class Acrobot:
                                                model='gemini-2.5-flash',
                                                contents=prompt,
                                                config=config)
-            text = response.text.strip()
+            if response.text: text = response.text.strip()
             self.call_count += 1
         except Exception as e:
             logger.error(f"Model error: {e}")
@@ -148,6 +160,9 @@ class Acrobot:
     
     
     # === COMMAND HANDLERS ===
+    # These are the callback functions that get invoked when the associted
+    # command is issued in a chat.
+    
     async def command_start(self, update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
         '''
         Posts an introduction message to the chat.        
@@ -161,9 +176,7 @@ class Acrobot:
         logger.info("Chat History:\n" + "\n".join(f"{u}: {m}" for u, m in self.history))
         logger.info(f"Keywords: {self.keywords}\n")
         logger.info(f"Queue length: {len(self.event_queue)} | API calls: {self.call_count}")
-        if update.message: await update.message.reply_text(
-            f"Queue length: {len(self.event_queue)} | API calls: {self.call_count} | KW: {self.keywords}"
-        )
+        if update.message: await update.message.reply_text(f"Queue length: {len(self.event_queue)} | API calls: {self.call_count} | KW: {self.keywords} | {TEMPERATURE=} | {THINKING_TOKENS=}")
     
     
     async def add_keywords(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -260,6 +273,10 @@ class Acrobot:
         self.queue_event.set()
 
     def start_loop(self) -> None:
+        '''
+        Checks if an existing asyncio event loop is running, and if not 
+        starts one. Then, run the queue_processor in the loop.
+        '''
         try:
             self.loop = asyncio.get_running_loop()
             logger.info("using running loop")               
@@ -270,24 +287,80 @@ class Acrobot:
         self.loop.create_task(self.queue_processor())
 
     def start_polling(self) -> None:
+        '''
+        Run acrobot in polling mode.
+        '''
         self.start_loop()
         self.telegram_app.run_polling()
 
+
+#************************************************************
+# WEBHOOK CLASS
+# -----------------------------------------------------------
+# We subclass from Acrobot and use a FastAPI mixin to add
+# the necessary functionality for responding to post requests
+# issued from telegram to the webhook URL address.
+#************************************************************
+class Acrowebhook(Acrobot, FastAPI):
+    def __init__(self, webhook_url: str|None = None) -> None:        
+        Acrobot.__init__(self)        
+        self.webhook_url = webhook_url                
+        FastAPI.__init__(self, lifespan=self.lifespan)
+        router = APIRouter()
+        router.add_api_route("/", self.webhook_handler, methods=["POST"])
+        self.include_router(router)
         
+    @asynccontextmanager
+    async def lifespan(self, _: FastAPI) -> AsyncIterator[None]:
+        """Handles application startup and shutdown events."""        
+        self.start_loop()
+        if self.webhook_url: 
+            await self.telegram_app.bot.setWebhook(self.webhook_url)            
+        async with self.telegram_app: 
+            await self.telegram_app.start()
+            yield
+            await self.telegram_app.stop()
+    
+    async def webhook_handler(self, request: Request) -> Response:
+        """Processes incoming Telegram updates from the webhook."""        
+        json_string = await request.json()
+        update = Update.de_json(json_string, self.telegram_app.bot)
+        await self.telegram_app.process_update(update)
+        return Response(status_code=HTTPStatus.OK)
 
-#     if not TELEGRAM_BOT_TOKEN:
-#         raise ValueError("TELEGRAM_BOT_TOKEN environment variable not set.")
-#     if not GEMINI_API_KEY:
-#         raise ValueError("GEMINI_API_KEY environment variable not set.")
 
-
+def run_webhook(webhook_url: str|None, ip_addr: str, port: int):
+    '''
+    Runs the bot in webhook mode. This requires fastAPI and uvicorn.
+    
+    A basic setup might proceed as follows:
+    RUN: ngrok http 8443 
+    RUN: python acrobot.py -a 0.0.0.0 -p 8443 -w https://xxx.ngrok-free.app    
+    '''
+    
+    logger.info(f"Invoking webhook mode with: {webhook_url=} | {ip_addr=} | {port=}")
+    bot = Acrowebhook(webhook_url=webhook_url)    
+    uvicorn.run(bot, host=ip_addr, port=port)   
 
 def run_polling() -> None:
     '''
     Runs the bot in polling mode - no need for a server.
     '''
+    logger.info("Invoking polling mode.")
     app = Acrobot()
     app.start_polling()
 
 if __name__ == "__main__":
-     run_polling()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-p', help='server port (listening)', type=int)
+    parser.add_argument('-a', help='server IP address (listening)', default='0.0.0.0', type=str)
+    parser.add_argument('-w', help='webhook URL', default=None,type=str)
+    args = parser.parse_args()
+    if len(sys.argv) > 1:     
+        webhook_url = args.w or os.getenv('webhook_url') or None
+        run_webhook(webhook_url, args.a, args.p)
+    else:     
+        run_polling()
+    
+        
+
