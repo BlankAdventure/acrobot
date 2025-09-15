@@ -6,7 +6,7 @@ Created on Sat Aug 23 17:02:09 2025
 """
 
 import threading
-from nicegui import ui
+from nicegui import ui, ElementFilter
 from nicegui.binding import BindableProperty, bind_from
 import acrobot
 
@@ -15,6 +15,11 @@ grid_options = {
     'scrollbarWidth': 0,  # Optional: set scrollbar width to 0
 }
 
+def borders_on():
+    ElementFilter(kind=ui.column).style('border: solid; border-width: thin; border-color: red;');
+    ElementFilter(kind=ui.row).style('border: solid; border-width: thin; border-color: green');
+    ElementFilter(kind=ui.label).style('border: solid; border-width: thin; border-color: yellow');
+
 
 class PanelApp():
     kw_tracker   = BindableProperty(on_change=lambda sender, value: sender.update_keywords(value))
@@ -22,10 +27,12 @@ class PanelApp():
     
     def __init__(self):
         self.setup_ui()
+        #borders_on()
         bind_from(self_obj=self, self_name='kw_tracker',  other_obj=bot, other_name='keywords', backward=lambda t: t)
         bind_from(self_obj=self, self_name='hist_tracker',other_obj=bot, other_name='history',  backward=lambda t: t)
     
     def setup_ui(self):
+        
         with ui.row():
             
             # === Params UI ===            
@@ -46,23 +53,25 @@ class PanelApp():
                         throttle=1.0, leading_events=False).bind_value(acrobot, 'THINKING_TOKENS')          
             
             # === Keyword UI ===
-            with ui.column():
+            with ui.column().classes('p-0 gap-0'):
                 self.kw_list = ui.aggrid(
                     auto_size_columns=False,
                     
                     options = {
                     "domLayout": "autoHeight",            
                     'columnDefs': [
-                        {'headerName': 'Keywords', 'field': 'keyword','checkboxSelection':True, 'editable':True, 'width': 100, 'resizable':False}],
+                        {'headerName': 'Keywords', 'field': 'keyword','checkboxSelection':True, 'editable':True, 'width': 150, 'resizable':False}],
                     'rowData': [],'rowSelection': 'multiple',                    
-                    }).classes('w-48').style('height: unset').on("cellValueChanged", self.keyword_change)
+                    }).classes('w-40').style('height: unset').on("cellValueChanged", self.keyword_change)
         
                 with ui.row():
-                    ui.button(icon='add_circle', on_click=self.add_kw_field)
-                    ui.button(icon='cancel', on_click=self.del_kw)
+                    ui.input(label='keyword').props('clearable dense').classes('w-40')
+                with ui.row().classes('pt-2'):
+                    ui.button(icon='add_circle', on_click=self.add_kw_field).props('size=md') #flat
+                    ui.button(icon='cancel', on_click=self.del_kw).props('size=md')
             
             # === History UI ===                    
-            with ui.column():
+            with ui.column().classes(): #'p-0 gap-0'
                 self.hist = ui.aggrid(
                     auto_size_columns=True,
                     options={
@@ -74,7 +83,7 @@ class PanelApp():
                 with ui.row():
                     ui.input(label='Username').props('clearable dense').classes('w-24')
                     ui.input(label='Message').props('clearable dense').classes('w-48')
-                    ui.button(icon='add_circle', on_click=self.add_message_dialog).classes('size-8')
+                    ui.button(icon='add_circle', on_click=self.add_message_dialog).props('size=md') #.classes('size-8')
                 
 
 
