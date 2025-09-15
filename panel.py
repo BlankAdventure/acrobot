@@ -35,18 +35,18 @@ class PanelApp():
             with ui.card().classes('w-80'):
                 ui.label('Max history')
                 ui.slider(min=0, max=10, step=1, value=acrobot.MAX_HISTORY).props('label-always') \
-                    .on('update:model-value', lambda e: ui.notify(e.args),
-                        throttle=1.0, leading_events=False).bind_value(acrobot, 'MAX_HISTORY')                
+                    .on('update:model-value', throttle=1.0, leading_events=False) \
+                    .bind_value(acrobot, 'MAX_HISTORY')                
 
                 ui.label('Temperature')
                 ui.slider(min=0, max=2, step=0.1, value=acrobot.TEMPERATURE).props('label-always') \
-                    .on('update:model-value', lambda e: ui.notify(e.args),
-                        throttle=1.0, leading_events=False).bind_value(acrobot, 'TEMPERATURE')                
+                    .on('update:model-value', throttle=1.0, leading_events=False) \
+                    .bind_value(acrobot, 'TEMPERATURE')                
 
                 ui.label('Thinking tokens')
                 ui.slider(min=0, max=1024, step=1, value=0).props('label-always') \
-                    .on('update:model-value', lambda e: ui.notify(e.args),
-                        throttle=1.0, leading_events=False).bind_value(acrobot, 'THINKING_TOKENS')          
+                    .on('update:model-value', throttle=1.0, leading_events=False) \
+                    .bind_value(acrobot, 'THINKING_TOKENS')          
             
             # === Keyword UI ===
             with ui.column().classes('p-0 gap-0'):
@@ -77,26 +77,12 @@ class PanelApp():
                     }).classes('w-96').style('height: unset')
                 
                 with ui.row():
-                    ui.input(label='Username').props('clearable dense').classes('w-24')
-                    ui.input(label='Message').props('clearable dense').classes('w-48')
-                    ui.button(icon='add_circle', on_click=self.add_message_dialog).props('size=md') #.classes('size-8')
+                    self.user_input = ui.input(label='Username').props('clearable dense').classes('w-24')
+                    self.msg_input = ui.input(label='Message').props('clearable dense').classes('w-48')
+                    ui.button(icon='add_circle', on_click=self.add_message).props('size=md') #.classes('size-8')
 
         self.update_keywords()
         self.update_history()    
-    
-   
-    def add_message_dialog(self) -> None:
-        with ui.dialog() as dialog, ui.card().classes('w-auto'):
-            with ui.row():
-                with ui.column():
-                    ui.label('Add Message').classes('font-bold w-full border-b')
-                    user_input = ui.input(label='Username').props('clearable').classes('w-48')
-                    message_input = ui.input(label='Message').props('clearable').classes('w-48')
-                    with ui.row():
-                        ui.button('Okay') #, on_click=add_rsvp)
-                        ui.button('Cancel', on_click=dialog.close)
-
-        dialog.open()
 
     async def del_kw(self) -> None:
         '''
@@ -115,8 +101,14 @@ class PanelApp():
         self.hist.options["rowData"] = [{'message': f"{u} - {m}"} for u, m in bot.history]
         self.hist.update()
 
-    def update_count(self, val) -> None:
-        print (f'count: {val}')
+    def add_message(self) -> None:
+        username = self.user_input.value
+        message = self.msg_input.value        
+        if username and message:        
+            bot._update_history(username, message)
+            
+        self.user_input.value = None
+        self.msg_input.value = None
 
     def update_keywords(self) -> None:
         '''
