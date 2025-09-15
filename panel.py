@@ -4,22 +4,19 @@ Created on Sat Aug 23 17:02:09 2025
 
 @author: BlankAdventure
 """
-# ADD/REMOVE keywords
-# ADD messages
-# MODIFY context length
-# MODIFY thinking tokens
 
-
-import acrobot
+import threading
 from nicegui import ui
 from nicegui.binding import BindableProperty, bind_from
-import threading
+import acrobot
 
-#from telegram import Update
-#from telegram.ext import ContextTypes
+grid_options = {
+    'suppressHorizontalScroll': True,
+    'scrollbarWidth': 0,  # Optional: set scrollbar width to 0
+}
 
 
-class App():
+class PanelApp():
     kw_tracker   = BindableProperty(on_change=lambda sender, value: sender.update_keywords(value))
     hist_tracker = BindableProperty(on_change=lambda sender, value: sender.update_history(value))
     
@@ -29,29 +26,9 @@ class App():
         bind_from(self_obj=self, self_name='hist_tracker',other_obj=bot, other_name='history',  backward=lambda t: t)
     
     def setup_ui(self):
-        with ui.row():            
-            with ui.column():
-                self.kw_list = ui.aggrid({
-                    "domLayout": "autoHeight",            
-                    'columnDefs': [
-                        {'headerName': 'Keywords', 'field': 'keyword','checkboxSelection': True, 'editable': True}],
-                    'rowData': [],'rowSelection': 'multiple',
-                    }).classes('w-48').style('height: unset').on("cellValueChanged", self.keyword_change)
-        
-                with ui.row():
-                    ui.button(icon='add_circle', on_click=self.add_kw_field)
-                    ui.button(icon='cancel', on_click=self.del_kw)
-                    
-            with ui.column():
-                self.hist = ui.aggrid({
-                    "domLayout": "autoHeight",            
-                    'columnDefs': [{'headerName': 'History', 'field': 'message'}],
-                    'rowData': [],
-                    }).classes('w-96').style('height: unset')
-                
-                with ui.row():
-                    ui.button(icon='add_circle', on_click=self.add_message)
-                
+        with ui.row():
+            
+            # === Params UI ===            
             with ui.card().classes('w-80'):
                 ui.label('Max history')
                 ui.slider(min=0, max=10, step=1, value=acrobot.MAX_HISTORY).props('label-always') \
@@ -67,6 +44,39 @@ class App():
                 ui.slider(min=0, max=1024, step=1, value=0).props('label-always') \
                     .on('update:model-value', lambda e: ui.notify(e.args),
                         throttle=1.0, leading_events=False).bind_value(acrobot, 'THINKING_TOKENS')          
+            
+            # === Keyword UI ===
+            with ui.column():
+                self.kw_list = ui.aggrid(
+                    auto_size_columns=False,
+                    
+                    options = {
+                    "domLayout": "autoHeight",            
+                    'columnDefs': [
+                        {'headerName': 'Keywords', 'field': 'keyword','checkboxSelection':True, 'editable':True, 'width': 100, 'resizable':False}],
+                    'rowData': [],'rowSelection': 'multiple',                    
+                    }).classes('w-48').style('height: unset').on("cellValueChanged", self.keyword_change)
+        
+                with ui.row():
+                    ui.button(icon='add_circle', on_click=self.add_kw_field)
+                    ui.button(icon='cancel', on_click=self.del_kw)
+            
+            # === History UI ===                    
+            with ui.column():
+                self.hist = ui.aggrid(
+                    auto_size_columns=True,
+                    options={
+                    "domLayout": "autoHeight",            
+                    'columnDefs': [{'headerName': 'History', 'field': 'message'}],
+                    'rowData': [],
+                    }).classes('w-96').style('height: unset')
+                
+                with ui.row():
+                    ui.input(label='Username').props('clearable dense').classes('w-24')
+                    ui.input(label='Message').props('clearable dense').classes('w-48')
+                    ui.button(icon='add_circle', on_click=self.add_message_dialog).classes('size-8')
+                
+
 
         self.update_keywords(None)
         self.update_history(None)
@@ -76,9 +86,22 @@ class App():
         to_remove = [k['keyword'] for k in selected_rows]
         bot._del_keywords(to_remove)
         
+    
    
-    def add_message(self):
-        pass
+    def add_message_dialog(self):
+        with ui.dialog() as dialog, ui.card().classes('w-auto'):
+            with ui.row():
+                with ui.column():
+                    ui.label('Add Message').classes('font-bold w-full border-b')
+                    user_input = ui.input(label='Username').props('clearable').classes('w-48')
+                    message_input = ui.input(label='Message').props('clearable').classes('w-48')
+                    with ui.row():
+                        ui.button('Okay') #, on_click=add_rsvp)
+                        ui.button('Cancel', on_click=dialog.close)
+
+        dialog.open()
+        
+        
 
     def add_kw_field(self):
         ''' Adds an empty field when the "+" button is pressed '''
@@ -109,35 +132,23 @@ class App():
         bot._add_keywords([e.args['value']])
         self.kw_list.update()
         
-        #bot.keywords = bot.keywords.union([e.args['value']])        
-        #bot.keywords.update([e.args['value']]) #this won't trigger
-        
-        #print(e.args['value'])
-        #new_kw = ContextTypes.DEFAULT_TYPE(None)
-        #new_kw.args = [e.args['value']]
-        #await bot.add_keyword(Update(None), new_kw)
-        #my_set.difference_update(items_to_remove)
-    #def delete_selected_rows(self):
-    #    selected_rows = self.kw_list.get_selected_rows()
-    #    data = [row for row in self.kw_list.options["rowData"] if row not in selected_rows]
-    #    self.kw_list.update()
 
 
 bot = acrobot.Acrobot()
 bot.keywords = {"beer","sister","hash","drunk"}
 
-thread = threading.Thread(target=bot.start_polling)
-thread.start()
+#thread = threading.Thread(target=bot.start_polling)
+#thread.start()
 
 
 
 
 @ui.page('/')
 def main():
-    App()
+    PanelApp()
 
 
 if __name__ in {'__main__', '__mp_main__'}:
     #main()
     # this will block
-    ui.run(reload=False)
+    ui.run(reload=True)
