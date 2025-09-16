@@ -31,7 +31,7 @@ class PanelApp():
     
     def setup_ui(self) -> None:
         with ui.element():
-            ui.label('Acroself.bot Adjusterizer').classes('text-center text-xl bg-slate-300 mb-2')
+            ui.label('Acrobot Adjusterizer').classes('text-center text-xl bg-slate-300 mb-2')
             with ui.row():
                 
                 # === Params UI ===            
@@ -128,17 +128,17 @@ class PanelApp():
             self.bot._add_keywords([kw])
         self.kw_input.value = None
      
-def run_webhook()->None:
+def run_webhook(webhook_url: str|None, ip_addr: str, port: int)->None:
     import uvicorn
     
     @ui.page('/panel')
     def index():
         PanelApp(bot)
     
-    bot = acrobot.Acrowebhook()
+    bot = acrobot.Acrowebhook(webhook_url=webhook_url)
     bot.keywords = {"beer","sister","hash","drunk"}            
     ui.run_with(bot)    
-    uvicorn.run(bot,host="0.0.0.0",port=8443)
+    uvicorn.run(bot,host=ip_addr,port=port) #this will block
 
 def run_polling()->None:
     import threading 
@@ -149,9 +149,11 @@ def run_polling()->None:
 
     bot = acrobot.Acrobot()
     bot.keywords = {"beer","sister","hash","drunk"}
+    
+    # start the bot loop in a thread so it doesn't block the ui
     thread = threading.Thread(target=bot.start_polling)
     thread.start()
-    ui.run(reload=False)
+    ui.run(reload=False) #this will block
 
 def run_ui():
     @ui.page('/')
