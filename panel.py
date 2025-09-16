@@ -30,6 +30,9 @@ class PanelApp():
         bind_from(self_obj=self, self_name='hist_tracker',other_obj=self.bot, other_name='history',  backward=lambda t: t)
     
     def setup_ui(self) -> None:
+        '''
+        Build the UI elements.
+        '''
         with ui.element():
             ui.label('Acrobot Adjusterizer').classes('text-center text-xl bg-slate-300 mb-2')
             with ui.row():
@@ -99,12 +102,14 @@ class PanelApp():
     def update_history(self) -> None:
         '''
         Called whenever a new message is added to bot.history
-        '''
-        
+        '''        
         self.hist.options["rowData"] = [{'message': f"{u} - {m}"} for u, m in self.bot.history]
         self.hist.update()
 
     def add_message(self) -> None:
+        '''
+        Adds a new message to that chat history.
+        '''
         username = self.user_input.value
         message = self.msg_input.value        
         if username and message:        
@@ -129,6 +134,9 @@ class PanelApp():
         self.kw_input.value = None
      
 def run_webhook(webhook_url: str|None, ip_addr: str, port: int)->None:
+    '''
+    Run in webhook mode with the panel webapp activated.
+    '''
     import uvicorn
     
     @ui.page('/panel')
@@ -141,6 +149,9 @@ def run_webhook(webhook_url: str|None, ip_addr: str, port: int)->None:
     uvicorn.run(bot,host=ip_addr,port=port) #this will block
 
 def run_polling()->None:
+    '''
+    Run in polling mode with the panel webapp activated.
+    '''
     import threading 
     
     @ui.page('/panel')
@@ -156,6 +167,10 @@ def run_polling()->None:
     ui.run(reload=False) #this will block
 
 def run_ui():
+    '''
+    Launch the panel webapp without starting acrobot. Useful for testing
+    the UI.
+    '''
     @ui.page('/')
     def index():
         PanelApp(bot)

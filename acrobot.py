@@ -255,6 +255,10 @@ class Acrobot:
                 self.queue_event.set()        
     
     def _update_history(self, sender: str, message: str) -> None:
+        '''
+        Helper function for manually adding a message to the conversation
+        history. 
+        '''
         self.history = self.history + [(sender, message)]
         self.history = self.history[-MAX_HISTORY:]
 
