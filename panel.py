@@ -5,7 +5,7 @@ Created on Sat Aug 23 17:02:09 2025
 @author: BlankAdventure
 """
 
-import threading
+
 from nicegui import ui, ElementFilter
 from nicegui.binding import BindableProperty, bind_from
 import acrobot
@@ -21,15 +21,17 @@ class PanelApp():
     kw_tracker   = BindableProperty(on_change=lambda sender,_: sender.update_keywords())
     hist_tracker = BindableProperty(on_change=lambda sender,_: sender.update_history())
     
-    def __init__(self):
+    def __init__(self, bot):
+        self.bot = bot
         self.setup_ui()
+        
         #borders_on()
-        bind_from(self_obj=self, self_name='kw_tracker',  other_obj=bot, other_name='keywords', backward=lambda t: t)
-        bind_from(self_obj=self, self_name='hist_tracker',other_obj=bot, other_name='history',  backward=lambda t: t)
+        bind_from(self_obj=self, self_name='kw_tracker',  other_obj=self.bot, other_name='keywords', backward=lambda t: t)
+        bind_from(self_obj=self, self_name='hist_tracker',other_obj=self.bot, other_name='history',  backward=lambda t: t)
     
     def setup_ui(self) -> None:
         with ui.element():
-            ui.label('Acrobot Adjusterizer').classes('text-center text-xl bg-slate-300 mb-2')
+            ui.label('Acroself.bot Adjusterizer').classes('text-center text-xl bg-slate-300 mb-2')
             with ui.row():
                 
                 # === Params UI ===            
@@ -92,21 +94,21 @@ class PanelApp():
         selected_rows = await self.kw_list.get_selected_rows()        
         to_remove = [k['keyword'] for k in selected_rows]
         if to_remove:
-            bot._del_keywords(to_remove)       
+            self.bot._del_keywords(to_remove)       
     
     def update_history(self) -> None:
         '''
         Called whenever a new message is added to bot.history
         '''
         
-        self.hist.options["rowData"] = [{'message': f"{u} - {m}"} for u, m in bot.history]
+        self.hist.options["rowData"] = [{'message': f"{u} - {m}"} for u, m in self.bot.history]
         self.hist.update()
 
     def add_message(self) -> None:
         username = self.user_input.value
         message = self.msg_input.value        
         if username and message:        
-            bot._update_history(username, message)
+            self.bot._update_history(username, message)
             
         self.user_input.value = None
         self.msg_input.value = None
@@ -115,7 +117,7 @@ class PanelApp():
         '''
         Called whenever a new keyword is added to bot.keywords
         '''
-        self.kw_list.options["rowData"] = [{'keyword': k} for k in bot.keywords]
+        self.kw_list.options["rowData"] = [{'keyword': k} for k in self.bot.keywords]
         self.kw_list.update()
         
     def add_keyword(self, kw: str) -> None:
@@ -123,26 +125,45 @@ class PanelApp():
         Called whenever a new keyword is added through the UI.
         '''
         if kw:
-            bot._add_keywords([kw])
+            self.bot._add_keywords([kw])
         self.kw_input.value = None
-        
+     
+def run_webhook()->None:
+    import uvicorn
+    
+    @ui.page('/panel')
+    def index():
+        PanelApp(bot)
+    
+    bot = acrobot.Acrowebhook()
+    bot.keywords = {"beer","sister","hash","drunk"}            
+    ui.run_with(bot)    
+    uvicorn.run(bot,host="0.0.0.0",port=8443)
 
+def run_polling()->None:
+    import threading 
+    
+    @ui.page('/panel')
+    def index():
+        PanelApp(bot)
 
-bot = acrobot.Acrobot()
-bot.keywords = {"beer","sister","hash","drunk"}
+    bot = acrobot.Acrobot()
+    bot.keywords = {"beer","sister","hash","drunk"}
+    thread = threading.Thread(target=bot.start_polling)
+    thread.start()
+    ui.run(reload=False)
 
-#thread = threading.Thread(target=bot.start_polling)
-#thread.start()
+def run_ui():
+    @ui.page('/')
+    def index():
+        PanelApp(bot)
 
+    bot = acrobot.Acrobot()
+    bot.keywords = {"beer","sister","hash","drunk"}
+    
 
-
-
-@ui.page('/')
-def main():
-    PanelApp()
-
-
+    
 if __name__ in {'__main__', '__mp_main__'}:
-    #main()
-    # this will block
+    run_ui()
     ui.run(reload=True)
+
