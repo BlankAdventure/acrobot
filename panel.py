@@ -12,10 +12,10 @@ import acrobot
 
 
 def borders_on():
-    ElementFilter(kind=ui.column).style('border: solid; border-width: thin; border-color: red;');
-    ElementFilter(kind=ui.row).style('border: solid; border-width: thin; border-color: green');
-    ElementFilter(kind=ui.label).style('border: solid; border-width: thin; border-color: yellow');
-
+    ElementFilter(kind=ui.column).style( 'border: solid; border-width: thin; border-color: red;');
+    ElementFilter(kind=ui.row).style(    'border: solid; border-width: thin; border-color: green');
+    ElementFilter(kind=ui.label).style(  'border: solid; border-width: thin; border-color: yellow');
+    ElementFilter(kind=ui.element).style('border: solid; border-width: thin; border-color: black');
 
 class PanelApp():
     kw_tracker   = BindableProperty(on_change=lambda sender,_: sender.update_keywords())
@@ -28,58 +28,59 @@ class PanelApp():
         bind_from(self_obj=self, self_name='hist_tracker',other_obj=bot, other_name='history',  backward=lambda t: t)
     
     def setup_ui(self) -> None:
-        
-        with ui.row():
-            
-            # === Params UI ===            
-            with ui.card().classes('w-80'):
-                ui.label('Max history')
-                ui.slider(min=0, max=10, step=1, value=acrobot.MAX_HISTORY).props('label-always') \
-                    .on('update:model-value', throttle=1.0, leading_events=False) \
-                    .bind_value(acrobot, 'MAX_HISTORY')                
-
-                ui.label('Temperature')
-                ui.slider(min=0, max=2, step=0.1, value=acrobot.TEMPERATURE).props('label-always') \
-                    .on('update:model-value', throttle=1.0, leading_events=False) \
-                    .bind_value(acrobot, 'TEMPERATURE')                
-
-                ui.label('Thinking tokens')
-                ui.slider(min=0, max=1024, step=1, value=0).props('label-always') \
-                    .on('update:model-value', throttle=1.0, leading_events=False) \
-                    .bind_value(acrobot, 'THINKING_TOKENS')          
-            
-            # === Keyword UI ===
-            with ui.column().classes('p-0 gap-0'):
-                self.kw_list = ui.aggrid(
-                    auto_size_columns=False,
-                    
-                    options = {
-                    "domLayout": "autoHeight",            
-                    'columnDefs': [
-                        {'headerName': 'Keywords', 'field': 'keyword','checkboxSelection':True,'width': 150, 'resizable':False}],
-                    'rowData': [],'rowSelection': 'multiple',                    
-                    }).classes('w-40').style('height: unset')
-        
-                with ui.row():
-                    self.kw_input = ui.input(label='keyword').props('clearable dense').classes('w-40')
-                with ui.row().classes('pt-2'):
-                    ui.button(icon='add_circle', on_click=lambda: self.add_keyword(self.kw_input.value)).props('size=md') #flat
-                    ui.button(icon='cancel', on_click=self.del_kw).props('size=md')
-            
-            # === History UI ===                    
-            with ui.column().classes():
-                self.hist = ui.aggrid(
-                    auto_size_columns=True,
-                    options={
-                    "domLayout": "autoHeight",            
-                    'columnDefs': [{'headerName': 'History', 'field': 'message'}],
-                    'rowData': [],
-                    }).classes('w-96').style('height: unset')
+        with ui.element():
+            ui.label('Acrobot Adjusterizer').classes('text-center text-xl bg-slate-300 mb-2')
+            with ui.row():
                 
-                with ui.row():
-                    self.user_input = ui.input(label='Username').props('clearable dense').classes('w-24')
-                    self.msg_input = ui.input(label='Message').props('clearable dense').classes('w-48')
-                    ui.button(icon='add_circle', on_click=self.add_message).props('size=md') #.classes('size-8')
+                # === Params UI ===            
+                with ui.card().classes('w-64'):
+                    ui.label('Max history')
+                    ui.slider(min=0, max=10, step=1, value=acrobot.MAX_HISTORY).props('label-always') \
+                        .on('update:model-value', throttle=1.0, leading_events=False) \
+                        .bind_value(acrobot, 'MAX_HISTORY')                
+    
+                    ui.label('Temperature')
+                    ui.slider(min=0, max=2, step=0.1, value=acrobot.TEMPERATURE).props('label-always') \
+                        .on('update:model-value', throttle=1.0, leading_events=False) \
+                        .bind_value(acrobot, 'TEMPERATURE')                
+    
+                    ui.label('Thinking tokens')
+                    ui.slider(min=0, max=1024, step=1, value=0).props('label-always') \
+                        .on('update:model-value', throttle=1.0, leading_events=False) \
+                        .bind_value(acrobot, 'THINKING_TOKENS')          
+                
+                # === Keyword UI ===
+                with ui.column().classes('p-0 gap-0'):
+                    self.kw_list = ui.aggrid(
+                        auto_size_columns=False,
+                        
+                        options = {
+                        "domLayout": "autoHeight",            
+                        'columnDefs': [
+                            {'headerName': 'Keywords', 'field': 'keyword','checkboxSelection':True,'width': 150, 'resizable':False}],
+                        'rowData': [],'rowSelection': 'multiple',                    
+                        }).classes('w-40').style('height: unset')
+            
+                    with ui.row():
+                        self.kw_input = ui.input(label='keyword').props('clearable dense').classes('w-40')
+                    with ui.row().classes('pt-2'):
+                        ui.button(icon='add_circle', on_click=lambda: self.add_keyword(self.kw_input.value)).props('size=md') #flat
+                        ui.button(icon='cancel', on_click=self.del_kw).props('size=md')
+                
+                # === History UI ===                    
+                with ui.column().classes():
+                    self.hist = ui.aggrid(
+                        auto_size_columns=True,
+                        options={
+                        "domLayout": "autoHeight",            
+                        'columnDefs': [{'headerName': 'History', 'field': 'message'}],
+                        'rowData': [],
+                        }).classes('w-96').style('height: unset')
+                    
+                    with ui.row():
+                        self.user_input = ui.input(label='Username').props('clearable dense').classes('w-24')
+                        self.msg_input = ui.input(label='Message').props('clearable dense').classes('w-48')
+                        ui.button(icon='add_circle', on_click=self.add_message).props('size=md') #.classes('size-8')
 
         self.update_keywords()
         self.update_history()    
