@@ -20,8 +20,7 @@ def run_webhook_panel(webhook_url: str|None, ip_addr: str, port: int)->None:
     def index():
         PanelApp(bot)
     
-    bot = acrobot.Acrowebhook(webhook_url=webhook_url)
-    bot.keywords = {"beer","sister","hash","drunk"}            
+    bot = acrobot.Acrowebhook(webhook_url=webhook_url)    
     ui.run_with(bot)    
     uvicorn.run(bot,host=ip_addr,port=port) #this will block
 
@@ -39,8 +38,7 @@ def run_polling_panel()->None:
         PanelApp(bot)
 
     bot = acrobot.Acrobot()
-    bot.keywords = {"beer","sister","hash","drunk"}
-    
+        
     # start the bot loop in a thread so it doesn't block the ui
     thread = threading.Thread(target=bot.start_polling)
     thread.start()
@@ -52,8 +50,7 @@ def run_webhook(webhook_url: str|None, ip_addr: str, port: int)->None:
     Run in webhook mode with the panel webapp activated.
     '''
     import uvicorn    
-    bot = acrobot.Acrowebhook(webhook_url=webhook_url)
-    bot.keywords = {"beer","sister","hash","drunk"}            
+    bot = acrobot.Acrowebhook(webhook_url=webhook_url)      
     uvicorn.run(bot,host=ip_addr,port=port) #this will block
 
 
@@ -62,8 +59,7 @@ def run_polling()->None:
     Run in polling mode with the panel webapp activated.
     '''
     from nicegui import ui
-    bot = acrobot.Acrobot()
-    bot.keywords = {"beer","sister","hash","drunk"}
+    acrobot.Acrobot()    
     ui.run(reload=False) #this will block
 
 
@@ -88,7 +84,7 @@ elif args.command == 'polling' and args.panel == True:
 elif args.command == 'webhook' and args.panel == False:
     run_webhook(args.w, args.a, args.p)
 elif args.command == 'webhook' and args.panel == True:
-    run_webhook_panel()(args.w, args.a, args.p)
+    run_webhook_panel(args.w, args.a, args.p)
 else:
     parser.print_help()
     
