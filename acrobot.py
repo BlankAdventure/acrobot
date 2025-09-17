@@ -41,6 +41,7 @@ MAX_HISTORY = 6 # length of conversation history
 MAX_CALLS = 50 # max allowable calls to the model API
 MAX_WORD_LENGTH = 12 # max length of acronym word in characters
 THROTTLE_INTERVAL = 5  # seconds
+KEYWORDS = {"beer","sister","hash","drunk"}
 
 SYSTEM_INSTRUCTION = """
 You are in a hash house harriers chat group. You like sending creative, dirty acronyms inspired by the conversation.
@@ -72,12 +73,12 @@ logger = logging.getLogger(__name__)
 # Can be run 'standalone' by invoking polling mode.
 #************************************************************
 class Acrobot:
-    def __init__(self) -> None:
+    def __init__(self, keywords: list[str]|None = None) -> None:
         self.event_queue: Deque[tuple[Callable,Update,Any]] = deque()
         self.queue_event: asyncio.Event = asyncio.Event()
         self.history: list[tuple[str,str]] = []
-        self.call_count: int = 0
-        self.keywords: set[str] = set()
+        self.call_count: int = 0        
+        self.keywords = set(keywords) if isinstance(keywords, list) else KEYWORDS
 
         self.telegram_app = ApplicationBuilder().token(TELEGRAM_BOT_TOKEN).build()    
         self.telegram_app.add_handler(CommandHandler("start", self.command_start))
@@ -309,8 +310,8 @@ class Acrobot:
 #************************************************************
 
 class Acrowebhook(Acrobot, FastAPI):
-    def __init__(self, webhook_url: str|None = None) -> None:        
-        Acrobot.__init__(self)        
+    def __init__(self, webhook_url: str|None=None, keywords: list[str]|None = None) -> None:        
+        Acrobot.__init__(self, keywords)        
         self.webhook_url = webhook_url                
         FastAPI.__init__(self, lifespan=self.lifespan)
         router = APIRouter()
