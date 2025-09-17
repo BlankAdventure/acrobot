@@ -6,11 +6,9 @@ Created on Fri Aug  8 21:39:33 2025
 """
 
 import os
-import sys
 import random
 import logging
 import asyncio
-import argparse
 from typing import Any
 from collections import deque
 from collections.abc import Callable
@@ -28,7 +26,6 @@ from telegram.ext import (
     ContextTypes,
     filters,
 )
-import uvicorn
 from telegram import Update
 from fastapi import FastAPI, Request, Response, APIRouter
 
@@ -339,38 +336,5 @@ class Acrowebhook(Acrobot, FastAPI):
         return Response(status_code=HTTPStatus.OK)
 
 
-def run_webhook(webhook_url: str|None, ip_addr: str, port: int):
-    '''
-    Runs the bot in webhook mode. This requires fastAPI and uvicorn.
-    
-    A basic setup might proceed as follows:
-    > ngrok http 8443 
-    > python acrobot.py -a 0.0.0.0 -p 8443 -w https://xxx.ngrok-free.app    
-    '''
-    
-    logger.info(f"Invoking webhook mode with: {webhook_url=} | {ip_addr=} | {port=}")
-    bot = Acrowebhook(webhook_url=webhook_url)    
-    uvicorn.run(bot, host=ip_addr, port=port)   
-
-def run_polling() -> None:
-    '''
-    Runs the bot in polling mode - no need for a server.
-    '''
-    logger.info("Invoking polling mode.")
-    app = Acrobot()
-    app.start_polling()
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-p', help='server port (listening)', type=int)
-    parser.add_argument('-a', help='server IP address (listening)', default='0.0.0.0', type=str)
-    parser.add_argument('-w', help='webhook URL', default=None,type=str)
-    args = parser.parse_args()
-    if len(sys.argv) > 1:     
-        webhook_url = args.w or os.getenv('webhook_url') or None
-        run_webhook(webhook_url, args.a, args.p)
-    else:     
-        run_polling()
-    
         
 

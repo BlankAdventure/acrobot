@@ -17,11 +17,17 @@ def borders_on():
     ElementFilter(kind=ui.label).style(  'border: solid; border-width: thin; border-color: yellow');
     ElementFilter(kind=ui.element).style('border: solid; border-width: thin; border-color: black');
 
+#************************************************************
+# PANELAPP CLASS
+# -----------------------------------------------------------
+# NiceGUI web app for real-time adjusting various acrobot
+# settings.
+#************************************************************
 class PanelApp():
     kw_tracker   = BindableProperty(on_change=lambda sender,_: sender.update_keywords())
     hist_tracker = BindableProperty(on_change=lambda sender,_: sender.update_history())
     
-    def __init__(self, bot):
+    def __init__(self, bot) -> None:
         self.bot = bot
         self.setup_ui()
         
@@ -50,7 +56,7 @@ class PanelApp():
                         .bind_value(acrobot, 'TEMPERATURE')                
     
                     ui.label('Thinking tokens')
-                    ui.slider(min=0, max=1024, step=1, value=0).props('label-always') \
+                    ui.slider(min=0, max=512, step=1, value=0).props('label-always') \
                         .on('update:model-value', throttle=1.0, leading_events=False) \
                         .bind_value(acrobot, 'THINKING_TOKENS')          
                 
@@ -85,7 +91,7 @@ class PanelApp():
                     with ui.row():
                         self.user_input = ui.input(label='Username').props('clearable dense').classes('w-24')
                         self.msg_input = ui.input(label='Message').props('clearable dense').classes('w-48')
-                        ui.button(icon='add_circle', on_click=self.add_message).props('size=md') #.classes('size-8')
+                        ui.button(icon='add_circle', on_click=self.add_message).props('size=md') 
 
         self.update_keywords()
         self.update_history()    
@@ -133,54 +139,7 @@ class PanelApp():
             self.bot._add_keywords([kw])
         self.kw_input.value = None
      
-def run_webhook(webhook_url: str|None, ip_addr: str, port: int)->None:
-    '''
-    Run in webhook mode with the panel webapp activated.
-    '''
-    import uvicorn
-    
-    @ui.page('/panel')
-    def index():
-        PanelApp(bot)
-    
-    bot = acrobot.Acrowebhook(webhook_url=webhook_url)
-    bot.keywords = {"beer","sister","hash","drunk"}            
-    ui.run_with(bot)    
-    uvicorn.run(bot,host=ip_addr,port=port) #this will block
-
-def run_polling()->None:
-    '''
-    Run in polling mode with the panel webapp activated.
-    '''
-    import threading 
-    
-    @ui.page('/panel')
-    def index():
-        PanelApp(bot)
-
+if __name__ == "__main__":
     bot = acrobot.Acrobot()
     bot.keywords = {"beer","sister","hash","drunk"}
-    
-    # start the bot loop in a thread so it doesn't block the ui
-    thread = threading.Thread(target=bot.start_polling)
-    thread.start()
-    ui.run(reload=False) #this will block
-
-def run_ui():
-    '''
-    Launch the panel webapp without starting acrobot. Useful for testing
-    the UI.
-    '''
-    @ui.page('/')
-    def index():
-        PanelApp(bot)
-
-    bot = acrobot.Acrobot()
-    bot.keywords = {"beer","sister","hash","drunk"}
-    
-
-    
-if __name__ in {'__main__', '__mp_main__'}:
-    run_ui()
-    ui.run(reload=True)
-
+    ui.run(reload=True) #this will block
