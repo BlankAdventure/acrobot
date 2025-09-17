@@ -82,13 +82,13 @@ args = parser.parse_args()
 
 
 if (args.command == 'polling' and args.panel == False) or len(sys.argv) < 2 :
-    print('polling mode')
+    run_polling()
 elif args.command == 'polling' and args.panel == True:
-    print('polling mode w/ panel')
+    run_polling_panel()
 elif args.command == 'webhook' and args.panel == False:
-    print('webhook mode')    
+    run_webhook(args.w, args.a, args.p)
 elif args.command == 'webhook' and args.panel == True:
-    print('webhook mode w/ panel')    
+    run_webhook_panel()(args.w, args.a, args.p)
 else:
     parser.print_help()
     
