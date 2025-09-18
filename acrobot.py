@@ -4,12 +4,12 @@ Created on Fri Aug  8 21:39:33 2025
 
 @author: BlankAdventure
 """
-
+import re
 import os
 import random
 import logging
 import asyncio
-from typing import Any
+from typing import Any, Iterable
 from collections import deque
 from collections.abc import Callable
 from typing import Deque
@@ -65,6 +65,16 @@ client = genai.Client(api_key=GEMINI_API_KEY)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+
+def match_words(message: str, keywords: Iterable[str]) -> list[str]:
+    '''
+    Returns a list of keywords found in message, if any.
+    '''
+    words = re.split(r'\W+', message.lower())            
+    found = [w.lower() for w in keywords if w.lower() in words]
+    return found
+
 
 #************************************************************
 # ACROBOT (BASE) CLASS
@@ -246,8 +256,8 @@ class Acrobot:
         message = update.message.text
     
         if message:
-            self._update_history(sender, message)            
-            found = [w for w in self.keywords if w in message]
+            self._update_history(sender, message)
+            found = match_words(message, self.keywords)
             if len(found) > 0:
                 self.event_queue.append((self.keyword_task, update, random.choice(found)))
                 self.queue_event.set()        
