@@ -140,6 +140,5 @@ class PanelApp():
         self.kw_input.value = None
      
 if __name__ == "__main__":
-    bot = acrobot.Acrobot()
-    bot.keywords = {"beer","sister","hash","drunk"}
+    bot = acrobot.Acrobot()    
     ui.run(reload=True) #this will block
