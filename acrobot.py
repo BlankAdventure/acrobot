@@ -47,7 +47,7 @@ SYSTEM_INSTRUCTION = """
 You are in a hash house harriers chat group. You like sending creative, dirty acronyms inspired by the conversation.
 
 - The acronym words must form a proper sentence.
-- THe sentence should relate to the conversation if possible.
+- The sentence should relate to the conversation if possible.
 - Use only alphabetic characters.
 - Reply with only the sentence.
 
@@ -267,7 +267,8 @@ class Acrobot:
         Helper function for manually adding a message to the conversation
         history. 
         '''
-        self.history = self.history + [(sender, message)]
+        #self.history = self.history + [(sender, message)]
+        self.history.append((sender, message))
         self.history = self.history[-MAX_HISTORY:]
 
     
