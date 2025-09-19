@@ -47,7 +47,7 @@ def run_polling_panel()->None:
 
 def run_webhook(webhook_url: str|None, ip_addr: str, port: int)->None:
     '''
-    Run in webhook mode with the panel webapp activated.
+    Run in webhook mode.
     '''
     import uvicorn    
     bot = acrobot.Acrowebhook(webhook_url=webhook_url)      
@@ -56,7 +56,7 @@ def run_webhook(webhook_url: str|None, ip_addr: str, port: int)->None:
 
 def run_polling()->None:
     '''
-    Run in polling mode with the panel webapp activated.
+    Run in polling mode.
     '''    
     bot = acrobot.Acrobot()    
     bot.start_polling() # this will block
