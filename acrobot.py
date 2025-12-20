@@ -142,44 +142,13 @@ class Acrobot:
         '''
         Forms the complete acronym prompt and gets the model's response.
         '''
-        
         convo = "\n".join(f"{u}: {m}" for u, m in self.history)
-        
-        response = await asyncio.to_thread(get_acro,
+        response,_ = await asyncio.to_thread(get_acro,
                                            model=llm,
                                            word=word,
                                            convo=convo,
                                            retries=1)
-        
-        #response = get_acro(llm,word,convo=convo,retries=1)
-        
-        #prompt = PROMPT_TEMPLATE.format(convo=convo, word=word)    
-        #response = await self.model_response(prompt)    
         return response
-    
-    
-    # async def model_response(self, prompt: str) -> None|str:
-    #     '''
-    #     Send the model a prompt and get a response.
-    #     '''
-    #     text = None
-    #     config = types.GenerateContentConfig(
-    #             system_instruction=SYSTEM_INSTRUCTION,
-    #             temperature=TEMPERATURE,
-    #             thinking_config=types.ThinkingConfig(thinking_budget=THINKING_TOKENS, include_thoughts=False),
-    #             automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True)
-    #         )
-    #     try:
-    #         response = await asyncio.to_thread(client.models.generate_content,
-    #                                            model='gemini-2.5-flash',
-    #                                            contents=prompt,
-    #                                            config=config)
-    #         if response.text: text = response.text.strip()
-    #         self.call_count += 1
-    #     except Exception as e:
-    #         logger.error(f"Model error: {e}")
-    #     return text
-    
     
     # === COMMAND HANDLERS ===
     # These are the callback functions that get invoked when the associated
