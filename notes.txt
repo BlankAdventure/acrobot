@@ -1,0 +1,22 @@
+in polling mode:
+-> Even loop runs locally, polling telegram server for updates. Does not require running an http server.
+
+in webhook mode:
+-> A running http server is required to handle POST requests FROM the telegram server. Telegram must be provided with an https url to send requests too (this is the 'webhook address').
+
+
+ngrok:
+-> Provides an https address and forwards any traffic to your/a specified address 
+
+python webhook.py -a 0.0.0.0 -p 10000 -w https://acrobot-t9k7.onrender.com
+
+ngrok http 8443 <- sets up an http tunnel, directing traffic to port 8443. This is the port your server is listening for connections on.
+
+
+# Set the webhook via the telegram API. 
+curl -F "url=https://8068c65d68b6.ngrok-free.app" https://api.telegram.org/bot<api_key>/setWebhook
+
+
+# Tell acrobot to run in webhook mode. The https address is obtained from running ngrok. The port numbers must match.
+python runner.py webhook -w https://1bbf1c35bece.ngrok-free.app -p 8443
+
