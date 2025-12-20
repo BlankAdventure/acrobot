@@ -17,8 +17,8 @@ from http import HTTPStatus
 from typing import AsyncIterator
 from contextlib import asynccontextmanager
 
-from google import genai
-from google.genai import types
+from models import CerebrasModel, get_acro
+
 from telegram.ext import (
     ApplicationBuilder,
     CommandHandler,
@@ -61,7 +61,7 @@ Now generate an acronym for the word "{word}".
 """
 
 # === SETUP ===
-client = genai.Client(api_key=GEMINI_API_KEY)
+llm = CerebrasModel()
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -144,32 +144,41 @@ class Acrobot:
         '''
         
         convo = "\n".join(f"{u}: {m}" for u, m in self.history)
-        prompt = PROMPT_TEMPLATE.format(convo=convo, word=word)    
-        response = await self.model_response(prompt)    
+        
+        response = await asyncio.to_thread(get_acro,
+                                           model=llm,
+                                           word=word,
+                                           convo=convo,
+                                           retries=1)
+        
+        #response = get_acro(llm,word,convo=convo,retries=1)
+        
+        #prompt = PROMPT_TEMPLATE.format(convo=convo, word=word)    
+        #response = await self.model_response(prompt)    
         return response
     
     
-    async def model_response(self, prompt: str) -> None|str:
-        '''
-        Send the model a prompt and get a response.
-        '''
-        text = None
-        config = types.GenerateContentConfig(
-                system_instruction=SYSTEM_INSTRUCTION,
-                temperature=TEMPERATURE,
-                thinking_config=types.ThinkingConfig(thinking_budget=THINKING_TOKENS, include_thoughts=False),
-                automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True)
-            )
-        try:
-            response = await asyncio.to_thread(client.models.generate_content,
-                                               model='gemini-2.5-flash',
-                                               contents=prompt,
-                                               config=config)
-            if response.text: text = response.text.strip()
-            self.call_count += 1
-        except Exception as e:
-            logger.error(f"Model error: {e}")
-        return text
+    # async def model_response(self, prompt: str) -> None|str:
+    #     '''
+    #     Send the model a prompt and get a response.
+    #     '''
+    #     text = None
+    #     config = types.GenerateContentConfig(
+    #             system_instruction=SYSTEM_INSTRUCTION,
+    #             temperature=TEMPERATURE,
+    #             thinking_config=types.ThinkingConfig(thinking_budget=THINKING_TOKENS, include_thoughts=False),
+    #             automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True)
+    #         )
+    #     try:
+    #         response = await asyncio.to_thread(client.models.generate_content,
+    #                                            model='gemini-2.5-flash',
+    #                                            contents=prompt,
+    #                                            config=config)
+    #         if response.text: text = response.text.strip()
+    #         self.call_count += 1
+    #     except Exception as e:
+    #         logger.error(f"Model error: {e}")
+    #     return text
     
     
     # === COMMAND HANDLERS ===
