@@ -118,10 +118,11 @@ if __name__ == "__main__":
     setup_logging()
     logger.info('running standalone')
     
-    #llm1 = GeminiModel()    
+    # do some basic sanity checking
+    llm1 = GeminiModel()    
     llm2 = CerebrasModel()    
     
-    #print( get_acro(llm1,'hash',retries=1) )
-    print( get_acro(llm2,'hash',retries=1) )
+    print( get_acro(llm1,'beer',retries=1) )
+    print( get_acro(llm2,'beer',retries=1) )
 
 
