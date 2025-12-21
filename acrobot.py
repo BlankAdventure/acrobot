@@ -32,33 +32,12 @@ from fastapi import FastAPI, Request, Response, APIRouter
 
 # === CONFIGURATION ===
 TELEGRAM_BOT_TOKEN = os.environ.get("telegram_bot")
-GEMINI_API_KEY = os.environ.get("genai_key")
 
-
-TEMPERATURE = 1.1
-THINKING_TOKENS = 0 # No thinking
 MAX_HISTORY = 6 # length of conversation history
 MAX_CALLS = 50 # max allowable calls to the model API
 MAX_WORD_LENGTH = 12 # max length of acronym word in characters
 THROTTLE_INTERVAL = 5  # seconds
 KEYWORDS = {"beer","sister","hash","drunk"}
-
-SYSTEM_INSTRUCTION = """
-You are in a hash house harriers chat group. You like sending creative, dirty acronyms inspired by the conversation.
-
-- The acronym words must form a proper sentence.
-- The sentence should relate to the conversation if possible.
-- Use only alphabetic characters.
-- Reply with only the sentence.
-
-"""
-
-PROMPT_TEMPLATE = """
-# CONVERSATION
-{convo}
-
-Now generate an acronym for the word "{word}".
-"""
 
 # === SETUP ===
 llm = CerebrasModel()
@@ -167,7 +146,7 @@ class Acrobot:
         logger.info("Chat History:\n" + "\n".join(f"{u}: {m}" for u, m in self.history))
         logger.info(f"Keywords: {self.keywords}\n")
         logger.info(f"Queue length: {len(self.event_queue)} | API calls: {self.call_count}")
-        if update.message: await update.message.reply_text(f"Queue length: {len(self.event_queue)} | API calls: {self.call_count} | KW: {self.keywords} | {TEMPERATURE=} | {THINKING_TOKENS=}")
+        if update.message: await update.message.reply_text(f"Queue length: {len(self.event_queue)} | API calls: {self.call_count} | KW: {self.keywords} ")
     
     
     async def add_keywords(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:

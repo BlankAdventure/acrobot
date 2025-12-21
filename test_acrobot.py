@@ -8,7 +8,7 @@ Created on Fri Sep 19 16:48:10 2025
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from acrobot import Acrobot, match_words, PROMPT_TEMPLATE
+from acrobot import Acrobot, match_words
 
 
 def test_match_words_found():
