@@ -27,6 +27,7 @@ Now generate an acronym for the word: "{word}". Reply with only the acronym.
 """
 
 def catch(func: Callable) -> Callable:
+    ''' Decorator function for handling failed model API calls '''
     def wrapper(*args, **kwargs) -> str|None:
         result = None
         try:
@@ -42,6 +43,7 @@ class Model(ABC):
         pass
 
 class GeminiModel(Model):
+    ''' Use this class for configuring Gemini models '''
     def __init__(self):
         thinking_config = types.ThinkingConfig(thinking_budget=0, include_thoughts=False)
         func_calling = types.AutomaticFunctionCallingConfig(disable=True)
@@ -61,6 +63,7 @@ class GeminiModel(Model):
         return response.text.strip()
 
 class CerebrasModel(Model):
+    ''' Use this class for configuring Cerebras models '''
     def __init__(self):            
         self.client = Cerebras()
         
@@ -78,23 +81,30 @@ class CerebrasModel(Model):
         return completion.choices[0].message.content.strip()
         
     
-def validate_format(word: str, acro_sentence: str) -> bool:
+def validate_format(word: str, expansion: str) -> bool:
+    '''
+    Checks if the word is a valid acronym for the expansion (word count 
+    matches letter count; first letter matches each letter in word)    
+    '''
     word_letters = list(word.lower())
-    acro_letters = [w[0] for w in acro_sentence.lower().split()]    
+    acro_letters = [w[0] for w in expansion.lower().split()]    
     return word_letters == acro_letters
 
 
 def get_acro(model: Model, word:str, convo:str='', retries:int=0) -> tuple[str|None,str]:
+    '''
+    Interprets word as an acronym and generates an expansion for it (yes this
+    function name is rather backwards).   
+    '''
+    
     prompt = PROMPT_TEMPLATE.format(convo=convo, word=word)
-    acro = model.generate_response(prompt)
+    expansion = model.generate_response(prompt)
     while retries > 0:
-        print (retries)
-        if acro and validate_format(word, acro):
-                break
-        else:
-            acro = model.generate_response(prompt)
-            retries -= 1 
-    return (acro, prompt)
+        if expansion and validate_format(word, expansion):
+            break
+        expansion = model.generate_response(prompt)
+        retries -= 1 
+    return (expansion, prompt)
 
 if __name__ == "__main__":    
     
