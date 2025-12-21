@@ -4,11 +4,16 @@ Created on Fri Dec 19 14:23:33 2025
 
 @author: BlankAdventure
 """
+
 from abc import ABC, abstractmethod
 from collections.abc import Callable
 from google import genai
 from google.genai import types
 from cerebras.cloud.sdk import Cerebras
+
+import logging
+from log_config import setup_logging
+logger = logging.getLogger(__name__)
 
 
 SYS_INSTRUCTION = """
@@ -33,7 +38,7 @@ def catch(func: Callable) -> Callable:
         try:
             result = func(*args, **kwargs)
         except Exception as e:
-            print(f"Model error: {e}")            
+            logger.error(f"Model error! {e}", exc_info=False)            
         return result
     return wrapper
 
@@ -97,22 +102,26 @@ def get_acro(model: Model, word:str, convo:str='', retries:int=0) -> tuple[str|N
     function name is rather backwards).   
     '''
     
-    prompt = PROMPT_TEMPLATE.format(convo=convo, word=word)
+    prompt = PROMPT_TEMPLATE.format(convo=convo, word=word)      
+    logger.info(f"Requested: {word}")        
+    logger.debug(f"PROMPT:\n{prompt}")    
     expansion = model.generate_response(prompt)
     while retries > 0:
         if expansion and validate_format(word, expansion):
             break
         expansion = model.generate_response(prompt)
         retries -= 1 
+    logger.info(f"Generated: {expansion}")
     return (expansion, prompt)
 
-if __name__ == "__main__":    
+if __name__ == "__main__":
+    setup_logging()
+    logger.info('running standalone')
     
-    print(' ***** testing *****')
-    llm1 = GeminiModel()    
+    #llm1 = GeminiModel()    
     llm2 = CerebrasModel()    
     
-    print( get_acro(llm1,'hash',retries=1) )
+    #print( get_acro(llm1,'hash',retries=1) )
     print( get_acro(llm2,'hash',retries=1) )
 
 

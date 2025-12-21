@@ -18,16 +18,13 @@ def test_catch_returns_value_when_no_exception():
     assert good_func(3) == 6
 
 
-def test_catch_returns_none_on_exception(capsys):
+def test_catch_returns_none_on_exception(caplog):
     @catch
     def bad_func():
         raise ValueError("boom")
-
     result = bad_func()
-
-    captured = capsys.readouterr()
     assert result is None
-    assert "Model error: boom" in captured.out
+    assert "boom" in caplog.text
 
 
 @pytest.mark.parametrize(
@@ -77,7 +74,7 @@ def test_get_acro_retries_until_valid(model):
     
 
 @pytest.mark.parametrize("model",[GeminiModel, CerebrasModel])    
-def test_generate_response_exception_handled(capsys, model):
+def test_generate_response_exception_handled(caplog, model):
     
     @catch
     def boom(_):
@@ -86,9 +83,7 @@ def test_generate_response_exception_handled(capsys, model):
     with patch.object(model, "generate_response", side_effect=boom):
         result = model.generate_response("test")
 
-    captured = capsys.readouterr()
-
     assert result is None
-    assert "Model error: API failure" in captured.out
+    assert "API failure" in caplog.text
     
    
