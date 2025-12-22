@@ -1,3 +1,4 @@
+cerebras_cloud_sdk
 google-genai
 python-telegram-bot
 fastapi

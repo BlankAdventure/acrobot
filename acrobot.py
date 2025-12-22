@@ -17,8 +17,9 @@ from http import HTTPStatus
 from typing import AsyncIterator
 from contextlib import asynccontextmanager
 
-from google import genai
-from google.genai import types
+from models import CerebrasModel, get_acro
+from log_config import setup_logging
+
 from telegram.ext import (
     ApplicationBuilder,
     CommandHandler,
@@ -29,43 +30,18 @@ from telegram.ext import (
 from telegram import Update
 from fastapi import FastAPI, Request, Response, APIRouter
 
+logger = logging.getLogger(__name__)
 
 # === CONFIGURATION ===
 TELEGRAM_BOT_TOKEN = os.environ.get("telegram_bot")
-GEMINI_API_KEY = os.environ.get("genai_key")
 
-
-TEMPERATURE = 1.1
-THINKING_TOKENS = 0 # No thinking
 MAX_HISTORY = 6 # length of conversation history
 MAX_CALLS = 50 # max allowable calls to the model API
 MAX_WORD_LENGTH = 12 # max length of acronym word in characters
 THROTTLE_INTERVAL = 5  # seconds
 KEYWORDS = {"beer","sister","hash","drunk"}
 
-SYSTEM_INSTRUCTION = """
-You are in a hash house harriers chat group. You like sending creative, dirty acronyms inspired by the conversation.
-
-- The acronym words must form a proper sentence.
-- The sentence should relate to the conversation if possible.
-- Use only alphabetic characters.
-- Reply with only the sentence.
-
-"""
-
-PROMPT_TEMPLATE = """
-# CONVERSATION
-{convo}
-
-Now generate an acronym for the word "{word}".
-"""
-
-# === SETUP ===
-client = genai.Client(api_key=GEMINI_API_KEY)
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
+llm = CerebrasModel()
 
 def match_words(message: str, keywords: Iterable[str]) -> list[str]:
     '''
@@ -142,35 +118,13 @@ class Acrobot:
         '''
         Forms the complete acronym prompt and gets the model's response.
         '''
-        
         convo = "\n".join(f"{u}: {m}" for u, m in self.history)
-        prompt = PROMPT_TEMPLATE.format(convo=convo, word=word)    
-        response = await self.model_response(prompt)    
+        response,_ = await asyncio.to_thread(get_acro,
+                                           model=llm,
+                                           word=word,
+                                           convo=convo,
+                                           retries=1)
         return response
-    
-    
-    async def model_response(self, prompt: str) -> None|str:
-        '''
-        Send the model a prompt and get a response.
-        '''
-        text = None
-        config = types.GenerateContentConfig(
-                system_instruction=SYSTEM_INSTRUCTION,
-                temperature=TEMPERATURE,
-                thinking_config=types.ThinkingConfig(thinking_budget=THINKING_TOKENS, include_thoughts=False),
-                automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True)
-            )
-        try:
-            response = await asyncio.to_thread(client.models.generate_content,
-                                               model='gemini-2.5-flash',
-                                               contents=prompt,
-                                               config=config)
-            if response.text: text = response.text.strip()
-            self.call_count += 1
-        except Exception as e:
-            logger.error(f"Model error: {e}")
-        return text
-    
     
     # === COMMAND HANDLERS ===
     # These are the callback functions that get invoked when the associated
@@ -189,7 +143,7 @@ class Acrobot:
         logger.info("Chat History:\n" + "\n".join(f"{u}: {m}" for u, m in self.history))
         logger.info(f"Keywords: {self.keywords}\n")
         logger.info(f"Queue length: {len(self.event_queue)} | API calls: {self.call_count}")
-        if update.message: await update.message.reply_text(f"Queue length: {len(self.event_queue)} | API calls: {self.call_count} | KW: {self.keywords} | {TEMPERATURE=} | {THINKING_TOKENS=}")
+        if update.message: await update.message.reply_text(f"Queue length: {len(self.event_queue)} | API calls: {self.call_count} | KW: {self.keywords} ")
     
     
     async def add_keywords(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -348,5 +302,10 @@ class Acrowebhook(Acrobot, FastAPI):
         return Response(status_code=HTTPStatus.OK)
 
 
-        
+if __name__ == "__main__":
+    setup_logging()
+    logger.info('launching in standalone polling mode')
+    bot = Acrobot()    
+    bot.start_polling() # this will block
+
 
