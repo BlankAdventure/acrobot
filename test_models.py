@@ -12,14 +12,14 @@ from models import catch, validate_format, get_acro, GeminiModel, CerebrasModel
 
 
 def test_catch_returns_value_when_no_exception():
-    @catch
+    @catch()
     def good_func(x):
         return x * 2
     assert good_func(3) == 6
 
 
 def test_catch_returns_none_on_exception(caplog):
-    @catch
+    @catch()
     def bad_func():
         raise ValueError("boom")
     result = bad_func()
@@ -76,7 +76,7 @@ def test_get_acro_retries_until_valid(model):
 @pytest.mark.parametrize("model",[GeminiModel, CerebrasModel])    
 def test_generate_response_exception_handled(caplog, model):
     
-    @catch
+    @catch()
     def boom(_):
         raise ValueError("API failure")
 
