@@ -22,7 +22,7 @@ def setup_logging(level=logging.INFO):
     root.setLevel(level)
 
     handler = logging.StreamHandler()
-    handler.addFilter(AppOnlyFilter())
+    #handler.addFilter(AppOnlyFilter())
     formatter = logging.Formatter(
         "%(levelname)s | %(name)s | %(filename)s | %(message)s"
     )

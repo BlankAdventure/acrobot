@@ -18,6 +18,7 @@ from typing import AsyncIterator
 from contextlib import asynccontextmanager
 
 from models import CerebrasModel, get_acro
+from log_config import setup_logging
 
 from telegram.ext import (
     ApplicationBuilder,
@@ -29,6 +30,7 @@ from telegram.ext import (
 from telegram import Update
 from fastapi import FastAPI, Request, Response, APIRouter
 
+logger = logging.getLogger(__name__)
 
 # === CONFIGURATION ===
 TELEGRAM_BOT_TOKEN = os.environ.get("telegram_bot")
@@ -39,12 +41,7 @@ MAX_WORD_LENGTH = 12 # max length of acronym word in characters
 THROTTLE_INTERVAL = 5  # seconds
 KEYWORDS = {"beer","sister","hash","drunk"}
 
-# === SETUP ===
 llm = CerebrasModel()
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
 
 def match_words(message: str, keywords: Iterable[str]) -> list[str]:
     '''
@@ -305,5 +302,10 @@ class Acrowebhook(Acrobot, FastAPI):
         return Response(status_code=HTTPStatus.OK)
 
 
-        
+if __name__ == "__main__":
+    setup_logging()
+    logger.info('launching in standalone polling mode')
+    bot = Acrobot()    
+    bot.start_polling() # this will block
+
 
