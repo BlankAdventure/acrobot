@@ -19,13 +19,12 @@ def test_catch_returns_value_when_no_exception():
 
 
 def test_catch_returns_none_on_exception(caplog):
-    @catch()
+    @catch(ValueError)
     def bad_func():
         raise ValueError("boom")
     result = bad_func()
     assert result is None
     assert "boom" in caplog.text
-
 
 @pytest.mark.parametrize(
     "word, sentence, expected",
@@ -76,7 +75,7 @@ def test_get_acro_retries_until_valid(model):
 @pytest.mark.parametrize("model",[GeminiModel, CerebrasModel])    
 def test_generate_response_exception_handled(caplog, model):
     
-    @catch()
+    @catch(ValueError)
     def boom(_):
         raise ValueError("API failure")
 
