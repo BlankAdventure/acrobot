@@ -4,7 +4,7 @@ Created on Fri Dec 19 14:23:33 2025
 
 @author: BlankAdventure
 """
-
+import functools
 from abc import ABC, abstractmethod
 from collections.abc import Callable
 from google import genai
@@ -33,30 +33,34 @@ PROMPT_TEMPLATE = """
 Now generate an acronym for the word: "{word}". Reply with only the acronym.
 """
 
-def catch(func: Callable) -> Callable:
-    ''' Decorator function for handling failed model API calls '''
-    def wrapper(*args, **kwargs) -> str|None:
-        result = None
-        try:
-            result = func(*args, **kwargs)
-        except errors.APIError as e:
-            logger.error(f"Gemini error: {e}", exc_info=False)
-        except APIError as e:
-            logger.error(f"Cerberas error: {e}", exc_info=False)
-        except ConnectError as e:
-            logger.error(f"Connection error: {e}", exc_info=False)                        
-        except Exception as e:
-            logger.error(f"An unexpected error occurred: {e}")
-        return result
-    return wrapper
 
-class Model(ABC):
+def catch (*model_exceptions: type[Exception]) -> Callable:
+    ''' Decorator function for handling failed model API calls '''
+    
+    def decorator(func: Callable) -> Callable:    
+        @functools.wraps(func) 
+        def wrapper(*args, **kwargs) -> str|None:
+            result = None
+            try:
+                result = func(*args, **kwargs)
+            except (model_exceptions) as e:
+                logger.error(f"Model error: {e}", exc_info=False)
+            except ConnectError as e:
+                logger.error(f"Connection error: {e}", exc_info=False)                        
+            except Exception as e:
+                logger.error(f"An unexpected error occurred: {e}")
+            return result
+        return wrapper
+    return decorator
+
+class Model(ABC):    
     @abstractmethod
     def generate_response(self, prompt: str) -> str|None:
         pass
 
 class GeminiModel(Model):
     ''' Use this class for configuring Gemini models '''
+    
     def __init__(self):
         thinking_config = types.ThinkingConfig(thinking_budget=0, include_thoughts=False)
         func_calling = types.AutomaticFunctionCallingConfig(disable=True)
@@ -68,7 +72,7 @@ class GeminiModel(Model):
             )
         self.client = genai.Client()
         
-    @catch
+    @catch(errors.APIError)
     def generate_response(self, prompt: str) -> str|None:
         response = self.client.models.generate_content(model='gemini-2.5-flash',
                                                        contents=prompt,
@@ -80,7 +84,7 @@ class CerebrasModel(Model):
     def __init__(self):            
         self.client = Cerebras()
         
-    @catch
+    @catch(APIError)
     def generate_response(self, prompt:str) -> str|None:
         messages=[{"role": "system", "content": SYS_INSTRUCTION},
                   {"role": "user", "content": prompt}]  
@@ -127,11 +131,13 @@ if __name__ == "__main__":
     setup_logging()
     logger.info('running standalone')
     
+    llm = GeminiModel()
+    get_acro(llm,'beer',retries=1)
     # do some basic sanity checking
     #llm1 = GeminiModel()    
-    llm2 = CerebrasModel()    
+    #llm2 = CerebrasModel()    
     
     #print( get_acro(llm1,'beer',retries=1) )
-    print( get_acro(llm2,'beer',retries=1) )
+    #print( get_acro(llm2,'beer',retries=1) )
 
 
