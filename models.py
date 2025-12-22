@@ -34,21 +34,18 @@ Now generate an acronym for the word: "{word}". Reply with only the acronym.
 """
 
 
-def catch (*model_exceptions: type[Exception]) -> Callable:
-    ''' Decorator function for handling failed model API calls '''
+def catch (*exceptions: type[Exception]) -> Callable:
+    ''' Decorator function for handling failed model API calls '''   
     
+    exceptions = exceptions + (ConnectError,)    
     def decorator(func: Callable) -> Callable:    
         @functools.wraps(func) 
         def wrapper(*args, **kwargs) -> str|None:
             result = None
             try:
                 result = func(*args, **kwargs)
-            except (model_exceptions) as e:
-                logger.error(f"Model error: {e}", exc_info=False)
-            except ConnectError as e:
-                logger.error(f"Connection error: {e}", exc_info=False)                        
-            except Exception as e:
-                logger.error(f"An unexpected error occurred: {e}")
+            except (exceptions) as e:
+                logger.error(f"CATCH : {type(e).__name__} : {e}", exc_info=False)
             return result
         return wrapper
     return decorator
@@ -119,20 +116,25 @@ def get_acro(model: Model, word:str, convo:str='', retries:int=0) -> tuple[str|N
     logger.info(f"Requested: {word}")        
     logger.debug(f"PROMPT:\n{prompt}")    
     expansion = model.generate_response(prompt)
-    while retries > 0:
+    
+    count = retries
+    while count > 0:
         if expansion and validate_format(word, expansion):
             break
         expansion = model.generate_response(prompt)
-        retries -= 1 
-    logger.info(f"Generated: {expansion}")
+        count -= 1 
+    logger.info(f"Generated: {expansion} (retries: {retries-count})")
     return (expansion, prompt)
+
 
 if __name__ == "__main__":
     setup_logging()
     logger.info('running standalone')
     
-    llm = GeminiModel()
+    
+    llm = CerebrasModel()
     get_acro(llm,'beer',retries=1)
+    
     # do some basic sanity checking
     #llm1 = GeminiModel()    
     #llm2 = CerebrasModel()    
