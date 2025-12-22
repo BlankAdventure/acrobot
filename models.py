@@ -8,8 +8,10 @@ Created on Fri Dec 19 14:23:33 2025
 from abc import ABC, abstractmethod
 from collections.abc import Callable
 from google import genai
-from google.genai import types
-from cerebras.cloud.sdk import Cerebras
+from google.genai import types, errors
+from cerebras.cloud.sdk import Cerebras, APIError
+from httpx import ConnectError
+
 
 import logging
 from log_config import setup_logging
@@ -37,8 +39,14 @@ def catch(func: Callable) -> Callable:
         result = None
         try:
             result = func(*args, **kwargs)
+        except errors.APIError as e:
+            logger.error(f"Gemini error: {e}", exc_info=False)
+        except APIError as e:
+            logger.error(f"Cerberas error: {e}", exc_info=False)
+        except ConnectError as e:
+            logger.error(f"Connection error: {e}", exc_info=False)                        
         except Exception as e:
-            logger.error(f"Model error! {e}", exc_info=False)            
+            logger.error(f"An unexpected error occurred: {e}")
         return result
     return wrapper
 
@@ -91,8 +99,9 @@ def validate_format(word: str, expansion: str) -> bool:
     Checks if the word is a valid acronym for the expansion (word count 
     matches letter count; first letter matches each letter in word)    
     '''
-    word_letters = list(word.lower())
-    acro_letters = [w[0] for w in expansion.lower().split()]    
+    
+    word_letters = word.lower()
+    acro_letters = ''.join(w[0] for w in expansion.lower().split())    
     return word_letters == acro_letters
 
 
@@ -119,10 +128,10 @@ if __name__ == "__main__":
     logger.info('running standalone')
     
     # do some basic sanity checking
-    llm1 = GeminiModel()    
+    #llm1 = GeminiModel()    
     llm2 = CerebrasModel()    
     
-    print( get_acro(llm1,'beer',retries=1) )
+    #print( get_acro(llm1,'beer',retries=1) )
     print( get_acro(llm2,'beer',retries=1) )
 
 
