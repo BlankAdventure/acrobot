@@ -4,6 +4,7 @@ Created on Fri Aug  8 21:39:33 2025
 
 @author: BlankAdventure
 """
+
 import re
 import os
 import sys
@@ -39,51 +40,54 @@ logger = logging.getLogger(__name__)
 # === CONFIGURATION ===
 TELEGRAM_BOT_TOKEN = os.environ.get("telegram_bot")
 
-MAX_HISTORY = 6 # length of conversation history
-MAX_CALLS = 50 # max allowable calls to the model API
-MAX_WORD_LENGTH = 12 # max length of acronym word in characters
+MAX_HISTORY = 6  # length of conversation history
+MAX_CALLS = 50  # max allowable calls to the model API
+MAX_WORD_LENGTH = 12  # max length of acronym word in characters
 THROTTLE_INTERVAL = 5  # seconds
-KEYWORDS = {"beer","sister","hash","drunk"}
+KEYWORDS = {"beer", "sister", "hash", "drunk"}
 
 llm = CerebrasModel()
 
+
 def match_words(message: str, keywords: Iterable[str]) -> list[str]:
-    '''
+    """
     Returns a list of keywords found in message, if any.
-    '''
-    words = re.split(r'\W+', message.lower())            
+    """
+    words = re.split(r"\W+", message.lower())
     found = [w.lower() for w in keywords if w.lower() in words]
     return found
 
 
-#************************************************************
+# ************************************************************
 # ACROBOT (BASE) CLASS
 # -----------------------------------------------------------
-# Wraps a telegram app with desired chat functionality. 
+# Wraps a telegram app with desired chat functionality.
 # Can be run 'standalone' by invoking polling mode.
-#************************************************************
+# ************************************************************
 class Acrobot:
-    def __init__(self, keywords: list[str]|None = None) -> None:
-        self.event_queue: Deque[tuple[Callable,Update,Any]] = deque()
+    def __init__(self, keywords: list[str] | None = None) -> None:
+        self.event_queue: Deque[tuple[Callable, Update, Any]] = deque()
         self.queue_event: asyncio.Event = asyncio.Event()
-        self.history: list[tuple[str,str]] = []
-        self.call_count: int = 0        
+        self.history: list[tuple[str, str]] = []
+        self.call_count: int = 0
         self.keywords = set(keywords) if isinstance(keywords, list) else KEYWORDS
 
-        self.telegram_app = ApplicationBuilder().token(TELEGRAM_BOT_TOKEN).build()    
+        self.telegram_app = ApplicationBuilder().token(TELEGRAM_BOT_TOKEN).build()
         self.telegram_app.add_handler(CommandHandler("start", self.command_start))
-        self.telegram_app.add_handler(CommandHandler("info", self.command_info))    
+        self.telegram_app.add_handler(CommandHandler("info", self.command_info))
         self.telegram_app.add_handler(CommandHandler("add_message", self.add_message))
         self.telegram_app.add_handler(CommandHandler("add_keywords", self.add_keywords))
         self.telegram_app.add_handler(CommandHandler("del_keywords", self.del_keywords))
         self.telegram_app.add_handler(CommandHandler("acro", self.handle_acro))
-        self.telegram_app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, self.handle_message))
+        self.telegram_app.add_handler(
+            MessageHandler(filters.TEXT & ~filters.COMMAND, self.handle_message)
+        )
 
     async def queue_processor(self) -> None:
-        '''
-        Async loop implementing a leaky bucket rate limiter. Acro requests 
+        """
+        Async loop implementing a leaky bucket rate limiter. Acro requests
         get added to the event queue and processed every THROTTLE_INTERVAL seconds.
-        '''
+        """
         while True:
             if not self.event_queue:
                 self.queue_event.clear()
@@ -92,156 +96,186 @@ class Acrobot:
                 func, *args = self.event_queue.popleft()
                 await func(*args)
                 await asyncio.sleep(THROTTLE_INTERVAL)
-    
-    
+
     # === BOT TASKS ===
     # These are the tasks arise from command requests and get added to
     # the processing queue for execution.
-    
+
     async def keyword_task(self, update: Update, word: str) -> None:
-        '''
+        """
         Form the bot's reply to a keyword hit.
-        '''    
+        """
         response = await self.generate_acro(word)
         if update.message and response:
-            await update.message.reply_text(f"{word}? Who said {word}!?\n" + response,do_quote=False)
-        elif update.message:
-            await update.message.reply_text("Dammit you broke something")    
-    
-    async def acro_task(self, update: Update, word: str) -> None:
-        '''
-        Form the bot's reply to an acronym request.    
-        '''    
-        response = await self.generate_acro(word)    
-        if update.message and response:
-            await update.message.reply_text(response,do_quote=False)
+            await update.message.reply_text(
+                f"{word}? Who said {word}!?\n" + response, do_quote=False
+            )
         elif update.message:
             await update.message.reply_text("Dammit you broke something")
-    
-    async def generate_acro(self, word: str) -> None|str:
-        '''
+
+    async def acro_task(self, update: Update, word: str) -> None:
+        """
+        Form the bot's reply to an acronym request.
+        """
+        response = await self.generate_acro(word)
+        if update.message and response:
+            await update.message.reply_text(response, do_quote=False)
+        elif update.message:
+            await update.message.reply_text("Dammit you broke something")
+
+    async def generate_acro(self, word: str) -> None | str:
+        """
         Forms the complete acronym prompt and gets the model's response.
-        '''
+        """
         convo = "\n".join(f"{u}: {m}" for u, m in self.history)
-        response,_ = await asyncio.to_thread(get_acro,
-                                           model=llm,
-                                           word=word,
-                                           convo=convo,
-                                           retries=1)
+        response, _ = await asyncio.to_thread(
+            get_acro, model=llm, word=word, convo=convo, retries=1
+        )
         return response
-    
+
     # === COMMAND HANDLERS ===
     # These are the callback functions that get invoked when the associated
     # command is issued in a chat.
-    
+
     async def command_start(self, update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
-        '''
-        Posts an introduction message to the chat.        
-        '''
-        if update.message: await update.message.reply_text("Hi, I'm Acrobot. Use /acro WORD to generate an acronym.")
-    
-    async def command_info(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-        '''
-        Relays info about the self of the bot.        
-        '''
+        """
+        Posts an introduction message to the chat.
+        """
+        if update.message:
+            await update.message.reply_text(
+                "Hi, I'm Acrobot. Use /acro WORD to generate an acronym."
+            )
+
+    async def command_info(
+        self, update: Update, context: ContextTypes.DEFAULT_TYPE
+    ) -> None:
+        """
+        Relays info about the self of the bot.
+        """
         logger.info("Chat History:\n" + "\n".join(f"{u}: {m}" for u, m in self.history))
         logger.info(f"Keywords: {self.keywords}\n")
-        logger.info(f"Queue length: {len(self.event_queue)} | API calls: {self.call_count}")
-        if update.message: await update.message.reply_text(f"Queue length: {len(self.event_queue)} | API calls: {self.call_count} | KW: {self.keywords} ")
-    
-    
-    async def add_keywords(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-        '''
+        logger.info(
+            f"Queue length: {len(self.event_queue)} | API calls: {self.call_count}"
+        )
+        if update.message:
+            await update.message.reply_text(
+                f"Queue length: {len(self.event_queue)} | API calls: {self.call_count} | KW: {self.keywords} "
+            )
+
+    async def add_keywords(
+        self, update: Update, context: ContextTypes.DEFAULT_TYPE
+    ) -> None:
+        """
         Manually add new keywords to the trigger list.
         Usage: /add_keyword kw1 kw2 kw3 ...
-        '''
+        """
         if context.args is None or len(context.args) < 1:
-            if update.message: await update.message.reply_text("Usage: /add_keyword kw1 kw2 kw3 ...")
+            if update.message:
+                await update.message.reply_text("Usage: /add_keyword kw1 kw2 kw3 ...")
             return
         self._add_keywords(context.args)
-        
-    def _add_keywords (self, keyword_list:list[str]) -> None:
-        '''
+
+    def _add_keywords(self, keyword_list: list[str]) -> None:
+        """
         Helper function for adding new keywords. We use a reassignment
-        technique rather than in-place assignment in order to trigger a 
-        descriptor update.        
-        '''
+        technique rather than in-place assignment in order to trigger a
+        descriptor update.
+        """
         if keyword_list is not None:
             self.keywords = self.keywords.union(keyword_list)
 
-    async def del_keywords(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-        '''
+    async def del_keywords(
+        self, update: Update, context: ContextTypes.DEFAULT_TYPE
+    ) -> None:
+        """
         Remove keywords from the trigger list.
         Usage: /del_keyword kw1 kw2 kw3 ...
-        '''
+        """
         if context.args is None or len(context.args) < 1:
-            if update.message: await update.message.reply_text("Usage: /del_keyword kw1 kw2 kw3 ...")
+            if update.message:
+                await update.message.reply_text("Usage: /del_keyword kw1 kw2 kw3 ...")
             return
         self._del_keywords(context.args)
-        
-    def _del_keywords (self, keyword_list:list[str]) -> None:
-        '''
+
+    def _del_keywords(self, keyword_list: list[str]) -> None:
+        """
         Helper function for removing keywords. We use a reassignment
-        technique rather than in-place assignment in order to trigger a 
-        descriptor update.        
-        '''
+        technique rather than in-place assignment in order to trigger a
+        descriptor update.
+        """
 
         if keyword_list is not None:
-            self.keywords = self.keywords.difference(keyword_list)    
-    
-    async def add_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-        '''
+            self.keywords = self.keywords.difference(keyword_list)
+
+    async def add_message(
+        self, update: Update, context: ContextTypes.DEFAULT_TYPE
+    ) -> None:
+        """
         Manually add a new message to the chat history.
         Usage: /add_message username add this message!
-        '''
+        """
         if context.args is None or len(context.args) < 2:
-            if update.message: await update.message.reply_text("Usage: /add_message username add this message!")
+            if update.message:
+                await update.message.reply_text(
+                    "Usage: /add_message username add this message!"
+                )
             return
-    
+
         username, message = context.args[0], " ".join(context.args[1:])
         self._update_history(username, message)
-        if update.message: await update.message.reply_text("Message added.")
-    
-    async def handle_message(self, update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
-        '''
+        if update.message:
+            await update.message.reply_text("Message added.")
+
+    async def handle_message(
+        self, update: Update, _: ContextTypes.DEFAULT_TYPE
+    ) -> None:
+        """
         Automatically adds new chat messages to the history.
-        '''
+        """
         if not update.message or not update.message.from_user:
             return
-        
+
         user = update.message.from_user
         sender = user.username or user.first_name or user.last_name or "Unknown"
         message = update.message.text
-    
+
         if message:
             self._update_history(sender, message)
             found = match_words(message, self.keywords)
             if len(found) > 0:
-                self.event_queue.append((self.keyword_task, update, random.choice(found)))
-                self.queue_event.set()        
-    
+                self.event_queue.append(
+                    (self.keyword_task, update, random.choice(found))
+                )
+                self.queue_event.set()
+
     def _update_history(self, sender: str, message: str) -> None:
-        '''
+        """
         Helper function for manually adding a message to the conversation
-        history. 
-        '''
-        #self.history = self.history + [(sender, message)]
+        history.
+        """
+        # self.history = self.history + [(sender, message)]
         self.history.append((sender, message))
         self.history = self.history[-MAX_HISTORY:]
 
-    
-    async def handle_acro(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-        '''
+    async def handle_acro(
+        self, update: Update, context: ContextTypes.DEFAULT_TYPE
+    ) -> None:
+        """
         Generates a new acronym and posts it in the chat. If no word is specified
         it will pick at random from the last message.
-        '''
-        
+        """
+
         if self.call_count >= MAX_CALLS:
-            if update.message: await update.message.reply_text("No more! You're wasting my precious tokens!")
+            if update.message:
+                await update.message.reply_text(
+                    "No more! You're wasting my precious tokens!"
+                )
             return
-    
-        word = context.args[0] if context.args else random.choice(
-            self.history[-1][1].split()
+
+        word = (
+            context.args[0]
+            if context.args
+            else random.choice(self.history[-1][1].split())
         )
         word = word[:MAX_WORD_LENGTH]
 
@@ -249,13 +283,13 @@ class Acrobot:
         self.queue_event.set()
 
     def start_loop(self) -> None:
-        '''
-        Checks if an existing asyncio event loop is running, and if not 
+        """
+        Checks if an existing asyncio event loop is running, and if not
         starts one. Then, run the queue_processor in the loop.
-        '''
+        """
         try:
             self.loop = asyncio.get_running_loop()
-            logger.info("using running loop")               
+            logger.info("using running loop")
         except:
             self.loop = asyncio.new_event_loop()
             logger.info("using existing loop")
@@ -263,43 +297,46 @@ class Acrobot:
         self.loop.create_task(self.queue_processor())
 
     def start_polling(self) -> None:
-        '''
+        """
         Run acrobot in polling mode.
-        '''
+        """
         self.start_loop()
         self.telegram_app.run_polling()
 
 
-#************************************************************
+# ************************************************************
 # WEBHOOK CLASS
 # -----------------------------------------------------------
 # We subclass from Acrobot and use a FastAPI mixin to add
 # the necessary functionality for responding to post requests
 # issued from telegram to the webhook URL address.
-#************************************************************
+# ************************************************************
+
 
 class Acrowebhook(Acrobot, FastAPI):
-    def __init__(self, webhook_url: str|None=None, keywords: list[str]|None = None) -> None:        
-        Acrobot.__init__(self, keywords)        
-        self.webhook_url = webhook_url                
+    def __init__(
+        self, webhook_url: str | None = None, keywords: list[str] | None = None
+    ) -> None:
+        Acrobot.__init__(self, keywords)
+        self.webhook_url = webhook_url
         FastAPI.__init__(self, lifespan=self.lifespan)
         router = APIRouter()
         router.add_api_route("/", self.webhook_handler, methods=["POST"])
         self.include_router(router)
-        
+
     @asynccontextmanager
     async def lifespan(self, _: FastAPI) -> AsyncIterator[None]:
-        """Handles application startup and shutdown events."""        
+        """Handles application startup and shutdown events."""
         self.start_loop()
-        if self.webhook_url: 
-            await self.telegram_app.bot.setWebhook(self.webhook_url)            
-        async with self.telegram_app: 
+        if self.webhook_url:
+            await self.telegram_app.bot.setWebhook(self.webhook_url)
+        async with self.telegram_app:
             await self.telegram_app.start()
             yield
             await self.telegram_app.stop()
-    
+
     async def webhook_handler(self, request: Request) -> Response:
-        """Processes incoming Telegram updates from the webhook."""        
+        """Processes incoming Telegram updates from the webhook."""
         json_string = await request.json()
         update = Update.de_json(json_string, self.telegram_app.bot)
         await self.telegram_app.process_update(update)
@@ -308,8 +345,6 @@ class Acrowebhook(Acrobot, FastAPI):
 
 if __name__ == "__main__":
     setup_logging()
-    logger.info('launching in standalone polling mode')
-    bot = Acrobot()    
-    bot.start_polling() # this will block
-
-
+    logger.info("launching in standalone polling mode")
+    bot = Acrobot()
+    bot.start_polling()  # this will block
