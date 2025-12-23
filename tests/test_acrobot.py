@@ -4,11 +4,10 @@ Created on Fri Sep 19 16:48:10 2025
 
 @author: BlankAdventure
 """
-
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from acrobot import Acrobot, match_words
+from acrobot.acrobot.acrobot import Acrobot, match_words, KEYWORDS
 
 
 def test_match_words_found():
@@ -84,9 +83,6 @@ async def test_generate_acro_calls_model_response():
 #     assert result is None
 #     assert bot.call_count == 0
 
-import pytest
-#from unittest.mock import AsyncMock, MagicMock
-from acrobot import KEYWORDS
 
 
 @pytest.fixture

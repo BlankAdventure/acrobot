@@ -17,8 +17,19 @@ from http import HTTPStatus
 from typing import AsyncIterator
 from contextlib import asynccontextmanager
 
-from models import CerebrasModel, get_acro
-from log_config import setup_logging
+#from models import CerebrasModel, get_acro
+
+try: 
+    from .models import CerebrasModel, get_acro #imported as module
+except ImportError: 
+    from models import CerebrasModel, get_acro #run as script
+
+
+try: 
+    from .log_config import setup_logging #imported as module
+except ImportError: 
+    from log_config import setup_logging #run as script
+
 
 from telegram.ext import (
     ApplicationBuilder,

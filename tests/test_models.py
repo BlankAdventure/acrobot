@@ -5,11 +5,10 @@ Created on Sat Dec 20 20:34:42 2025
 @author: BlankAdventure
 """
 
-
 import pytest
 from unittest.mock import patch
-from models import catch, validate_format, get_acro, GeminiModel, CerebrasModel
 
+from acrobot.acrobot.models import catch, validate_format, get_acro, GeminiModel, CerebrasModel
 
 def test_catch_returns_value_when_no_exception():
     @catch()

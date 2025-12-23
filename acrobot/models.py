@@ -15,7 +15,13 @@ from google import genai
 from google.genai import errors, types
 from httpx import ConnectError
 
-from log_config import setup_logging
+
+# Argghh, some annoying path/import stuff to deal with.
+try: # When imported as a module
+    from log_config import setup_logging 
+except ImportError: # When running as a standalone script
+    from .log_config import setup_logging 
+#from .log_config import setup_logging 
 
 logger = logging.getLogger(__name__)
 
