@@ -4,6 +4,7 @@ Created on Fri Dec 19 14:23:33 2025
 
 @author: BlankAdventure
 """
+
 import sys
 import functools
 import logging

@@ -4,11 +4,14 @@ Created on Sun Dec 21 14:48:23 2025
 
 @author: BlankAdventure
 """
+
 import logging
+
 
 class AppOnlyFilter(logging.Filter):
     def filter(self, record):
         return record.name.startswith("__main__")
+
 
 def setup_logging(level=logging.INFO):
     logging.getLogger().handlers.clear()
@@ -20,7 +23,7 @@ def setup_logging(level=logging.INFO):
     root.setLevel(level)
 
     handler = logging.StreamHandler()
-    #handler.addFilter(AppOnlyFilter())
+    # handler.addFilter(AppOnlyFilter())
     formatter = logging.Formatter(
         "%(levelname)s | %(name)s | %(filename)s | %(message)s"
     )
@@ -29,5 +32,3 @@ def setup_logging(level=logging.INFO):
 
     logging.getLogger("httpx").setLevel(logging.WARNING)
     logging.getLogger("cerebras").setLevel(logging.WARNING)
-
-    
