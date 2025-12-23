@@ -4,10 +4,18 @@ Created on Fri Sep 19 16:48:10 2025
 
 @author: BlankAdventure
 """
-import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
+import sys
+from pathlib import Path
 
-from acrobot.acrobot.acrobot import Acrobot, match_words, KEYWORDS
+import pytest
+from unittest.mock import AsyncMock, MagicMock
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from acrobot.acrobot import Acrobot, match_words, KEYWORDS
+
+
+#from acrobot.acrobot.acrobot import Acrobot, match_words, KEYWORDS
 
 
 def test_match_words_found():

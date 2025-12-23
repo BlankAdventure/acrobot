@@ -6,9 +6,11 @@ Created on Fri Aug  8 21:39:33 2025
 """
 import re
 import os
+import sys
 import random
 import logging
 import asyncio
+from pathlib import Path
 from typing import Any, Iterable
 from collections import deque
 from collections.abc import Callable
@@ -17,18 +19,9 @@ from http import HTTPStatus
 from typing import AsyncIterator
 from contextlib import asynccontextmanager
 
-#from models import CerebrasModel, get_acro
-
-try: 
-    from .models import CerebrasModel, get_acro #imported as module
-except ImportError: 
-    from models import CerebrasModel, get_acro #run as script
-
-
-try: 
-    from .log_config import setup_logging #imported as module
-except ImportError: 
-    from log_config import setup_logging #run as script
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from models import CerebrasModel, get_acro
+from log_config import setup_logging
 
 
 from telegram.ext import (

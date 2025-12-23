@@ -4,8 +4,6 @@ Created on Sun Dec 21 14:48:23 2025
 
 @author: BlankAdventure
 """
-
-
 import logging
 
 class AppOnlyFilter(logging.Filter):
