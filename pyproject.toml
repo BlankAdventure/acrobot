@@ -1,0 +1,13 @@
+[project]
+name = "acrobot"
+version = "0.1.0"
+description = "Acrobot"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "cerebras-cloud-sdk>=1.59.0",
+    "fastapi>=0.127.0",
+    "google-genai>=1.56.0",
+    "python-telegram-bot>=22.5",
+    "uvicorn>=0.40.0",
+]
