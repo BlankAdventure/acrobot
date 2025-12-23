@@ -4,9 +4,10 @@ Created on Fri Dec 19 14:23:33 2025
 
 @author: BlankAdventure
 """
-
+import sys
 import functools
 import logging
+from pathlib import Path
 from abc import ABC, abstractmethod
 from collections.abc import Callable
 
@@ -15,7 +16,9 @@ from google import genai
 from google.genai import errors, types
 from httpx import ConnectError
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 from log_config import setup_logging
+
 
 logger = logging.getLogger(__name__)
 

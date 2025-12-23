@@ -4,11 +4,16 @@ Created on Sat Dec 20 20:34:42 2025
 
 @author: BlankAdventure
 """
-
-
+import sys
+from pathlib import Path
 import pytest
 from unittest.mock import patch
-from models import catch, validate_format, get_acro, GeminiModel, CerebrasModel
+
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from acrobot.models import catch, validate_format, get_acro, GeminiModel, CerebrasModel
+
+#from app.B import calc
 
 
 def test_catch_returns_value_when_no_exception():
