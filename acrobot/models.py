@@ -147,6 +147,10 @@ def get_acro(
 
 
 def get_model(model_name: str) -> Model:
+    """ 
+    Takes a model name as a string and returns a new instance of its associated
+    class, if it exists.
+    """
     look_up = {x.__name__: x for x in Model.__subclasses__()}
     try:
         cls = cast(Type[Model], look_up[model_name])
@@ -160,13 +164,7 @@ def get_model(model_name: str) -> Model:
 if __name__ == "__main__":
     setup_logging()
     logger.info("running standalone")
-    get_model('blabla')
-    #llm = CerebrasModel()
-    #get_acro(llm, "beer", retries=1)
 
-    # do some basic sanity checking
-    # llm1 = GeminiModel()
-    # llm2 = CerebrasModel()
+    llm = CerebrasModel()
+    print ( get_acro(llm, "beer", retries=1) )
 
-    # print( get_acro(llm1,'beer',retries=1) )
-    # print( get_acro(llm2,'beer',retries=1) )
