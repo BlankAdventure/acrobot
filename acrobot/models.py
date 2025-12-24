@@ -18,7 +18,7 @@ from google.genai import errors, types
 from httpx import ConnectError
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from log_config import setup_logging
+from config import setup_logging
 
 
 logger = logging.getLogger(__name__)
@@ -148,12 +148,22 @@ def get_acro(
     return (expansion, prompt)
 
 
+def get_model(model_name: str) -> Model:
+    look_up = {x.__name__: x for x in Model.__subclasses__()}
+    try:
+        return look_up[model_name]
+    except KeyError as e:
+        err_string = f"get_model: {model_name} not found. Valid options are: {', '.join(look_up.keys())}"
+        e.add_note(err_string)
+        logger.critical(err_string)
+        raise
+    
 if __name__ == "__main__":
     setup_logging()
     logger.info("running standalone")
-
-    llm = CerebrasModel()
-    get_acro(llm, "beer", retries=1)
+    get_model('blabla')
+    #llm = CerebrasModel()
+    #get_acro(llm, "beer", retries=1)
 
     # do some basic sanity checking
     # llm1 = GeminiModel()
