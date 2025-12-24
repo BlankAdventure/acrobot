@@ -21,9 +21,8 @@ from typing import AsyncIterator
 from contextlib import asynccontextmanager
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from models import CerebrasModel, get_acro
-from log_config import setup_logging
-
+from models import get_acro, get_model
+from config import settings, setup_logging
 
 from telegram.ext import (
     ApplicationBuilder,
@@ -36,17 +35,8 @@ from telegram import Update
 from fastapi import FastAPI, Request, Response, APIRouter
 
 logger = logging.getLogger(__name__)
-
-# === CONFIGURATION ===
 TELEGRAM_BOT_TOKEN = os.environ.get("telegram_bot")
-
-MAX_HISTORY = 6  # length of conversation history
-MAX_CALLS = 50  # max allowable calls to the model API
-MAX_WORD_LENGTH = 12  # max length of acronym word in characters
-THROTTLE_INTERVAL = 5  # seconds
-KEYWORDS = {"beer", "sister", "hash", "drunk"}
-
-llm = CerebrasModel()
+llm = get_model(settings.model.name)
 
 
 def match_words(message: str, keywords: Iterable[str]) -> list[str]:
@@ -70,7 +60,7 @@ class Acrobot:
         self.queue_event: asyncio.Event = asyncio.Event()
         self.history: list[tuple[str, str]] = []
         self.call_count: int = 0
-        self.keywords = set(keywords) if isinstance(keywords, list) else KEYWORDS
+        self.keywords = set(keywords) if isinstance(keywords, list) else settings.acrobot.keywords
 
         self.telegram_app = ApplicationBuilder().token(TELEGRAM_BOT_TOKEN).build()
         self.telegram_app.add_handler(CommandHandler("start", self.command_start))
@@ -95,7 +85,7 @@ class Acrobot:
             else:
                 func, *args = self.event_queue.popleft()
                 await func(*args)
-                await asyncio.sleep(THROTTLE_INTERVAL)
+                await asyncio.sleep(settings.acrobot.throttle_interval)
 
     # === BOT TASKS ===
     # These are the tasks arise from command requests and get added to
@@ -129,7 +119,8 @@ class Acrobot:
         """
         convo = "\n".join(f"{u}: {m}" for u, m in self.history)
         response, _ = await asyncio.to_thread(
-            get_acro, model=llm, word=word, convo=convo, retries=1
+            get_acro, model=llm, word=word, convo=convo, 
+            retries=settings.model.retries
         )
         return response
 
@@ -255,7 +246,7 @@ class Acrobot:
         """
         # self.history = self.history + [(sender, message)]
         self.history.append((sender, message))
-        self.history = self.history[-MAX_HISTORY:]
+        self.history = self.history[-settings.acrobot.max_history:]
 
     async def handle_acro(
         self, update: Update, context: ContextTypes.DEFAULT_TYPE
@@ -265,7 +256,7 @@ class Acrobot:
         it will pick at random from the last message.
         """
 
-        if self.call_count >= MAX_CALLS:
+        if self.call_count >= settings.acrobot.max_calls:
             if update.message:
                 await update.message.reply_text(
                     "No more! You're wasting my precious tokens!"
@@ -277,7 +268,7 @@ class Acrobot:
             if context.args
             else random.choice(self.history[-1][1].split())
         )
-        word = word[:MAX_WORD_LENGTH]
+        word = word[:settings.acrobot.max_word_length]
 
         self.event_queue.append((self.acro_task, update, word))
         self.queue_event.set()

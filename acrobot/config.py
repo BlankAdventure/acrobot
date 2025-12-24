@@ -11,21 +11,22 @@ import yaml
 from typing import Literal
 
 class Acrobot(BaseModel):
-    """App config class."""
-    max_history: int
-    max_calls: int
-    max_word_length: int
-    throttle_interval: int
-    keywords: list[str]
+    """Bot config class."""
+    max_history: int = 5
+    max_calls: int = -1
+    max_word_length: int = 12
+    throttle_interval: int = 5
+    keywords: set[str] = {}
 
 
 class Model(BaseModel):
-    """Testing config class."""
+    """Model config class."""
     name: str
+    retries: int = 0
 
 class Logging(BaseModel):
-    """Testing config class."""
-    level: Literal[*logging.getLevelNamesMapping().keys()]
+    """Logging config class."""
+    level: Literal[*logging.getLevelNamesMapping().keys()] = "INFO"
 
 class Config(BaseModel):
     """CLI config class."""
@@ -35,19 +36,14 @@ class Config(BaseModel):
 
 
 def load_yaml_config(path: pathlib.Path) -> Config:
-    """Classmethod returns YAML config"""
+    """Returns YAML config"""
     try:
         return yaml.safe_load(path.read_text())
-    except FileNotFoundError as error:
-        message = "Error: yml config file not found."
-        raise FileNotFoundError(error, message) from error
+    except FileNotFoundError as error:        
+        raise FileNotFoundError(error, "Could not load yaml config file.") from error
 
 path = pathlib.Path(__file__).parent.parent / 'config.yaml'
 settings = Config(**load_yaml_config(path))
-
-class AppOnlyFilter(logging.Filter):
-    def filter(self, record):
-        return record.name.startswith("__main__")
 
 def setup_logging(level=settings.logging.level) -> None:
     logging.getLogger().handlers.clear()
@@ -57,9 +53,8 @@ def setup_logging(level=settings.logging.level) -> None:
         return
 
     root.setLevel(level)
-
     handler = logging.StreamHandler()
-    # handler.addFilter(AppOnlyFilter())
+    
     formatter = logging.Formatter(
         "%(levelname)s | %(name)s | %(filename)s | %(message)s"
     )

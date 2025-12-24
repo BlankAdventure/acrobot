@@ -10,5 +10,6 @@ acrobot:
         - hash
 model:
     name: CerebrasModel
+    retries: 1
 logging:
     level: INFO
