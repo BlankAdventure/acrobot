@@ -11,7 +11,7 @@ import logging
 from pathlib import Path
 from abc import ABC, abstractmethod
 from collections.abc import Callable
-
+from typing import cast, Type
 from cerebras.cloud.sdk import APIError, Cerebras
 from google import genai
 from google.genai import errors, types
@@ -54,9 +54,7 @@ def catch(*exceptions: type[Exception]) -> Callable:
             except exceptions as e:
                 logger.error(f"CATCH : {type(e).__name__} : {e}", exc_info=False)
             return result
-
         return wrapper
-
     return decorator
 
 
@@ -151,7 +149,8 @@ def get_acro(
 def get_model(model_name: str) -> Model:
     look_up = {x.__name__: x for x in Model.__subclasses__()}
     try:
-        return look_up[model_name]
+        cls = cast(Type[Model], look_up[model_name])
+        return cls()
     except KeyError as e:
         err_string = f"get_model: {model_name} not found. Valid options are: {', '.join(look_up.keys())}"
         e.add_note(err_string)

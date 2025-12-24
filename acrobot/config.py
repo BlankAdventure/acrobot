@@ -49,7 +49,7 @@ class AppOnlyFilter(logging.Filter):
     def filter(self, record):
         return record.name.startswith("__main__")
 
-def setup_logging(level=settings.logging.level):
+def setup_logging(level=settings.logging.level) -> None:
     logging.getLogger().handlers.clear()
     root = logging.getLogger()
 

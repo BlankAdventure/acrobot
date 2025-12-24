@@ -11,7 +11,7 @@ from unittest.mock import patch
 
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from acrobot.models import catch, validate_format, get_acro, GeminiModel, CerebrasModel
+from acrobot.models import catch, validate_format, get_acro, GeminiModel, CerebrasModel, get_model
 
 #from app.B import calc
 
@@ -90,4 +90,13 @@ def test_generate_response_exception_handled(caplog, model):
     assert result is None
     assert "API failure" in caplog.text
     
-   
+
+def test_get_model_success():  
+    assert isinstance(get_model("GeminiModel"),GeminiModel)
+
+def test_get_model_fails():  
+    with pytest.raises(KeyError): #as excinfo:  
+        get_model("does not exist")
+
+
+    
