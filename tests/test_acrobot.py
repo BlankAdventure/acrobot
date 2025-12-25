@@ -14,10 +14,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from acrobot.acrobot import Acrobot, match_words, KEYWORDS
 
-
-#from acrobot.acrobot.acrobot import Acrobot, match_words, KEYWORDS
-
-
 def test_match_words_found():
     message = "Let's grab a beer and go!"
     keywords = {"beer", "hash"}
