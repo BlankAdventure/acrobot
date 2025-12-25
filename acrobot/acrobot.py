@@ -65,10 +65,10 @@ class Acrobot:
         self.telegram_app = ApplicationBuilder().token(TELEGRAM_BOT_TOKEN).build()
         self.telegram_app.add_handler(CommandHandler("start", self.command_start))
         self.telegram_app.add_handler(CommandHandler("info", self.command_info))
-        self.telegram_app.add_handler(CommandHandler("add_message", self.add_message))
-        self.telegram_app.add_handler(CommandHandler("add_keywords", self.add_keywords))
-        self.telegram_app.add_handler(CommandHandler("del_keywords", self.del_keywords))
-        self.telegram_app.add_handler(CommandHandler("acro", self.handle_acro))
+        self.telegram_app.add_handler(CommandHandler("add_message", self.command_add_message))
+        self.telegram_app.add_handler(CommandHandler("add_keywords", self.command_add_keywords))
+        self.telegram_app.add_handler(CommandHandler("del_keywords", self.command_del_keywords))
+        self.telegram_app.add_handler(CommandHandler("acro", self.command_acro))
         self.telegram_app.add_handler(
             MessageHandler(filters.TEXT & ~filters.COMMAND, self.handle_message)
         )
@@ -87,9 +87,20 @@ class Acrobot:
                 await func(*args)
                 await asyncio.sleep(settings.acrobot.throttle_interval)
 
+    async def generate_acro(self, word: str) -> None | str:
+        """
+        Forms the complete acronym prompt and gets the model's response.
+        """
+        convo = "\n".join(f"{u}: {m}" for u, m in self.history)
+        response, _ = await asyncio.to_thread(
+            get_acro, model=llm, word=word, convo=convo, 
+            retries=settings.model.retries
+        )
+        return response
+
     # === BOT TASKS ===
-    # These are the tasks arise from command requests and get added to
-    # the processing queue for execution.
+    # The following functions are tasks that arise from command requests and 
+    # which get added to the processing queue for execution.
 
     async def keyword_task(self, update: Update, word: str) -> None:
         """
@@ -113,16 +124,6 @@ class Acrobot:
         elif update.message:
             await update.message.reply_text("Dammit you broke something")
 
-    async def generate_acro(self, word: str) -> None | str:
-        """
-        Forms the complete acronym prompt and gets the model's response.
-        """
-        convo = "\n".join(f"{u}: {m}" for u, m in self.history)
-        response, _ = await asyncio.to_thread(
-            get_acro, model=llm, word=word, convo=convo, 
-            retries=settings.model.retries
-        )
-        return response
 
     # === COMMAND HANDLERS ===
     # These are the callback functions that get invoked when the associated
@@ -153,7 +154,7 @@ class Acrobot:
                 f"Queue length: {len(self.event_queue)} | API calls: {self.call_count} | KW: {self.keywords} "
             )
 
-    async def add_keywords(
+    async def command_add_keywords(
         self, update: Update, context: ContextTypes.DEFAULT_TYPE
     ) -> None:
         """
@@ -175,7 +176,7 @@ class Acrobot:
         if keyword_list is not None:
             self.keywords = self.keywords.union(keyword_list)
 
-    async def del_keywords(
+    async def command_del_keywords(
         self, update: Update, context: ContextTypes.DEFAULT_TYPE
     ) -> None:
         """
@@ -198,7 +199,7 @@ class Acrobot:
         if keyword_list is not None:
             self.keywords = self.keywords.difference(keyword_list)
 
-    async def add_message(
+    async def command_add_message(
         self, update: Update, context: ContextTypes.DEFAULT_TYPE
     ) -> None:
         """
@@ -216,6 +217,34 @@ class Acrobot:
         self._update_history(username, message)
         if update.message:
             await update.message.reply_text("Message added.")
+
+    async def command_acro(
+        self, update: Update, context: ContextTypes.DEFAULT_TYPE
+    ) -> None:
+        """
+        Generates a new acronym and posts it in the chat. If no word is specified
+        it will pick at random from the last message.
+        """
+
+        if self.call_count >= settings.acrobot.max_calls:
+            if update.message:
+                await update.message.reply_text(
+                    "No more! You're wasting my precious tokens!"
+                )
+            return
+
+        word = (
+            context.args[0]
+            if context.args
+            else random.choice(self.history[-1][1].split())
+        )
+        word = word[:settings.acrobot.max_word_length]
+
+        self.event_queue.append((self.acro_task, update, word))
+        self.queue_event.set()
+
+    # === MESSAGE HANDLER ===
+    # General-purpose chat message handler. 
 
     async def handle_message(
         self, update: Update, _: ContextTypes.DEFAULT_TYPE
@@ -243,35 +272,10 @@ class Acrobot:
         """
         Helper function for manually adding a message to the conversation
         history.
-        """
-        # self.history = self.history + [(sender, message)]
+        """        
         self.history.append((sender, message))
         self.history = self.history[-settings.acrobot.max_history:]
 
-    async def handle_acro(
-        self, update: Update, context: ContextTypes.DEFAULT_TYPE
-    ) -> None:
-        """
-        Generates a new acronym and posts it in the chat. If no word is specified
-        it will pick at random from the last message.
-        """
-
-        if self.call_count >= settings.acrobot.max_calls:
-            if update.message:
-                await update.message.reply_text(
-                    "No more! You're wasting my precious tokens!"
-                )
-            return
-
-        word = (
-            context.args[0]
-            if context.args
-            else random.choice(self.history[-1][1].split())
-        )
-        word = word[:settings.acrobot.max_word_length]
-
-        self.event_queue.append((self.acro_task, update, word))
-        self.queue_event.set()
 
     def start_loop(self) -> None:
         """
