@@ -59,7 +59,7 @@ class Acrobot:
         self.event_queue: Deque[tuple[Callable, Update, Any]] = deque()
         self.queue_event: asyncio.Event = asyncio.Event()
         self.history: list[tuple[str, str]] = []
-        self.call_count: int = 0
+        self.call_count: int = 0 # not implemented
         self.keywords = set(keywords) if isinstance(keywords, list) else settings.acrobot.keywords
 
         self.telegram_app = ApplicationBuilder().token(TELEGRAM_BOT_TOKEN).build()
@@ -91,6 +91,7 @@ class Acrobot:
         """
         Forms the complete acronym prompt and gets the model's response.
         """
+        
         convo = "\n".join(f"{u}: {m}" for u, m in self.history)
         response, _ = await asyncio.to_thread(
             get_acro, model=llm, word=word, convo=convo, 
@@ -225,14 +226,6 @@ class Acrobot:
         Generates a new acronym and posts it in the chat. If no word is specified
         it will pick at random from the last message.
         """
-
-        if self.call_count >= settings.acrobot.max_calls:
-            if update.message:
-                await update.message.reply_text(
-                    "No more! You're wasting my precious tokens!"
-                )
-            return
-
         word = (
             context.args[0]
             if context.args

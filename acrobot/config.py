@@ -13,7 +13,6 @@ from typing import Literal
 class Acrobot(BaseModel):
     """Bot config class."""
     max_history: int = 5
-    max_calls: int = -1
     max_word_length: int = 12
     throttle_interval: int = 5
     keywords: set[str] = {}
