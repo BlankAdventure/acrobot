@@ -90,9 +90,6 @@ class Acrobot:
             await asyncio.sleep(settings.acrobot.throttle_interval)
             self.queue.task_done()
 
-    async def go(self) -> None:
-        asyncio.create_task(self.queue_processor()) 
-
     async def generate_acro(self, word: str) -> None | str:
         """
         Forms the complete acronym prompt and gets the model's response.
@@ -273,34 +270,12 @@ class Acrobot:
         self.history.append((sender, message))
         self.history = self.history[-settings.acrobot.max_history:]
 
-
-    def start(self):        
+    def start(self) -> None:
+        async def go() -> None:
+            asyncio.create_task(self.queue_processor()) 
         loop = asyncio.get_event_loop()
-        loop.create_task(self.go()) 
+        loop.create_task(go()) 
         self.telegram_app.run_polling()
-
-
-    # def start_loop(self) -> None:
-    #     """
-    #     Checks if an existing asyncio event loop is running, and if not
-    #     starts one. Then, run the queue_processor in the loop.
-    #     """
-    #     try:
-    #         self.loop = asyncio.get_running_loop()
-    #         logger.info("using running loop")
-    #     except:
-    #         self.loop = asyncio.new_event_loop()
-    #         logger.info("using existing loop")
-    #     asyncio.set_event_loop(self.loop)
-    #     self.loop.create_task(self.queue_processor())
-
-    # def start_polling(self) -> None:
-    #     """
-    #     Run acrobot in polling mode.
-    #     """
-    #     #self.start_loop()
-    #     self.telegram_app.run_polling()
-
 
 # ************************************************************
 # WEBHOOK CLASS
@@ -342,7 +317,7 @@ class Acrowebhook(Acrobot, FastAPI):
 
 
 if __name__ == "__main__":
-    setup_logging(level="DEBUG")
+    setup_logging()
     logger.info("launching in standalone polling mode")
     bot = Acrobot()
     bot.start()  # this will block
