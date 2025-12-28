@@ -12,10 +12,10 @@ import random
 import logging
 import asyncio
 from pathlib import Path
-from typing import Any, Iterable
-from collections import deque
-from collections.abc import Callable
-from typing import Deque
+from typing import Iterable
+#from collections import deque
+#from collections.abc import Callable
+#from typing import Deque
 from http import HTTPStatus
 from typing import AsyncIterator
 from contextlib import asynccontextmanager
@@ -56,8 +56,7 @@ def match_words(message: str, keywords: Iterable[str]) -> list[str]:
 # ************************************************************
 class Acrobot:
     def __init__(self, keywords: list[str] | None = None) -> None:
-        self.event_queue: Deque[tuple[Callable, Update, Any]] = deque()
-        self.queue_event: asyncio.Event = asyncio.Event()
+        self.queue = asyncio.Queue()
         self.history: list[tuple[str, str]] = []
         self.call_count: int = 0 # not implemented
         self.keywords = set(keywords) if isinstance(keywords, list) else settings.acrobot.keywords
@@ -79,13 +78,11 @@ class Acrobot:
         get added to the event queue and processed every THROTTLE_INTERVAL seconds.
         """
         while True:
-            if not self.event_queue:
-                self.queue_event.clear()
-                await self.queue_event.wait()
-            else:
-                func, *args = self.event_queue.popleft()
-                await func(*args)
-                await asyncio.sleep(settings.acrobot.throttle_interval)
+            task = await self.queue.get()            
+            result = task()
+            if asyncio.iscoroutine(result):
+                await result 
+            await asyncio.sleep(settings.acrobot.throttle_interval)
 
     async def generate_acro(self, word: str) -> None | str:
         """
@@ -233,8 +230,8 @@ class Acrobot:
         )
         word = word[:settings.acrobot.max_word_length]
 
-        self.event_queue.append((self.acro_task, update, word))
-        self.queue_event.set()
+        await self.queue.put( lambda: self.acro_task(update, word) )
+
 
     # === MESSAGE HANDLER ===
     # General-purpose chat message handler. 
@@ -256,10 +253,7 @@ class Acrobot:
             self._update_history(sender, message)
             found = match_words(message, self.keywords)
             if len(found) > 0:
-                self.event_queue.append(
-                    (self.keyword_task, update, random.choice(found))
-                )
-                self.queue_event.set()
+                await self.queue.put( lambda: self.keyword_task(update, random.choice(found)) )
 
     def _update_history(self, sender: str, message: str) -> None:
         """
