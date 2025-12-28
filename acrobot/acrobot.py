@@ -14,8 +14,8 @@ import asyncio
 from pathlib import Path
 from typing import Iterable
 #from collections import deque
-#from collections.abc import Callable
-#from typing import Deque
+from collections.abc import Callable
+#from typing import Coroutine
 from http import HTTPStatus
 from typing import AsyncIterator
 from contextlib import asynccontextmanager
@@ -56,7 +56,7 @@ def match_words(message: str, keywords: Iterable[str]) -> list[str]:
 # ************************************************************
 class Acrobot:
     def __init__(self, keywords: list[str] | None = None) -> None:
-        self.queue = asyncio.Queue()
+        self.queue: asyncio.Queue[Callable] = asyncio.Queue()
         self.history: list[tuple[str, str]] = []
         self.call_count: int = 0 # not implemented
         self.keywords = set(keywords) if isinstance(keywords, list) else settings.acrobot.keywords
@@ -72,17 +72,26 @@ class Acrobot:
             MessageHandler(filters.TEXT & ~filters.COMMAND, self.handle_message)
         )
 
-    async def queue_processor(self) -> None:
+
+    async def queue_processor(self) -> None:        
         """
         Async loop implementing a leaky bucket rate limiter. Acro requests
         get added to the event queue and processed every THROTTLE_INTERVAL seconds.
         """
+
+        logger.info('queue processor started.')        
         while True:
-            task = await self.queue.get()            
-            result = task()
+            logger.debug('queue processor awaiting.')
+            func = await self.queue.get() #result is a FUNCTION, if using lambda
+            logger.debug(f'task received. {func}')
+            result = func()
             if asyncio.iscoroutine(result):
-                await result 
+                await result                
             await asyncio.sleep(settings.acrobot.throttle_interval)
+            self.queue.task_done()
+
+    async def go(self) -> None:
+        asyncio.create_task(self.queue_processor()) 
 
     async def generate_acro(self, word: str) -> None | str:
         """
@@ -117,6 +126,7 @@ class Acrobot:
         Form the bot's reply to an acronym request.
         """
         response = await self.generate_acro(word)
+        
         if update.message and response:
             await update.message.reply_text(response, do_quote=False)
         elif update.message:
@@ -142,15 +152,15 @@ class Acrobot:
         """
         Relays info about the self of the bot.
         """
-        logger.info("Chat History:\n" + "\n".join(f"{u}: {m}" for u, m in self.history))
-        logger.info(f"Keywords: {self.keywords}\n")
-        logger.info(
-            f"Queue length: {len(self.event_queue)} | API calls: {self.call_count}"
-        )
+        #logger.info("Chat History:\n" + "\n".join(f"{u}: {m}" for u, m in self.history))
+        #logger.info(f"Keywords: {self.keywords}\n")
+        #logger.info(
+        #    f"Queue length: {len(self.event_queue)} | API calls: {self.call_count}"
+        #)
         if update.message:
-            await update.message.reply_text(
-                f"Queue length: {len(self.event_queue)} | API calls: {self.call_count} | KW: {self.keywords} "
-            )
+            await update.message.reply_text("INFO INFO INFO!")
+                #f"Queue length: {len(self.queue)} | API calls: {self.call_count} | KW: {self.keywords} "
+            
 
     async def command_add_keywords(
         self, update: Update, context: ContextTypes.DEFAULT_TYPE
@@ -229,9 +239,9 @@ class Acrobot:
             else random.choice(self.history[-1][1].split())
         )
         word = word[:settings.acrobot.max_word_length]
-
+        logger.info(f"command_acro: {word}")
         await self.queue.put( lambda: self.acro_task(update, word) )
-
+        
 
     # === MESSAGE HANDLER ===
     # General-purpose chat message handler. 
@@ -264,26 +274,32 @@ class Acrobot:
         self.history = self.history[-settings.acrobot.max_history:]
 
 
-    def start_loop(self) -> None:
-        """
-        Checks if an existing asyncio event loop is running, and if not
-        starts one. Then, run the queue_processor in the loop.
-        """
-        try:
-            self.loop = asyncio.get_running_loop()
-            logger.info("using running loop")
-        except:
-            self.loop = asyncio.new_event_loop()
-            logger.info("using existing loop")
-        asyncio.set_event_loop(self.loop)
-        self.loop.create_task(self.queue_processor())
-
-    def start_polling(self) -> None:
-        """
-        Run acrobot in polling mode.
-        """
-        self.start_loop()
+    def start(self):        
+        loop = asyncio.get_event_loop()
+        loop.create_task(self.go()) 
         self.telegram_app.run_polling()
+
+
+    # def start_loop(self) -> None:
+    #     """
+    #     Checks if an existing asyncio event loop is running, and if not
+    #     starts one. Then, run the queue_processor in the loop.
+    #     """
+    #     try:
+    #         self.loop = asyncio.get_running_loop()
+    #         logger.info("using running loop")
+    #     except:
+    #         self.loop = asyncio.new_event_loop()
+    #         logger.info("using existing loop")
+    #     asyncio.set_event_loop(self.loop)
+    #     self.loop.create_task(self.queue_processor())
+
+    # def start_polling(self) -> None:
+    #     """
+    #     Run acrobot in polling mode.
+    #     """
+    #     #self.start_loop()
+    #     self.telegram_app.run_polling()
 
 
 # ************************************************************
@@ -326,7 +342,7 @@ class Acrowebhook(Acrobot, FastAPI):
 
 
 if __name__ == "__main__":
-    setup_logging()
+    setup_logging(level="DEBUG")
     logger.info("launching in standalone polling mode")
     bot = Acrobot()
-    bot.start_polling()  # this will block
+    bot.start()  # this will block
