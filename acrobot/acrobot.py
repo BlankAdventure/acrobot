@@ -291,16 +291,17 @@ class Acrobot:
         if run_polling:
             self.telegram_app.run_polling()
 
-    async def shutdown(self) -> None:
+    async def complete(self, stop) -> None:
         """
         Ends the the queue processor loop and waits for remaining tasks to 
         finish.
         """
-        await self.queue.put( None )
-        await asyncio.wait_for(self.task_go,timeout=60)
-        await asyncio.wait_for(self.task_qp,timeout=60)
+        if stop:
+            await self.queue.put( None )
+        await self.queue.join()
         
-        
+
+            
     
     
 
