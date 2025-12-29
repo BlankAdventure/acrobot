@@ -14,6 +14,7 @@ dependencies = [
 ]
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+addopts = "-s -ra -v -x --strict-markers --log-cli-level=INFO"
 
 [dependency-groups]
 dev = [

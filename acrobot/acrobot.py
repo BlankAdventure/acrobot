@@ -224,7 +224,7 @@ class Acrobot:
         username, message = context.args[0], " ".join(context.args[1:])
         self._update_history(username, message)
         if update.message:
-            await update.message.reply_text("Message added.")
+            await update.message.reply_text("Message added.",do_quote=True)
 
     async def command_acro(
         self, update: Update, context: ContextTypes.DEFAULT_TYPE

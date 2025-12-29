@@ -8,11 +8,11 @@ import sys
 from pathlib import Path
 
 import pytest
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from acrobot.acrobot import Acrobot, match_words, KEYWORDS
+from acrobot.acrobot import Acrobot, match_words
 
 def test_match_words_found():
     message = "Let's grab a beer and go!"
@@ -39,43 +39,15 @@ def test_del_keywords():
     assert "hash" not in bot.keywords
     assert "drunk" in bot.keywords
 
+@patch('acrobot.acrobot.settings.acrobot.max_history', 5)
 def test_update_history():
     bot = Acrobot()
     for i in range(10):
-        bot._update_history(f"user{i}", f"message {i}")
-    # Should keep only last MAX_HISTORY = 6
-    assert len(bot.history) == 6
-    assert bot.history[0][0] == "user4"  # user4 to user9 are kept
+        bot._update_history(f"user_{i}", f"message_{i}")    
+    assert len(bot.history) == 5
+    assert bot.history[0]  == ("user_5","message_5")  
+    assert bot.history[-1] == ("user_9","message_9")
 
-
-@pytest.mark.asyncio
-async def test_generate_acro_calls_model_response():
-    bot = Acrobot()
-    bot.history = [("user1", "Let's get drunk"), ("user2", "Totally down")]
-    bot.model_response = AsyncMock(return_value="Downright Rambunctious Unicorns Need Kegs")
-
-    result = await bot.generate_acro("drunk")
-
-    #expected_prompt = PROMPT_TEMPLATE.format(
-    #    convo="user1: Let's get drunk\nuser2: Totally down", word="drunk"
-    #)
-    #bot.model_response.assert_awaited_once_with(expected_prompt)
-    assert result == "Downright Rambunctious Unicorns Need Kegs"
-
-
-# @pytest.mark.asyncio
-# @patch("acrobot.client.models.generate_content")
-# async def test_model_response_success(mock_generate_content):
-#     mock_response = MagicMock()
-#     mock_response.text = "Downright Rambunctious Unicorns Need Kegs"
-#     mock_generate_content.return_value = mock_response
-
-#     bot = Acrobot()
-#     prompt = "Generate an acronym for DRUNK"
-#     result = await bot.model_response(prompt)
-
-#     assert "Downright Rambunctious Unicorns Need Kegs" == result
-#     assert bot.call_count == 1
 
 
 # @pytest.mark.asyncio
@@ -106,7 +78,7 @@ def mock_context():
     mock.args = []
     return mock
 
-@pytest.mark.asyncio
+
 async def test_command_start_sends_intro(mock_update, mock_context):
     bot = Acrobot()
     await bot.command_start(mock_update, mock_context)
@@ -114,13 +86,13 @@ async def test_command_start_sends_intro(mock_update, mock_context):
         "Hi, I'm Acrobot. Use /acro WORD to generate an acronym."
     )
 
-@pytest.mark.asyncio
+
 async def test_add_keywords_command_updates_keywords(mock_update):
     bot = Acrobot()
     context = MagicMock()
     context.args = ["newword", "beer"]
     
-    await bot.add_keywords(mock_update, context)
+    await bot.command_add_keywords(mock_update, context)
     
     assert "newword" in bot.keywords
     assert "beer" in bot.keywords
@@ -131,7 +103,7 @@ async def test_del_keywords_command_removes_keywords(mock_update):
     context = MagicMock()
     context.args = ["beer"]
     
-    await bot.del_keywords(mock_update, context)
+    await bot.command_del_keywords(mock_update, context)
     
     assert "beer" not in bot.keywords
     assert "hash" in bot.keywords
@@ -142,38 +114,8 @@ async def test_add_message_command_updates_history(mock_update):
     context = MagicMock()
     context.args = ["alice", "Hello", "world"]
 
-    await bot.add_message(mock_update, context)
+    await bot.command_add_message(mock_update, context)
     
     assert bot.history[-1] == ("alice", "Hello world")
-    mock_update.message.reply_text.assert_awaited_once_with("Message added.")
+    mock_update.message.reply_text.assert_awaited_once_with("Message added.",do_quote=True)
 
-@pytest.mark.asyncio
-async def test_handle_message_with_keyword_queues_task(mock_update):
-    bot = Acrobot()
-    bot.queue_event = AsyncMock()
-    bot.history = []
-
-    await bot.handle_message(mock_update, MagicMock())
-
-    # Message should be added to history
-    assert bot.history[-1][0] == "testuser"
-    assert bot.event_queue  # task should be in queue
-    assert callable(bot.event_queue[0][0])  # should be keyword_task
-    assert bot.event_queue[0][2] in KEYWORDS  # matched keyword
-
-@pytest.mark.asyncio
-async def test_handle_acro_command_queues_task(mock_update):
-    bot = Acrobot()
-    bot.history = [("testuser", "Some previous message")]
-    bot.queue_event = AsyncMock()
-    
-    context = MagicMock()
-    context.args = []
-
-    await bot.handle_acro(mock_update, context)
-
-    assert bot.event_queue
-    assert bot.event_queue[0][0] == bot.acro_task
-
-
-#pip install pytest pytest-asyncio

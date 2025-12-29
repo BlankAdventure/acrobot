@@ -48,7 +48,7 @@ def test_catch_returns_none_on_exception(caplog):
 def test_validate_format(word, sentence, expected):
     assert validate_format(word, sentence) is expected
 
-def test_get_acro_success_first_try_gemini(dummy_model):
+def test_get_acro_success_first_try(dummy_model):
     model = dummy_model()
     with patch.object(model, "generate_response", 
                       return_value="Cool Awesome Tiger") as mock_generate:
@@ -89,13 +89,13 @@ def test_generate_response_exception_handled(caplog, dummy_model):
     assert "API failure" in caplog.text
     
 
-def test_find_and_get_class(dummy_model):
+def test_get_model_success(dummy_model):
     assert isinstance(get_model("Dummy"),dummy_model)
 
 
 def test_get_model_fails():  
     with pytest.raises(KeyError): 
-        get_model("does not exist")
+        get_model("model_doesnt_exist")
 
 
     
