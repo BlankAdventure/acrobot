@@ -273,11 +273,22 @@ class Acrobot:
         self.history.append((sender, message))
         self.history = self.history[-settings.acrobot.max_history:]
 
-    def start(self) -> None:
+    def start(self, run_polling: bool = False) -> None:
         async def go() -> None:
             self.task_qp = asyncio.create_task(self.queue_processor())  
-        loop = asyncio.get_event_loop()
+        
+        try:
+            loop = asyncio.get_event_loop()
+            logger.debug ('using existing event loop')            
+        except RuntimeError:
+            loop = asyncio.new_event_loop()
+            logger.debug ('got new event loop')
+        
+        asyncio.set_event_loop(loop)             
         self.task_go = loop.create_task(go())
+        
+        if run_polling:
+            self.telegram_app.run_polling()
 
     async def shutdown(self) -> None:
         """
@@ -335,4 +346,4 @@ if __name__ == "__main__":
     setup_logging()
     logger.info("launching in standalone polling mode")
     bot = Acrobot()
-    bot.start()  # this will block
+    bot.start(True)  # this will block
