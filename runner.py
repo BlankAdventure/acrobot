@@ -6,7 +6,7 @@ Created on Mon Sep 15 23:05:44 2025
 """
 import sys
 import argparse
-import acrobot
+from acrobot import acrobot
 
 def run_webhook(webhook_url: str|None, ip_addr: str, port: int)->None:
     '''
@@ -34,9 +34,9 @@ webhook_parser.add_argument('-a', help='server IP address (listening)', default=
 webhook_parser.add_argument('-w', help='webhook URL', default=None,type=str)
 args = parser.parse_args()
 
-if (args.command == 'polling' and args.panel == False) or len(sys.argv) < 2 :
+if (args.command == 'polling') or len(sys.argv) < 2 :
     run_polling()
-elif args.command == 'webhook' and args.panel == False:
+elif args.command == 'webhook':
     run_webhook(args.w, args.a, args.p)
 else:
     parser.print_help()

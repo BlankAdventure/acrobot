@@ -55,7 +55,7 @@ def match_words(message: str, keywords: Iterable[str]) -> list[str]:
 # ************************************************************
 class Acrobot:
     def __init__(self, keywords: list[str] | None = None) -> None:
-        self.queue: asyncio.Queue[Callable] = asyncio.Queue()
+        self.queue: asyncio.Queue[None|Callable] = asyncio.Queue()
         self.history: list[tuple[str, str]] = []
         self.call_count: int = 0 # not implemented
         self.keywords = set(keywords) if isinstance(keywords, list) else settings.acrobot.keywords
@@ -274,6 +274,7 @@ class Acrobot:
         self.history = self.history[-settings.acrobot.max_history:]
 
     def start(self, run_polling: bool = False) -> None:
+        
         async def go() -> None:
             self.task_qp = asyncio.create_task(self.queue_processor())  
         
@@ -326,7 +327,7 @@ class Acrowebhook(Acrobot, FastAPI):
     @asynccontextmanager
     async def lifespan(self, _: FastAPI) -> AsyncIterator[None]:
         """Handles application startup and shutdown events."""
-        self.start_loop()
+        self.start(False)
         if self.webhook_url:
             await self.telegram_app.bot.setWebhook(self.webhook_url)
         async with self.telegram_app:
