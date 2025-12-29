@@ -13,9 +13,8 @@ import logging
 import asyncio
 from pathlib import Path
 from typing import Iterable
-#from collections import deque
 from collections.abc import Callable
-#from typing import Coroutine
+
 from http import HTTPStatus
 from typing import AsyncIterator
 from contextlib import asynccontextmanager
@@ -80,15 +79,19 @@ class Acrobot:
         """
 
         logger.info('queue processor started.')        
+        
         while True:
             logger.debug('queue processor awaiting.')
-            func = await self.queue.get() #result is a FUNCTION, if using lambda
-            logger.debug(f'task received. {func}')
-            result = func()
-            if asyncio.iscoroutine(result):
-                await result                
+            item = await self.queue.get() 
+            logger.debug(f'task received: {item}')
+            if item is None: 
+                self.queue.task_done()
+                logger.info ("loop stopping")
+                break            
+            await item()            
             await asyncio.sleep(settings.acrobot.throttle_interval)
             self.queue.task_done()
+
 
     async def generate_acro(self, word: str) -> None | str:
         """
@@ -272,10 +275,22 @@ class Acrobot:
 
     def start(self) -> None:
         async def go() -> None:
-            asyncio.create_task(self.queue_processor()) 
+            self.task_qp = asyncio.create_task(self.queue_processor())  
         loop = asyncio.get_event_loop()
-        loop.create_task(go()) 
-        self.telegram_app.run_polling()
+        self.task_go = loop.create_task(go())
+
+    async def shutdown(self) -> None:
+        """
+        Ends the the queue processor loop and waits for remaining tasks to 
+        finish.
+        """
+        await self.queue.put( None )
+        await asyncio.wait_for(self.task_go,timeout=60)
+        await asyncio.wait_for(self.task_qp,timeout=60)
+        
+        
+    
+    
 
 # ************************************************************
 # WEBHOOK CLASS
