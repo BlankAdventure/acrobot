@@ -114,11 +114,11 @@ class Acrobot:
         Form the bot's reply to a keyword hit.
         """
         response = await self.generate_acro(word)
-        if update.message and response:
+        if response:
             await update.message.reply_text(
                 f"{word}? Who said {word}!?\n" + response, do_quote=False
             )
-        elif update.message:
+        else:
             await update.message.reply_text("Dammit you broke something")
 
     async def acro_task(self, update: Update, word: str) -> None:
@@ -127,9 +127,9 @@ class Acrobot:
         """
         response = await self.generate_acro(word)
         
-        if update.message and response:
+        if response:
             await update.message.reply_text(response, do_quote=False)
-        elif update.message:
+        else:
             await update.message.reply_text("Dammit you broke something")
 
 
@@ -141,8 +141,7 @@ class Acrobot:
         """
         Posts an introduction message to the chat.
         """
-        if update.message:
-            await update.message.reply_text(
+        await update.message.reply_text(
                 "Hi, I'm Acrobot. Use /acro WORD to generate an acronym."
             )
 
@@ -152,14 +151,7 @@ class Acrobot:
         """
         Relays info about the self of the bot.
         """
-        #logger.info("Chat History:\n" + "\n".join(f"{u}: {m}" for u, m in self.history))
-        #logger.info(f"Keywords: {self.keywords}\n")
-        #logger.info(
-        #    f"Queue length: {len(self.event_queue)} | API calls: {self.call_count}"
-        #)
-        if update.message:
-            await update.message.reply_text("INFO INFO INFO!")
-                #f"Queue length: {len(self.queue)} | API calls: {self.call_count} | KW: {self.keywords} "
+        await update.message.reply_text("INFO INFO INFO!")                
             
 
     async def command_add_keywords(
@@ -169,12 +161,12 @@ class Acrobot:
         Manually add new keywords to the trigger list.
         Usage: /add_keyword kw1 kw2 kw3 ...
         """
-        if context.args is None or len(context.args) < 1:
-            if update.message:
+        if context.args is None or len(context.args) < 1:            
                 await update.message.reply_text("Usage: /add_keyword kw1 kw2 kw3 ...")
-            return
-        self._add_keywords(context.args)
-
+        else:
+            self._add_keywords(context.args)
+            await update.message.reply_text("Keywords added.",do_quote=True)
+            
     def _add_keywords(self, keyword_list: list[str]) -> None:
         """
         Helper function for adding new keywords. We use a reassignment
@@ -191,11 +183,11 @@ class Acrobot:
         Remove keywords from the trigger list.
         Usage: /del_keyword kw1 kw2 kw3 ...
         """
-        if context.args is None or len(context.args) < 1:
-            if update.message:
-                await update.message.reply_text("Usage: /del_keyword kw1 kw2 kw3 ...")
-            return
-        self._del_keywords(context.args)
+        if context.args is None or len(context.args) < 1:            
+            await update.message.reply_text("Usage: /del_keyword kw1 kw2 kw3 ...")
+        else:
+            self._del_keywords(context.args)
+            await update.message.reply_text("Keywords deleted.",do_quote=True)
 
     def _del_keywords(self, keyword_list: list[str]) -> None:
         """
@@ -214,16 +206,13 @@ class Acrobot:
         Manually add a new message to the chat history.
         Usage: /add_message username add this message!
         """
-        if context.args is None or len(context.args) < 2:
-            if update.message:
-                await update.message.reply_text(
-                    "Usage: /add_message username add this message!"
+        if context.args is None or len(context.args) < 2:     
+            await update.message.reply_text(
+                "Usage: /add_message username add this message!"
                 )
-            return
-
-        username, message = context.args[0], " ".join(context.args[1:])
-        self._update_history(username, message)
-        if update.message:
+        else:
+            username, message = context.args[0], " ".join(context.args[1:])
+            self._update_history(username, message)            
             await update.message.reply_text("Message added.",do_quote=True)
 
     async def command_acro(
@@ -252,18 +241,18 @@ class Acrobot:
         """
         Automatically adds new chat messages to the history.
         """
-        if not update.message or not update.message.from_user:
-            return
+        #if not update.message or not update.message.from_user:
+        #    return
 
         user = update.message.from_user
         sender = user.username or user.first_name or user.last_name or "Unknown"
         message = update.message.text
 
-        if message:
-            self._update_history(sender, message)
-            found = match_words(message, self.keywords)
-            if len(found) > 0:
-                await self.queue.put( lambda: self.keyword_task(update, random.choice(found)) )
+        
+        self._update_history(sender, message)
+        found = match_words(message, self.keywords)
+        if len(found) > 0:
+            await self.queue.put( lambda: self.keyword_task(update, random.choice(found)) )
 
     def _update_history(self, sender: str, message: str) -> None:
         """
