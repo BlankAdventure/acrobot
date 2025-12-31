@@ -231,17 +231,24 @@ class Acrobot:
     ) -> None:
         """
         Generates a new acronym and posts it in the chat. If no word is specified
-        it will pick at random from the last message.
-        """
-        word = (
-            context.args[0]
-            if context.args
-            else random.choice(self.history[-1][1].split())
-        )
-        word = word[:settings.acrobot.max_word_length]
-        logger.info(f"command_acro: {word}")
-        await self.queue.put( lambda: self.acro_task(update, word) )
+        it will pick one at random from the history.
         
+        This function removes any non-alphabetic characters.
+        """
+        if update.message:
+            word: str = ''
+            if context.args:
+                word = context.args[0]
+            else:
+                flat_history = [word for user, msg in self.history for word in (user, *msg.split())]
+                word = random.choice(flat_history) or ''
+    
+            word = "".join(char for char in word if char.isalpha())[:settings.acrobot.max_word_length]
+    
+            if word:            
+                await self.queue.put( lambda: self.acro_task(update, word) )
+            else:         
+                await update.message.reply_text("Not allowed boyo!",do_quote=True)
 
     # === MESSAGE HANDLER ===
     # General-purpose chat message handler. 
