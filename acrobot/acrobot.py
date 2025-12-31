@@ -241,7 +241,7 @@ class Acrobot:
                 word = context.args[0]
             else:
                 flat_history = [word for user, msg in self.history for word in (user, *msg.split())]
-                word = random.choice(flat_history) or ''
+                word = random.choice(flat_history) if flat_history else ""
     
             word = "".join(char for char in word if char.isalpha())[:settings.acrobot.max_word_length]
     
