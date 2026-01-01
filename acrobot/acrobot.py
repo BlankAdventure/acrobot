@@ -113,24 +113,27 @@ class Acrobot:
         """
         Form the bot's reply to a keyword hit.
         """
-        response = await self.generate_acro(word)
-        if update.message and response:
-            await update.message.reply_text(
-                f"{word}? Who said {word}!?\n" + response, do_quote=False
-            )
-        elif update.message:
-            await update.message.reply_text("Dammit you broke something")
+        
+        if update.message:
+            response = await self.generate_acro(word) 
+            if response:
+                await update.message.reply_text(
+                    f"{word}? Who said {word}!?\n" + response, do_quote=False
+                )
+            else:
+                await update.message.reply_text("Dammit you broke something")
 
     async def acro_task(self, update: Update, word: str) -> None:
         """
         Form the bot's reply to an acronym request.
         """
-        response = await self.generate_acro(word)
         
-        if update.message and response:
-            await update.message.reply_text(response, do_quote=False)
-        elif update.message:
-            await update.message.reply_text("Dammit you broke something")
+        if update.message:
+            response = await self.generate_acro(word)
+            if response:
+                await update.message.reply_text(response, do_quote=False)
+            else:
+                await update.message.reply_text("Dammit you broke something")
 
 
     # === COMMAND HANDLERS ===
@@ -214,17 +217,15 @@ class Acrobot:
         Manually add a new message to the chat history.
         Usage: /add_message username add this message!
         """
-        if context.args is None or len(context.args) < 2:
-            if update.message:
+        if update.message:
+            if context.args is None or len(context.args) < 2:
                 await update.message.reply_text(
                     "Usage: /add_message username add this message!"
                 )
-            return
-
-        username, message = context.args[0], " ".join(context.args[1:])
-        self._update_history(username, message)
-        if update.message:
-            await update.message.reply_text("Message added.",do_quote=True)
+            else:
+                username, message = context.args[0], " ".join(context.args[1:])
+                self._update_history(username, message)    
+                await update.message.reply_text("Message added.",do_quote=True)
 
     async def command_acro(
         self, update: Update, context: ContextTypes.DEFAULT_TYPE
