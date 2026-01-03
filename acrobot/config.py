@@ -6,9 +6,9 @@ Created on Sun Dec 21 14:48:23 2025
 """
 import pathlib
 import logging
-from pydantic import BaseModel, ConfigDict, Field
-import yaml
 from typing import Literal
+import yaml
+from pydantic import BaseModel, ConfigDict, Field
 
 class Acrobot(BaseModel):
     """Bot config class."""
@@ -16,17 +16,19 @@ class Acrobot(BaseModel):
     max_word_length: int = Field(default=12, ge=1)
     throttle_interval: int = Field(default=5, ge=0)
     keywords: set[str] = {}
-
+    model_config = ConfigDict(extra='forbid')
 
 class Model(BaseModel):
     """Model config class."""
     name: str
     retries: int = Field(default=0, ge=0)
+    model_config = ConfigDict(extra='forbid')
 
 class Logging(BaseModel):
     """Logging config class."""
     level: Literal[*logging.getLevelNamesMapping().keys()] = "INFO"
-
+    model_config = ConfigDict(extra='forbid')
+    
 class Config(BaseModel):
     """CLI config class."""
     acrobot: Acrobot
@@ -42,7 +44,7 @@ def load_yaml_config(path: pathlib.Path) -> Config:
         raise FileNotFoundError(error, "Could not load yaml config file.") from error
 
 path = pathlib.Path(__file__).parent.parent / 'config.yaml'
-settings = Config(**load_yaml_config(path),extra="allow")
+settings = Config(**load_yaml_config(path))
 
 def setup_logging(level=settings.logging.level) -> None:
     logging.getLogger().handlers.clear()
