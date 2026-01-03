@@ -161,6 +161,8 @@ def build_model(config: str|dict[str,Any]) -> Model:
     if isinstance(config, str):
         config = {'provider': config}
     
+    logger.debug(f"Building model with settings:\n{config}")
+    
     try:
         provider = config['provider']
     except KeyError as e:
