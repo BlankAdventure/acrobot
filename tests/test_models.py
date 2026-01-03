@@ -10,12 +10,14 @@ import pytest
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from acrobot.models import catch, validate_format, get_acro, get_model, Model
+from acrobot.models import catch, validate_format, get_acro, build_model, Model
 
 @pytest.fixture
 def dummy_model():
     class Dummy(Model):
-       def generate_response(self, prompt:str):
+        def __init__(self, x=0):
+            self.x=x
+        def generate_response(self, prompt:str):
            ... # not implemented - we patch this method as needed.
     return Dummy
 
@@ -89,13 +91,21 @@ def test_generate_response_exception_handled(caplog, dummy_model):
     assert "API failure" in caplog.text
     
 
-def test_get_model_success(dummy_model):
-    assert isinstance(get_model("Dummy"),dummy_model)
+def test_get_model_success_dict(dummy_model):
+    config = {'provider': 'Dummy', 'x': 10}    
+    model = build_model(config)    
+    assert isinstance(model,dummy_model)
+    assert model.x == 10
+
+def test_get_model_success_str(dummy_model):
+    model = build_model("Dummy")    
+    assert isinstance(model,dummy_model)
+    assert model.x == 0 #default value
 
 
 def test_get_model_fails():  
     with pytest.raises(KeyError): 
-        get_model("model_doesnt_exist")
+        build_model("model_doesnt_exist")
 
 
     
