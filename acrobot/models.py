@@ -16,6 +16,8 @@ from cerebras.cloud.sdk import APIError, Cerebras
 from google import genai
 from google.genai import errors, types
 from httpx import ConnectError
+from dataclasses import dataclass
+from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from config import setup_logging
@@ -63,18 +65,22 @@ class Model(ABC):
     def generate_response(self, prompt: str) -> str | None:
         pass
 
-
+@dataclass
 class GeminiModel(Model):
     """Use this class for configuring Gemini models"""
-
-    def __init__(self):
+    
+    thinking_budget: int = 0
+    temperature: float = 1.1
+    model_name: str = "gemini-2.5-flash"
+    
+    def __post_init__(self):
         thinking_config = types.ThinkingConfig(
-            thinking_budget=0, include_thoughts=False
+            thinking_budget=self.thinking_budget, include_thoughts=False
         )
         func_calling = types.AutomaticFunctionCallingConfig(disable=True)
         self.config = types.GenerateContentConfig(
             system_instruction=SYS_INSTRUCTION,
-            temperature=1.1,
+            temperature=self.temperature,
             thinking_config=thinking_config,
             automatic_function_calling=func_calling,
         )
@@ -83,15 +89,20 @@ class GeminiModel(Model):
     @catch(errors.APIError)
     def generate_response(self, prompt: str) -> str | None:
         response = self.client.models.generate_content(
-            model="gemini-2.5-flash", contents=prompt, config=self.config
+            model=self.model_name, contents=prompt, config=self.config
         )
         return response.text.strip()
 
-
+@dataclass
 class CerebrasModel(Model):
     """Use this class for configuring Cerebras models"""
 
-    def __init__(self):
+    model_name: str = "gpt-oss-120b"
+    max_completion_tokens: int = 1024
+    temperature: float = 1
+    top_p: float = 1
+
+    def __post_init__(self):
         self.client = Cerebras()
 
     @catch(APIError)
@@ -103,10 +114,10 @@ class CerebrasModel(Model):
 
         completion = self.client.chat.completions.create(
             messages=messages,
-            model="gpt-oss-120b",
-            max_completion_tokens=1024,
-            temperature=1,
-            top_p=0.6,
+            model=self.model_name, 
+            max_completion_tokens=self.max_completion_tokens,
+            temperature=self.temperature,
+            top_p=self.top_p,
             stream=False,
         )
         return completion.choices[0].message.content.strip()
@@ -145,18 +156,26 @@ def get_acro(
     logger.info(f"Generated: {expansion} (retries: {retries - count})")
     return (expansion, prompt)
 
-
-def get_model(model_name: str) -> Model:
-    """ 
-    Takes a model name as a string and returns a new instance of its associated
-    class, if it exists.
-    """
-    look_up = {x.__name__: x for x in Model.__subclasses__()}
+def build_model(config: str|dict[str,Any]) -> Model:
+    
+    if isinstance(config, str):
+        config = {'provider': config}
+    
     try:
-        cls = cast(Type[Model], look_up[model_name])
-        return cls()
+        provider = config['provider']
     except KeyError as e:
-        err_string = f"get_model: {model_name} not found. Valid options are: {', '.join(look_up.keys())}"
+        err_string = "build_model: config_dict must include 'provider' key with model name."
+        e.add_note(err_string)
+        logger.critical(err_string)
+        raise            
+        
+    look_up = {x.__name__: x for x in Model.__subclasses__()}
+    
+    try:
+        cls = cast(Type[Model], look_up[provider])
+        return cls( **{k: v for k, v in config.items() if k != 'provider'} )
+    except KeyError as e:
+        err_string = f"get_model: {provider} not found. Valid options are: {', '.join(look_up.keys())}"
         e.add_note(err_string)
         logger.critical(err_string)
         raise
@@ -165,6 +184,6 @@ if __name__ == "__main__":
     setup_logging()
     logger.info("running standalone")
 
-    llm = CerebrasModel()
-    print ( get_acro(llm, "beer", retries=1) )
-
+    llm = build_model('GeminiModel')
+    print ( get_acro(llm, "beer", retries=0) )
+    
