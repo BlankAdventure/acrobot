@@ -26,14 +26,14 @@ def test_match_words_none():
 
 
 def test_add_keywords():
-    bot = Acrobot(keywords=["beer"])
+    bot = Acrobot()
     bot._add_keywords(["hash", "drunk"])
     assert "hash" in bot.keywords
     assert "drunk" in bot.keywords
     assert "beer" in bot.keywords
 
 def test_del_keywords():
-    bot = Acrobot(keywords=["beer", "hash", "drunk"])
+    bot = Acrobot()
     bot._del_keywords(["beer", "hash"])
     assert "beer" not in bot.keywords
     assert "hash" not in bot.keywords

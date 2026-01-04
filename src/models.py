@@ -24,7 +24,7 @@ from config import setup_logging
 
 
 logger = logging.getLogger(__name__)
-
+_REGISTRY = {}
 
 SYS_INSTRUCTION = """
 You are in a hash house harriers chat group. You like sending creative, dirty acronyms inspired by the conversation.
@@ -61,6 +61,12 @@ def catch(*exceptions: type[Exception]) -> Callable:
 
 
 class Model(ABC):
+    _registry = {}
+
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        cls._registry[cls.__name__] = cls
+        _REGISTRY[cls.__name__] = cls
     @abstractmethod
     def generate_response(self, prompt: str) -> str | None:
         pass
@@ -170,14 +176,15 @@ def build_model(config: str|dict[str,Any]) -> Model:
         e.add_note(err_string)
         logger.critical(err_string)
         raise            
+
+    print(f"bm-1: {Model._registry}")    
+    print(f"bm-2: {_REGISTRY}") 
         
-    look_up = {x.__name__: x for x in Model.__subclasses__()}
-    
     try:
-        cls = cast(Type[Model], look_up[provider])
+        cls = cast(Type[Model], Model._registry[provider])
         return cls( **{k: v for k, v in config.items() if k != 'provider'} )
     except KeyError as e:
-        err_string = f"get_model: {provider} not found. Valid options are: {', '.join(look_up.keys())}"
+        err_string = f"build_model: {provider} not found. Valid options are: {', '.join(Model._registry.keys())}"
         e.add_note(err_string)
         logger.critical(err_string)
         raise

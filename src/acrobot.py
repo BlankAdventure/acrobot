@@ -20,7 +20,7 @@ from typing import AsyncIterator
 from contextlib import asynccontextmanager
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from models import get_acro, build_model
+from models import get_acro, build_model, Model
 from config import get_settings, setup_logging, Config
 
 from telegram.ext import (
@@ -58,10 +58,16 @@ class Acrobot:
         self.queue: asyncio.Queue[None|Callable] = asyncio.Queue()
         self.history: list[tuple[str, str]] = []
         self.call_count: int = 0 # not implemented
-        self.keywords = settings.acrobot.keywords
+        self.keywords = self.settings.acrobot.keywords
 
-        model_config = settings.model.use_config
-        self.llm = build_model( settings.__pydantic_extra__[model_config] )
+        q1 = self.settings.model.use_config
+        print(q1)
+        q2 = self.settings.__pydantic_extra__[q1]
+        print(q2)
+        
+        print(f"aoi: {Model._registry}")
+        
+        self.llm = build_model( q2 )
         
         self.telegram_app = ApplicationBuilder().token(TELEGRAM_BOT_TOKEN).build()
         self.telegram_app.add_handler(CommandHandler("start", self.command_start))
@@ -360,4 +366,4 @@ if __name__ == "__main__":
     logger.info("launching in standalone polling mode")
     #settings = get_settings()
     bot = Acrobot()
-    bot.start(True)  # this will block
+    #bot.start(True)  # this will block
