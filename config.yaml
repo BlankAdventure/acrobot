@@ -8,7 +8,9 @@ acrobot:
         - drunk
         - hash
 model:
-    name: CerebrasModel
+    use_config: config0
     retries: 1
 logging:
     level: INFO
+config0:
+    provider: CerebrasModel
