@@ -5,10 +5,9 @@ Created on Fri Dec 19 14:23:33 2025
 @author: BlankAdventure
 """
 
-import sys
+
 import functools
 import logging
-from pathlib import Path
 from abc import ABC, abstractmethod
 from collections.abc import Callable
 from typing import cast, Type
@@ -19,12 +18,9 @@ from httpx import ConnectError
 from dataclasses import dataclass
 from typing import Any
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
 from config import setup_logging
 
-
 logger = logging.getLogger(__name__)
-
 
 SYS_INSTRUCTION = """
 You are in a hash house harriers chat group. You like sending creative, dirty acronyms inspired by the conversation.
@@ -183,7 +179,7 @@ def build_model(config: str|dict[str,Any]) -> Model:
         raise
     
 if __name__ == "__main__":
-    setup_logging()
+    setup_logging("INFO")
     logger.info("running standalone")
 
     llm = build_model('GeminiModel')

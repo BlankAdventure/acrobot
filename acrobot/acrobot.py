@@ -7,11 +7,9 @@ Created on Fri Aug  8 21:39:33 2025
 
 import re
 import os
-import sys
 import random
 import logging
 import asyncio
-from pathlib import Path
 from typing import Iterable
 from collections.abc import Callable
 
@@ -19,7 +17,6 @@ from http import HTTPStatus
 from typing import AsyncIterator
 from contextlib import asynccontextmanager
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
 from models import get_acro, build_model
 from config import get_settings, setup_logging, Config
 
@@ -360,4 +357,4 @@ if __name__ == "__main__":
     logger.info("launching in standalone polling mode")
     #settings = get_settings()
     bot = Acrobot()
-    bot.start(True)  # this will block
+    #bot.start(True)  # this will block
