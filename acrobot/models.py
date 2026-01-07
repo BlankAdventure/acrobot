@@ -18,7 +18,7 @@ from httpx import ConnectError
 from dataclasses import dataclass
 from typing import Any
 
-from acrobot.src.config import setup_logging
+from acrobot.config import setup_logging
 
 logger = logging.getLogger(__name__)
 

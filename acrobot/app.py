@@ -17,8 +17,8 @@ from http import HTTPStatus
 from typing import AsyncIterator
 from contextlib import asynccontextmanager
 
-from acrobot.src.models import get_acro, build_model
-from acrobot.src.config import get_settings, setup_logging, Config
+from acrobot.models import get_acro, build_model
+from acrobot.config import get_settings, setup_logging, Config
 
 from telegram.ext import (
     ApplicationBuilder,
