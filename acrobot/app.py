@@ -54,7 +54,8 @@ class Acrobot:
         self.settings = Config.model_validate(settings)        
         self.queue: asyncio.Queue[None|Callable] = asyncio.Queue()
         self.history: list[tuple[str, str]] = []
-
+        self.keywords = self.settings.acrobot.keywords
+        
         model_config = settings.model.use_config        
         try:
             llm_config = settings.__pydantic_extra__[model_config]            
