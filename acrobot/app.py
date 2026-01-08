@@ -99,7 +99,7 @@ class Acrobot:
         """
         
         convo = "\n".join(f"{u}: {m}" for u, m in self.history)
-        response, _ = await asyncio.to_thread(
+        response, _,_ = await asyncio.to_thread(
             get_acro, model=self.llm, word=word, convo=convo, 
             retries=self.settings.model.retries
         )

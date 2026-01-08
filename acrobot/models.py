@@ -124,7 +124,7 @@ class CerebrasModel(Model):
         return completion.choices[0].message.content.strip()
 
 
-def validate_format(word: str, expansion: str) -> bool:
+def validate_format(word: str, expansion: str|None) -> bool:
     """
     Checks if the word is a valid acronym for the expansion (word count
     matches letter count; first letter matches each letter in word)
@@ -139,8 +139,8 @@ def validate_format(word: str, expansion: str) -> bool:
 
 
 def get_acro(
-    model: Model, word: str, convo: str = "", retries: int = 0, hard_fail=True,
-) -> tuple[str | None, str]:
+    model: Model, word: str, convo: str = "", retries: int = 0, hard_fail=False,
+) -> tuple[str | None, bool, str]:
     """
     Interprets word as an acronym and generates an expansion for it (yes this
     function name is rather backwards).
