@@ -37,6 +37,11 @@ PROMPT_TEMPLATE = """
 Now generate an acronym for the word: "{word}". Reply with only the acronym.
 """
 
+class AcroError(Exception):
+    """Exception raised for specific application errors."""
+    def __init__(self, message):
+        super().__init__(message)
+        logger.critical(message)
 
 def catch(*exceptions: type[Exception]) -> Callable:
     """Decorator function for handling failed model API calls"""
@@ -131,7 +136,7 @@ def validate_format(word: str, expansion: str) -> bool:
 
 
 def get_acro(
-    model: Model, word: str, convo: str = "", retries: int = 0
+    model: Model, word: str, convo: str = "", retries: int = 0, hard_fail=True,
 ) -> tuple[str | None, str]:
     """
     Interprets word as an acronym and generates an expansion for it (yes this
@@ -139,17 +144,51 @@ def get_acro(
     """
 
     prompt = PROMPT_TEMPLATE.format(convo=convo, word=word)
-    logger.info(f"Requested: {word}")
+    logger.info(f"Requested: '{word}'")
     logger.debug(f"PROMPT:\n{prompt}")
-    expansion = model.generate_response(prompt)
+    
+    
+    expansion: str|None = None
+    is_valid_acro: bool  = False
+    
+    # retries means extra passes through the loop beyond a first initial 
+    # pass. Therefore, need set count to retires + 1. Also need to ensure
+    # count is at least 1.
 
-    count = retries
-    while count > 0:
-        if expansion and validate_format(word, expansion):
-            break
-        expansion = model.generate_response(prompt)
+    if retries < 1:
+        count = 1 
+    else:
+        count = retries + 1
+    
+    while count > 0:        
+        try:
+            expansion = model.generate_response(prompt)
+        except Exception as e:
+            if hard_fail:
+                raise AcroError(f"LLM response failed: {e}")
+            else:
+                expansion = None
+                
+        if not isinstance(expansion, str):
+            if hard_fail:
+                raise AcroError("LLM response must be a string.")
+            else:
+                expansion = None
+        
         count -= 1
-    logger.info(f"Generated: {expansion} (retries: {retries - count})")
+        
+        if expansion:
+           is_valid_acro = validate_format(word, expansion)            
+        else:
+           is_valid_acro = False
+           break       
+        if is_valid_acro:
+           break
+        
+    if hard_fail and not is_valid_acro:
+        raise AcroError("Invalid expansion.")
+    
+    logger.info(f"Generated: '{expansion}' (retries: {retries-count}, valid: {is_valid_acro})")
     return (expansion, prompt)
 
 def build_model(config: str|dict[str,Any]) -> Model:
