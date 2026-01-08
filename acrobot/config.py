@@ -17,7 +17,7 @@ class Acrobot(BaseModel):
     max_history: int = Field(default=5, ge=0)
     max_word_length: int = Field(default=12, ge=1)
     throttle_interval: int = Field(default=5, ge=0)
-    keywords: set[str] = {}
+    keywords: set[str] = set()
     model_config = ConfigDict(extra='forbid')
 
 class Model(BaseModel):
@@ -28,7 +28,7 @@ class Model(BaseModel):
 
 class Logging(BaseModel):
     """Logging config class."""
-    level: Literal[*logging.getLevelNamesMapping().keys()] = "INFO"
+    level: str = "INFO" #Literal[*logging.getLevelNamesMapping().keys()]
     model_config = ConfigDict(extra='forbid')
     
 class Config(BaseModel):
