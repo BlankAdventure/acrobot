@@ -55,17 +55,7 @@ class Acrobot:
         self.queue: asyncio.Queue[None|Callable] = asyncio.Queue()
         self.history: list[tuple[str, str]] = []
         self.keywords = self.settings.acrobot.keywords
-        
-        model_config = settings.model.use_config        
-        try:
-            llm_config = settings.__pydantic_extra__[model_config]            
-        except KeyError as e:
-            err_string = f"No configuration for {model_config} found! Exiting."
-            e.add_note(err_string)
-            logger.critical(err_string)
-            raise
-
-        self.llm = build_model( llm_config  )
+        self.llm = build_model(settings.user_config)
         
         if start_telegram == True:
             logger.info("configuring telegram app.")
@@ -335,9 +325,8 @@ class Acrobot:
 
 class Acrowebhook(Acrobot, FastAPI):
     def __init__(
-        self, webhook_url: str | None = None, keywords: list[str] | None = None
-    ) -> None:
-        Acrobot.__init__(self, keywords)
+        self, webhook_url: str | None = None) -> None:
+        Acrobot.__init__(self, get_settings())
         self.webhook_url = webhook_url
         FastAPI.__init__(self, lifespan=self.lifespan)
         router = APIRouter()
