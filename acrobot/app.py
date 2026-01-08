@@ -51,14 +51,11 @@ def match_words(message: str, keywords: Iterable[str]) -> list[str]:
 class Acrobot:
     def __init__(self, settings: Config, start_telegram: bool=True) -> None:
         logger.info(f"Initializing with:\n{settings}")
-        self.settings = settings
+        self.settings = Config.model_validate(settings)        
         self.queue: asyncio.Queue[None|Callable] = asyncio.Queue()
         self.history: list[tuple[str, str]] = []
-        self.call_count: int = 0 # not implemented
-        self.keywords = settings.acrobot.keywords
 
-        model_config = settings.model.use_config
-        
+        model_config = settings.model.use_config        
         try:
             llm_config = settings.__pydantic_extra__[model_config]            
         except KeyError as e:
