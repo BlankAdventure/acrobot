@@ -49,7 +49,7 @@ def match_words(message: str, keywords: Iterable[str]) -> list[str]:
 # Can be run 'standalone' by invoking polling mode.
 # ************************************************************
 class Acrobot:
-    def __init__(self, settings: Config, start_telegram: bool=True) -> None:
+    def __init__(self, settings: Config=get_settings(), start_telegram: bool=True) -> None:
         logger.info(f"Initializing with:\n{settings}")
         self.settings = Config.model_validate(settings)        
         self.queue: asyncio.Queue[None|Callable] = asyncio.Queue()
@@ -326,7 +326,7 @@ class Acrobot:
 class Acrowebhook(Acrobot, FastAPI):
     def __init__(
         self, webhook_url: str | None = None) -> None:
-        Acrobot.__init__(self, get_settings())
+        Acrobot.__init__(self)
         self.webhook_url = webhook_url
         FastAPI.__init__(self, lifespan=self.lifespan)
         router = APIRouter()
@@ -352,9 +352,8 @@ class Acrowebhook(Acrobot, FastAPI):
         return Response(status_code=HTTPStatus.OK)
 
 
-if __name__ == "__main__":
-    settings = get_settings()
-    setup_logging(settings.logging.level)
+if __name__ == "__main__":    
+    setup_logging("INFO")
     logger.info("launching in standalone polling mode")
-    bot = Acrobot(settings)
-    #bot.start(True)  # this will block
+    bot = Acrobot()
+    bot.start(True)  # this will block
