@@ -4,17 +4,12 @@ Created on Fri Dec 19 14:23:33 2025
 
 @author: BlankAdventure
 """
-
-
-import functools
 import logging
 from abc import ABC, abstractmethod
-from collections.abc import Callable
 from typing import cast, Type
-from cerebras.cloud.sdk import APIError, Cerebras
+from cerebras.cloud.sdk import Cerebras
 from google import genai
-from google.genai import errors, types
-from httpx import ConnectError
+from google.genai import types
 from dataclasses import dataclass
 from typing import Any
 
@@ -43,24 +38,6 @@ class AcroError(Exception):
         super().__init__(message)
         logger.critical(message)
 
-# def catch(*exceptions: type[Exception]) -> Callable:
-#     """Decorator function for handling failed model API calls"""
-
-#     exceptions = exceptions + (ConnectError,)
-
-#     def decorator(func: Callable) -> Callable:
-#         @functools.wraps(func)
-#         def wrapper(*args, **kwargs) -> str | None:
-#             result = None
-#             try:
-#                 result = func(*args, **kwargs)
-#             except exceptions as e:
-#                 logger.error(f"CATCH : {type(e).__name__} : {e}", exc_info=False)
-#             return result
-#         return wrapper
-#     return decorator
-
-
 class Model(ABC):
     @abstractmethod
     def generate_response(self, prompt: str) -> str | None:
@@ -87,7 +64,6 @@ class GeminiModel(Model):
         )
         self.client = genai.Client()
 
-    #@catch(errors.APIError)
     def generate_response(self, prompt: str) -> str | None:
         response = self.client.models.generate_content(
             model=self.model_name, contents=prompt, config=self.config
@@ -106,7 +82,6 @@ class CerebrasModel(Model):
     def __post_init__(self):
         self.client = Cerebras()
 
-    #@catch(APIError)
     def generate_response(self, prompt: str) -> str | None:
         messages = [
             {"role": "system", "content": SYS_INSTRUCTION},
