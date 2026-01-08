@@ -49,7 +49,7 @@ def match_words(message: str, keywords: Iterable[str]) -> list[str]:
 # Can be run 'standalone' by invoking polling mode.
 # ************************************************************
 class Acrobot:
-    def __init__(self, settings: Config) -> None:
+    def __init__(self, settings: Config, start_telegram: bool=True) -> None:
         logger.info(f"Initializing with:\n{settings}")
         self.settings = settings
         self.queue: asyncio.Queue[None|Callable] = asyncio.Queue()
@@ -67,18 +67,22 @@ class Acrobot:
             logger.critical(err_string)
             raise
 
-        self.llm = build_model( llm_config  )    
-        self.telegram_app = ApplicationBuilder().token(TELEGRAM_BOT_TOKEN).build()
-        self.telegram_app.add_handler(CommandHandler("start", self.command_start))
-        self.telegram_app.add_handler(CommandHandler("info", self.command_info))
-        self.telegram_app.add_handler(CommandHandler("add_message", self.command_add_message))
-        self.telegram_app.add_handler(CommandHandler("add_keywords", self.command_add_keywords))
-        self.telegram_app.add_handler(CommandHandler("del_keywords", self.command_del_keywords))
-        self.telegram_app.add_handler(CommandHandler("acro", self.command_acro))
-        self.telegram_app.add_handler(
-            MessageHandler(filters.TEXT & ~filters.COMMAND, self.handle_message)
-        )
-
+        self.llm = build_model( llm_config  )
+        
+        if start_telegram == True:
+            logger.info("configuring telegram app.")
+            self.telegram_app = ApplicationBuilder().token(TELEGRAM_BOT_TOKEN).build()
+            self.telegram_app.add_handler(CommandHandler("start", self.command_start))
+            self.telegram_app.add_handler(CommandHandler("info", self.command_info))
+            self.telegram_app.add_handler(CommandHandler("add_message", self.command_add_message))
+            self.telegram_app.add_handler(CommandHandler("add_keywords", self.command_add_keywords))
+            self.telegram_app.add_handler(CommandHandler("del_keywords", self.command_del_keywords))
+            self.telegram_app.add_handler(CommandHandler("acro", self.command_acro))
+            self.telegram_app.add_handler(
+               MessageHandler(filters.TEXT & ~filters.COMMAND, self.handle_message)
+            )
+        else:
+            logger.info("telegram app NOT configured.")
 
     async def queue_processor(self) -> None:        
         """

@@ -78,6 +78,6 @@ async def test_add_message_command_updates_history(dummy_bot, mock_update):
 async def test_fail_build(default_config):
     del default_config["testconf"]
     with pytest.raises(KeyError):
-        Acrobot(Config(**default_config))
+        Acrobot(Config(**default_config),start_telegram=False)
     
     

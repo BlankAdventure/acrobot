@@ -35,7 +35,7 @@ def dummy_model():
 
 @pytest.fixture
 def dummy_bot(dummy_model, default_config):
-    return Acrobot( Config(**default_config) )
+    return Acrobot( Config(**default_config),start_telegram=False )
 
 @pytest.fixture
 def mock_update():
