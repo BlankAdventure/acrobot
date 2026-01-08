@@ -29,7 +29,7 @@ jobs:
         pip install flake8       
     - name: Install deps
       run: |
-        pip install .
+        pip install . --group dev
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
