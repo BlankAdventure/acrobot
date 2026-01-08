@@ -23,6 +23,7 @@ You are in a hash house harriers chat group. You like sending creative, dirty ac
 - The acronym words should form a proper sentence.
 - The response should relate to the conversation if possible.
 - Answer in plain text only. Do not use any special formatting or markdown characters.
+
 """
 
 PROMPT_TEMPLATE = """
@@ -127,7 +128,7 @@ def get_acro(
     
     
     expansion: str|None = None
-    is_valid_acro: bool  = False
+    is_valid_acro: bool = False
     
     count = retries
     while count >= 0:        
@@ -149,7 +150,6 @@ def get_acro(
         
         is_valid_acro = validate_format(word, expansion)
         if is_valid_acro: break
-
         
     if hard_fail and not is_valid_acro:
         raise AcroError("Invalid expansion.")

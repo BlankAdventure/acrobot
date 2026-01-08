@@ -41,14 +41,14 @@ class Config(BaseModel):
     __pydantic_extra__: Dict[str,Any]    
     
     @property
-    def user_config(self) -> dict[str,Any]:
+    def use_config(self) -> dict[str,Any]:
         return self.__pydantic_extra__[self.model.use_config]            
     
     @model_validator(mode='after')
     def validation(self) -> Self:
         if self.model.use_config not in self.__pydantic_extra__:
             raise KeyError (f"No settings found for {self.model.use_config}!")            
-        if "provider" not in self.user_config:
+        if "provider" not in self.use_config:
             raise KeyError (f"{self.model.use_config} must include 'provider' parameter!")           
         return self    
     
