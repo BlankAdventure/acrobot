@@ -37,23 +37,28 @@ PROMPT_TEMPLATE = """
 Now generate an acronym for the word: "{word}". Reply with only the acronym.
 """
 
+class AcroError(Exception):
+    """Exception raised for specific application errors."""
+    def __init__(self, message):
+        super().__init__(message)
+        logger.critical(message)
 
-def catch(*exceptions: type[Exception]) -> Callable:
-    """Decorator function for handling failed model API calls"""
+# def catch(*exceptions: type[Exception]) -> Callable:
+#     """Decorator function for handling failed model API calls"""
 
-    exceptions = exceptions + (ConnectError,)
+#     exceptions = exceptions + (ConnectError,)
 
-    def decorator(func: Callable) -> Callable:
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs) -> str | None:
-            result = None
-            try:
-                result = func(*args, **kwargs)
-            except exceptions as e:
-                logger.error(f"CATCH : {type(e).__name__} : {e}", exc_info=False)
-            return result
-        return wrapper
-    return decorator
+#     def decorator(func: Callable) -> Callable:
+#         @functools.wraps(func)
+#         def wrapper(*args, **kwargs) -> str | None:
+#             result = None
+#             try:
+#                 result = func(*args, **kwargs)
+#             except exceptions as e:
+#                 logger.error(f"CATCH : {type(e).__name__} : {e}", exc_info=False)
+#             return result
+#         return wrapper
+#     return decorator
 
 
 class Model(ABC):
@@ -82,7 +87,7 @@ class GeminiModel(Model):
         )
         self.client = genai.Client()
 
-    @catch(errors.APIError)
+    #@catch(errors.APIError)
     def generate_response(self, prompt: str) -> str | None:
         response = self.client.models.generate_content(
             model=self.model_name, contents=prompt, config=self.config
@@ -101,7 +106,7 @@ class CerebrasModel(Model):
     def __post_init__(self):
         self.client = Cerebras()
 
-    @catch(APIError)
+    #@catch(APIError)
     def generate_response(self, prompt: str) -> str | None:
         messages = [
             {"role": "system", "content": SYS_INSTRUCTION},
@@ -119,38 +124,63 @@ class CerebrasModel(Model):
         return completion.choices[0].message.content.strip()
 
 
-def validate_format(word: str, expansion: str) -> bool:
+def validate_format(word: str, expansion: str|None) -> bool:
     """
     Checks if the word is a valid acronym for the expansion (word count
     matches letter count; first letter matches each letter in word)
     """
+    if isinstance(word, str) and isinstance(expansion, str):
+        word_letters = word.lower()
+        acro_letters = "".join(w[0] for w in expansion.lower().split())
+        return word_letters == acro_letters
+    else:
+        return False
 
-    word_letters = word.lower()
-    acro_letters = "".join(w[0] for w in expansion.lower().split())
-    return word_letters == acro_letters
 
 
 def get_acro(
-    model: Model, word: str, convo: str = "", retries: int = 0
-) -> tuple[str | None, str]:
+    model: Model, word: str, convo: str = "", retries: int = 0, hard_fail=False,
+) -> tuple[str | None, bool, str]:
     """
     Interprets word as an acronym and generates an expansion for it (yes this
     function name is rather backwards).
     """
 
     prompt = PROMPT_TEMPLATE.format(convo=convo, word=word)
-    logger.info(f"Requested: {word}")
+    logger.info(f"Requested: '{word}'")
     logger.debug(f"PROMPT:\n{prompt}")
-    expansion = model.generate_response(prompt)
-
+    
+    
+    expansion: str|None = None
+    is_valid_acro: bool  = False
+    
     count = retries
-    while count > 0:
-        if expansion and validate_format(word, expansion):
-            break
-        expansion = model.generate_response(prompt)
+    while count >= 0:        
+        try:
+            expansion = model.generate_response(prompt)
+        except Exception as e:
+            if hard_fail:
+                raise AcroError(f"LLM response failure: {e}")
+            else:
+                expansion = None
+                
+        if not isinstance(expansion, str):
+            if hard_fail:
+                raise AcroError("LLM response must be a string.")
+            else:
+                expansion = None
+        
         count -= 1
-    logger.info(f"Generated: {expansion} (retries: {retries - count})")
-    return (expansion, prompt)
+        
+        is_valid_acro = validate_format(word, expansion)
+        if is_valid_acro: break
+
+        
+    if hard_fail and not is_valid_acro:
+        raise AcroError("Invalid expansion.")
+    
+    logger.info(f"Generated: '{expansion}' (retries: {retries-count-1}, valid: {is_valid_acro})")
+    return (expansion, is_valid_acro, prompt)
 
 def build_model(config: str|dict[str,Any]) -> Model:
     
