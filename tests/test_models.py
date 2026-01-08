@@ -7,31 +7,9 @@ Created on Sat Dec 20 20:34:42 2025
 import pytest
 from unittest.mock import patch
 
-from acrobot.models import catch, validate_format, get_acro, build_model, Model
+from acrobot.models import validate_format, get_acro, build_model
+from acrobot.models import AcroError
 
-@pytest.fixture
-def dummy_model():
-    class Dummy(Model):
-        def __init__(self, x=0):
-            self.x=x
-        def generate_response(self, prompt:str):
-           ... # not implemented - we patch this method as needed.
-    return Dummy
-
-def test_catch_returns_value_when_no_exception():
-    @catch()
-    def good_func(x):
-        return x * 2
-    assert good_func(3) == 6
-
-
-def test_catch_returns_none_on_exception(caplog):
-    @catch(ValueError)
-    def bad_func():
-        raise ValueError("boom")
-    result = bad_func()
-    assert result is None
-    assert "boom" in caplog.text
 
 @pytest.mark.parametrize(
     "word, sentence, expected",
@@ -42,6 +20,8 @@ def test_catch_returns_none_on_exception(caplog):
         ("cat", "cool awesome is tigers", False), # too long        
         ("cat", "Cold Angry Grape", False), # letter/word mismatch
         ("CAT", "cool angry tiger", True), # case-insensitive
+        ("", None, False), # case-insensitive
+        (4, 2, False), # case-insensitive
     ],
 )
 def test_validate_format(word, sentence, expected):
@@ -52,16 +32,18 @@ def test_get_acro_success_first_try(dummy_model):
     with patch.object(model, "generate_response", 
                       return_value="Cool Awesome Tiger") as mock_generate:
 
-        acro, prompt = get_acro(model, word="cat")
+        acro, qual, prompt = get_acro(model, word="cat")
 
     assert acro == "Cool Awesome Tiger"
     assert "cat" in prompt
+    assert qual == True
     mock_generate.assert_called_once()
 
 def test_get_acro_retries_until_valid(dummy_model):
     model = dummy_model()
     responses = [
         None,
+        3.5,
         "Still Wrong",
         "Cool Awesome Tiger",
     ]
@@ -69,24 +51,56 @@ def test_get_acro_retries_until_valid(dummy_model):
     with patch.object(model, "generate_response", 
                       side_effect=responses) as mock_generate:
 
-        acro, _ = get_acro(model, word="cat", retries=3)
+        acro,_,_ = get_acro(model, word="cat", retries=6, hard_fail=False)
 
     assert acro == "Cool Awesome Tiger"
-    assert mock_generate.call_count == 3   
+    assert mock_generate.call_count == 4   
 
 
-def test_generate_response_exception_handled(caplog, dummy_model):
+        
+# This checks that in soft failure mode, a response of None is returned when
+# an error condition occurs
+def test_sof_failure(caplog, dummy_model):
     model = dummy_model()
-    @catch(ValueError)
-    def boom(_):
-        raise ValueError("API failure")
 
-    with patch.object(model, "generate_response", side_effect=boom):
-        result = model.generate_response("test")
+    with patch.object(model, "generate_response", 
+                      side_effect=ValueError) as mock_generate:
+        acro,qual,_ = get_acro(model, word="cat", retries=0, hard_fail=False)        
+    assert acro == None
+    assert mock_generate.call_count == 1
+    assert qual == False
 
-    assert result is None
-    assert "API failure" in caplog.text
+    with patch.object(model, "generate_response",
+                      return_value=3.141) as mock_generate:
+        acro,qual,_ = get_acro(model, word="cat", retries=0, hard_fail=False)
+    assert acro == None
+    assert mock_generate.call_count == 1
+    assert qual == False
+
+    with patch.object(model, "generate_response",
+                      return_value="not_acro") as mock_generate:
+        acro,qual,_ = get_acro(model, word="cat", retries=1, hard_fail=False)
+    assert acro == "not_acro"
+    assert mock_generate.call_count == 2
+    assert qual == False
+
+
+# In hard fail mode, check that we raise AcroError for (1) LLM failure;
+# (2) not a string; (3) quality failure
+def test_hard_failure(caplog, dummy_model):
+    model = dummy_model()
+    with patch.object(model, "generate_response", side_effect=ValueError):
+        with pytest.raises(AcroError):         
+            get_acro(model, word="cat", retries=0, hard_fail=True)
     
+    with patch.object(model, "generate_response", return_value=3.141):
+        with pytest.raises(AcroError):         
+            get_acro(model, word="cat", retries=0, hard_fail=True)
+
+    with patch.object(model, "generate_response", return_value="not_valid"):
+        with pytest.raises(AcroError):         
+            get_acro(model, word="cat", retries=0, hard_fail=True)
+
 
 def test_get_model_success_dict(dummy_model):
     config = {'provider': 'Dummy', 'x': 10}    
