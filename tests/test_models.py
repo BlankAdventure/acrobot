@@ -4,12 +4,9 @@ Created on Sat Dec 20 20:34:42 2025
 
 @author: BlankAdventure
 """
-import sys
-from pathlib import Path
 import pytest
 from unittest.mock import patch
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
 from acrobot.models import catch, validate_format, get_acro, build_model, Model
 
 @pytest.fixture
@@ -101,7 +98,6 @@ def test_get_model_success_str(dummy_model):
     model = build_model("Dummy")    
     assert isinstance(model,dummy_model)
     assert model.x == 0 #default value
-
 
 def test_get_model_fails():  
     with pytest.raises(KeyError): 

@@ -49,7 +49,7 @@ def match_words(message: str, keywords: Iterable[str]) -> list[str]:
 # Can be run 'standalone' by invoking polling mode.
 # ************************************************************
 class Acrobot:
-    def __init__(self, settings: Config = get_settings()) -> None:
+    def __init__(self, settings: Config) -> None:
         logger.info(f"Initializing with:\n{settings}")
         self.settings = settings
         self.queue: asyncio.Queue[None|Callable] = asyncio.Queue()
@@ -58,8 +58,16 @@ class Acrobot:
         self.keywords = settings.acrobot.keywords
 
         model_config = settings.model.use_config
-        self.llm = build_model( settings.__pydantic_extra__[model_config] )
         
+        try:
+            llm_config = settings.__pydantic_extra__[model_config]            
+        except KeyError as e:
+            err_string = f"No configuration for {model_config} found! Exiting."
+            e.add_note(err_string)
+            logger.critical(err_string)
+            raise
+
+        self.llm = build_model( llm_config  )    
         self.telegram_app = ApplicationBuilder().token(TELEGRAM_BOT_TOKEN).build()
         self.telegram_app.add_handler(CommandHandler("start", self.command_start))
         self.telegram_app.add_handler(CommandHandler("info", self.command_info))
@@ -172,12 +180,13 @@ class Acrobot:
         Manually add new keywords to the trigger list.
         Usage: /add_keyword kw1 kw2 kw3 ...
         """
-        if context.args is None or len(context.args) < 1:
-            if update.message:
+        if update.message:
+            if context.args is None or len(context.args) < 1:
                 await update.message.reply_text("Usage: /add_keyword kw1 kw2 kw3 ...")
-            return
-        self._add_keywords(context.args)
-
+            else:
+                self._add_keywords(context.args)
+                await update.message.reply_text("keywords added.", do_quote=True)
+                
     def _add_keywords(self, keyword_list: list[str]) -> None:
         """
         Helper function for adding new keywords. We use a reassignment
@@ -353,8 +362,8 @@ class Acrowebhook(Acrobot, FastAPI):
 
 
 if __name__ == "__main__":
-    setup_logging('INFO')
+    settings = get_settings()
+    setup_logging(settings.logging.level)
     logger.info("launching in standalone polling mode")
-    #settings = get_settings()
-    bot = Acrobot()
+    bot = Acrobot(settings)
     #bot.start(True)  # this will block
