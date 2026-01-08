@@ -6,9 +6,9 @@ Created on Sun Dec 21 14:48:23 2025
 """
 import pathlib
 import logging
-from typing import Literal
+from typing import Literal, Dict, Any
 import yaml
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 path = pathlib.Path(__file__).parent.parent / 'config.yaml'
 
@@ -36,8 +36,31 @@ class Config(BaseModel):
     acrobot: Acrobot
     model: Model
     logging: Logging
+    
+    
     model_config = ConfigDict(extra='allow')
-
+    __pydantic_extra__: Dict[str,Any]
+    
+    
+    @property
+    def user_config(self):
+        return self.__pydantic_extra__[self.model.use_config]            
+    
+    @model_validator(mode='after')
+    def validation(self):
+        try:
+            user_config = self.__pydantic_extra__[self.model.use_config]            
+        except KeyError as e:            
+            e.add_note(f"No settings found for {self.model.use_config}!")            
+            raise
+        try:
+            user_config['provider']
+        except KeyError as e:                
+            e.add_note(f"{self.app.use} must include name parameter!")
+            raise
+            
+        return self    
+    
 def load_yaml_config(path: pathlib.Path) -> Config:
     """Returns YAML config"""
     try:
@@ -45,12 +68,12 @@ def load_yaml_config(path: pathlib.Path) -> Config:
     except FileNotFoundError as error:        
         raise FileNotFoundError(error, "Could not load yaml config file.") from error
 
-def get_settings():    
+def get_settings() -> Config:
     settings = Config(**load_yaml_config(path))
     return settings
 
 #level=settings.logging.level
-def setup_logging(level) -> None:
+def setup_logging(level: str) -> None:
     logging.getLogger().handlers.clear()
     root = logging.getLogger()
 
