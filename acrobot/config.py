@@ -10,6 +10,8 @@ from typing import Literal
 import yaml
 from pydantic import BaseModel, ConfigDict, Field
 
+path = pathlib.Path(__file__).parent.parent / 'config.yaml'
+
 class Acrobot(BaseModel):
     """Bot config class."""
     max_history: int = Field(default=5, ge=0)
@@ -20,7 +22,7 @@ class Acrobot(BaseModel):
 
 class Model(BaseModel):
     """Model config class."""
-    name: str
+    use_config: str
     retries: int = Field(default=0, ge=0)
     model_config = ConfigDict(extra='forbid')
 
@@ -43,10 +45,12 @@ def load_yaml_config(path: pathlib.Path) -> Config:
     except FileNotFoundError as error:        
         raise FileNotFoundError(error, "Could not load yaml config file.") from error
 
-path = pathlib.Path(__file__).parent.parent / 'config.yaml'
-settings = Config(**load_yaml_config(path))
+def get_settings():    
+    settings = Config(**load_yaml_config(path))
+    return settings
 
-def setup_logging(level=settings.logging.level) -> None:
+#level=settings.logging.level
+def setup_logging(level) -> None:
     logging.getLogger().handlers.clear()
     root = logging.getLogger()
 

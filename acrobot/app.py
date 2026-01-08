@@ -7,11 +7,9 @@ Created on Fri Aug  8 21:39:33 2025
 
 import re
 import os
-import sys
 import random
 import logging
 import asyncio
-from pathlib import Path
 from typing import Iterable
 from collections.abc import Callable
 
@@ -19,9 +17,8 @@ from http import HTTPStatus
 from typing import AsyncIterator
 from contextlib import asynccontextmanager
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-from models import get_acro, get_model
-from config import settings, setup_logging
+from acrobot.models import get_acro, build_model
+from acrobot.config import get_settings, setup_logging, Config
 
 from telegram.ext import (
     ApplicationBuilder,
@@ -35,8 +32,6 @@ from fastapi import FastAPI, Request, Response, APIRouter
 
 logger = logging.getLogger(__name__)
 TELEGRAM_BOT_TOKEN = os.environ.get("telegram_bot")
-llm = get_model(settings.model.name)
-
 
 def match_words(message: str, keywords: Iterable[str]) -> list[str]:
     """
@@ -54,12 +49,25 @@ def match_words(message: str, keywords: Iterable[str]) -> list[str]:
 # Can be run 'standalone' by invoking polling mode.
 # ************************************************************
 class Acrobot:
-    def __init__(self, keywords: list[str] | None = None) -> None:
+    def __init__(self, settings: Config) -> None:
+        logger.info(f"Initializing with:\n{settings}")
+        self.settings = settings
         self.queue: asyncio.Queue[None|Callable] = asyncio.Queue()
         self.history: list[tuple[str, str]] = []
         self.call_count: int = 0 # not implemented
-        self.keywords = set(keywords) if isinstance(keywords, list) else settings.acrobot.keywords
+        self.keywords = settings.acrobot.keywords
 
+        model_config = settings.model.use_config
+        
+        try:
+            llm_config = settings.__pydantic_extra__[model_config]            
+        except KeyError as e:
+            err_string = f"No configuration for {model_config} found! Exiting."
+            e.add_note(err_string)
+            logger.critical(err_string)
+            raise
+
+        self.llm = build_model( llm_config  )    
         self.telegram_app = ApplicationBuilder().token(TELEGRAM_BOT_TOKEN).build()
         self.telegram_app.add_handler(CommandHandler("start", self.command_start))
         self.telegram_app.add_handler(CommandHandler("info", self.command_info))
@@ -89,7 +97,7 @@ class Acrobot:
                 logger.info ("loop stopping")
                 break            
             await item()            
-            await asyncio.sleep(settings.acrobot.throttle_interval)
+            await asyncio.sleep(self.settings.acrobot.throttle_interval)
             self.queue.task_done()
 
 
@@ -100,8 +108,8 @@ class Acrobot:
         
         convo = "\n".join(f"{u}: {m}" for u, m in self.history)
         response, _ = await asyncio.to_thread(
-            get_acro, model=llm, word=word, convo=convo, 
-            retries=settings.model.retries
+            get_acro, model=self.llm, word=word, convo=convo, 
+            retries=self.settings.model.retries
         )
         return response
 
@@ -172,12 +180,13 @@ class Acrobot:
         Manually add new keywords to the trigger list.
         Usage: /add_keyword kw1 kw2 kw3 ...
         """
-        if context.args is None or len(context.args) < 1:
-            if update.message:
+        if update.message:
+            if context.args is None or len(context.args) < 1:
                 await update.message.reply_text("Usage: /add_keyword kw1 kw2 kw3 ...")
-            return
-        self._add_keywords(context.args)
-
+            else:
+                self._add_keywords(context.args)
+                await update.message.reply_text("keywords added.", do_quote=True)
+                
     def _add_keywords(self, keyword_list: list[str]) -> None:
         """
         Helper function for adding new keywords. We use a reassignment
@@ -244,7 +253,7 @@ class Acrobot:
                 flat_history = [word for user, msg in self.history for word in (user, *msg.split())]
                 word = random.choice(flat_history) if flat_history else ""
     
-            word = "".join(char for char in word if char.isalpha())[:settings.acrobot.max_word_length]
+            word = "".join(char for char in word if char.isalpha())[:self.settings.acrobot.max_word_length]
     
             if word:            
                 await self.queue.put( lambda: self.acro_task(update, word) )
@@ -279,7 +288,7 @@ class Acrobot:
         history.
         """        
         self.history.append((sender, message))
-        self.history = self.history[-settings.acrobot.max_history:]
+        self.history = self.history[-self.settings.acrobot.max_history:]
 
     def start(self, run_polling: bool = False) -> None:
         
@@ -353,7 +362,8 @@ class Acrowebhook(Acrobot, FastAPI):
 
 
 if __name__ == "__main__":
-    setup_logging()
+    settings = get_settings()
+    setup_logging(settings.logging.level)
     logger.info("launching in standalone polling mode")
-    bot = Acrobot()
-    bot.start(True)  # this will block
+    bot = Acrobot(settings)
+    #bot.start(True)  # this will block
