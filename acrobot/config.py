@@ -6,7 +6,7 @@ Created on Sun Dec 21 14:48:23 2025
 """
 import pathlib
 import logging
-from typing import Literal, Dict, Any
+from typing import Literal, Dict, Any, Self
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -35,30 +35,21 @@ class Config(BaseModel):
     """CLI config class."""
     acrobot: Acrobot
     model: Model
-    logging: Logging
-    
+    logging: Logging    
     
     model_config = ConfigDict(extra='allow')
-    __pydantic_extra__: Dict[str,Any]
-    
+    __pydantic_extra__: Dict[str,Any]    
     
     @property
-    def user_config(self):
+    def user_config(self) -> dict[str,Any]:
         return self.__pydantic_extra__[self.model.use_config]            
     
     @model_validator(mode='after')
-    def validation(self):
-        try:
-            user_config = self.__pydantic_extra__[self.model.use_config]            
-        except KeyError as e:            
-            e.add_note(f"No settings found for {self.model.use_config}!")            
-            raise
-        try:
-            user_config['provider']
-        except KeyError as e:                
-            e.add_note(f"{self.app.use} must include name parameter!")
-            raise
-            
+    def validation(self) -> Self:
+        if self.model.use_config not in self.__pydantic_extra__:
+            raise KeyError (f"No settings found for {self.model.use_config}!")            
+        if "provider" not in self.user_config:
+            raise KeyError (f"{self.model.use_config} must include 'provider' parameter!")           
         return self    
     
 def load_yaml_config(path: pathlib.Path) -> Config:
