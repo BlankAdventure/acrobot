@@ -8,9 +8,15 @@ Created on Sat Jan  3 17:49:58 2026
 import pytest
 from unittest.mock import AsyncMock, MagicMock
 
-from acrobot.config import Config
 from acrobot.models import Model
 from acrobot.app import Acrobot
+
+class Dummy(Model):
+    def __init__(self, x=0):
+        self.x=x
+    def generate_response(self, prompt:str):            
+        pass
+
 
 @pytest.fixture
 def default_config():
@@ -25,17 +31,12 @@ def default_config():
 
 @pytest.fixture
 def dummy_model():
-    class Dummy(Model):
-        def __init__(self, x=0):
-            self.x=x
-        def generate_response(self, prompt:str):            
-           ... # not implemented - we patch this method as needed.
     return Dummy
 
-
 @pytest.fixture
-def dummy_bot(dummy_model, default_config):
-    return Acrobot( Config(**default_config),start_telegram=False )
+def dummy_bot(default_config):
+   return Acrobot(default_config, start_telegram=False)
+
 
 @pytest.fixture
 def mock_update():
@@ -51,6 +52,6 @@ def mock_update():
 @pytest.fixture
 def mock_context():
     mock = MagicMock()
-    mock.args = []
+    mock.args = None
     return mock
 

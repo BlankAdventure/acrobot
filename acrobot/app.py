@@ -51,11 +51,11 @@ def match_words(message: str, keywords: Iterable[str]) -> list[str]:
 class Acrobot:
     def __init__(self, settings: Config=get_settings(), start_telegram: bool=True) -> None:
         logger.info(f"Initializing with:\n{settings}")
-        self.settings = Config.model_validate(settings)        
+        self.settings = Config.model_validate(settings)                
         self.queue: asyncio.Queue[None|Callable] = asyncio.Queue()
         self.history: list[tuple[str, str]] = []
         self.keywords = self.settings.acrobot.keywords
-        self.llm = build_model(settings.user_config)
+        self.llm = build_model(self.settings.use_config)
         
         if start_telegram == True:
             logger.info("configuring telegram app.")
@@ -121,7 +121,7 @@ class Acrobot:
                     f"{word}? Who said {word}!?\n" + response, do_quote=False
                 )
             else:
-                await update.message.reply_text("Dammit you broke something")
+                await update.message.reply_text("Dammit you broke something",do_quote=True)
 
     async def acro_task(self, update: Update, word: str) -> None:
         """
@@ -133,7 +133,7 @@ class Acrobot:
             if response:
                 await update.message.reply_text(response, do_quote=False)
             else:
-                await update.message.reply_text("Dammit you broke something")
+                await update.message.reply_text("Dammit you broke something",do_quote=True)
 
 
     # === COMMAND HANDLERS ===

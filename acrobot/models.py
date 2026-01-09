@@ -12,7 +12,7 @@ from google import genai
 from google.genai import types
 from dataclasses import dataclass
 from typing import Any
-
+from time import sleep
 from acrobot.config import setup_logging
 
 logger = logging.getLogger(__name__)
@@ -23,6 +23,7 @@ You are in a hash house harriers chat group. You like sending creative, dirty ac
 - The acronym words should form a proper sentence.
 - The response should relate to the conversation if possible.
 - Answer in plain text only. Do not use any special formatting or markdown characters.
+
 """
 
 PROMPT_TEMPLATE = """
@@ -127,7 +128,7 @@ def get_acro(
     
     
     expansion: str|None = None
-    is_valid_acro: bool  = False
+    is_valid_acro: bool = False
     
     count = retries
     while count >= 0:        
@@ -149,7 +150,8 @@ def get_acro(
         
         is_valid_acro = validate_format(word, expansion)
         if is_valid_acro: break
-
+    
+        sleep(0.25)
         
     if hard_fail and not is_valid_acro:
         raise AcroError("Invalid expansion.")
