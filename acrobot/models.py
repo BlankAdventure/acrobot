@@ -12,7 +12,7 @@ from google import genai
 from google.genai import types
 from dataclasses import dataclass
 from typing import Any
-
+from time import sleep
 from acrobot.config import setup_logging
 
 logger = logging.getLogger(__name__)
@@ -150,6 +150,8 @@ def get_acro(
         
         is_valid_acro = validate_format(word, expansion)
         if is_valid_acro: break
+    
+        sleep(0.25)
         
     if hard_fail and not is_valid_acro:
         raise AcroError("Invalid expansion.")
