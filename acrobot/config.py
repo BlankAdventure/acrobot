@@ -6,7 +6,7 @@ Created on Sun Dec 21 14:48:23 2025
 """
 import pathlib
 import logging
-from typing import Literal, Dict, Any, Self
+from typing import Dict, Any, Self
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -28,7 +28,7 @@ class Model(BaseModel):
 
 class Logging(BaseModel):
     """Logging config class."""
-    level: str = "INFO" #Literal[*logging.getLevelNamesMapping().keys()]
+    level: str = "INFO" 
     model_config = ConfigDict(extra='forbid')
     
 class Config(BaseModel):

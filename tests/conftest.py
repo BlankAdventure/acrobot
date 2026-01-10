@@ -43,9 +43,6 @@ def mock_update():
     mock = MagicMock()
     mock.message = MagicMock()
     mock.message.reply_text = AsyncMock()
-    mock.message.text = "Let's get drunk"
-    mock.message.from_user = MagicMock()
-    mock.message.from_user.username = "testuser"
     return mock
 
 

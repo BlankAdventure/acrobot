@@ -58,7 +58,7 @@ class Acrobot:
         self.llm = build_model(self.settings.use_config)
         
         if start_telegram == True:
-            logger.info("configuring telegram app.")
+            logger.info("Configuring telegram app.")
             self.telegram_app = ApplicationBuilder().token(TELEGRAM_BOT_TOKEN).build()
             self.telegram_app.add_handler(CommandHandler("start", self.command_start))
             self.telegram_app.add_handler(CommandHandler("info", self.command_info))
@@ -70,7 +70,7 @@ class Acrobot:
                MessageHandler(filters.TEXT & ~filters.COMMAND, self.handle_message)
             )
         else:
-            logger.info("telegram app NOT configured.")
+            logger.info("Telegram app not configured.")
 
     async def queue_processor(self) -> None:        
         """
@@ -283,7 +283,11 @@ class Acrobot:
         self.history = self.history[-self.settings.acrobot.max_history:]
 
     def start(self, run_polling: bool = False) -> None:
-        
+        """
+        Starts the asyncio event loop, and optionally starts the telegram bot
+        in polling mode (this is a blocking operation).
+        """
+
         async def go() -> None:
             self.task_qp = asyncio.create_task(self.queue_processor())  
         
@@ -298,20 +302,16 @@ class Acrobot:
         self.task_go = loop.create_task(go())
         
         if run_polling:
-            self.telegram_app.run_polling()
+            self.telegram_app.run_polling() #this will block
 
     async def complete(self, stop) -> None:
         """
-        Ends the the queue processor loop and waits for remaining tasks to 
-        finish.
+        Waits for any queued tasks to finish and optionally terminates the
+        event loop.
         """
         if stop:
             await self.queue.put( None )
-        await self.queue.join()
-        
-
-            
-    
+        await self.queue.join()     
     
 
 # ************************************************************
@@ -321,11 +321,8 @@ class Acrobot:
 # the necessary functionality for responding to post requests
 # issued from telegram to the webhook URL address.
 # ************************************************************
-
-
 class Acrowebhook(Acrobot, FastAPI):
-    def __init__(
-        self, webhook_url: str | None = None) -> None:
+    def __init__(self, webhook_url: str | None = None) -> None:
         Acrobot.__init__(self)
         self.webhook_url = webhook_url
         FastAPI.__init__(self, lifespan=self.lifespan)
@@ -343,6 +340,7 @@ class Acrowebhook(Acrobot, FastAPI):
             await self.telegram_app.start()
             yield
             await self.telegram_app.stop()
+            await self.complete(True)
 
     async def webhook_handler(self, request: Request) -> Response:
         """Processes incoming Telegram updates from the webhook."""
