@@ -31,3 +31,7 @@ build-backend = "uv_build"
 [tool.uv.build-backend]
 module-root = "."
 module-name = "acrobot"
+
+[project.scripts]            
+acrobot = "acrobot.runner:main"     
+
