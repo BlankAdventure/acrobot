@@ -10,7 +10,7 @@ from typing import Dict, Any, Self
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-path = pathlib.Path(__file__).parent.parent / 'config.yaml'
+path = pathlib.Path(__file__).parent / 'config.yaml'
 
 class Acrobot(BaseModel):
     """Bot config class."""
@@ -52,8 +52,8 @@ class Config(BaseModel):
             raise KeyError (f"{self.model.use_config} must include 'provider' parameter!")           
         return self    
     
-def load_yaml_config(path: pathlib.Path) -> Config:
-    """Returns YAML config"""
+def load_yaml_config(path: pathlib.Path) -> Config:    
+    """Returns YAML config"""    
     try:
         return yaml.safe_load(path.read_text())
     except FileNotFoundError as error:        
