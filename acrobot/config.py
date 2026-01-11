@@ -10,7 +10,7 @@ from typing import Dict, Any, Self
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-path = pathlib.Path(__file__).parent.parent / 'config.yaml'
+path = pathlib.Path(__file__).parent / 'config.yaml'
 
 class Acrobot(BaseModel):
     """Bot config class."""
