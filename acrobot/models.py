@@ -51,6 +51,7 @@ class GeminiModel(Model):
     thinking_budget: int = 0
     temperature: float = 1.1
     model_name: str = "gemini-2.5-flash"
+    api_key: str|None = None
     
     def __post_init__(self):
         thinking_config = types.ThinkingConfig(
@@ -63,7 +64,7 @@ class GeminiModel(Model):
             thinking_config=thinking_config,
             automatic_function_calling=func_calling,
         )
-        self.client = genai.Client()
+        self.client = genai.Client(api_key=self.api_key)
 
     def generate_response(self, prompt: str) -> str | None:
         response = self.client.models.generate_content(
@@ -79,9 +80,10 @@ class CerebrasModel(Model):
     max_completion_tokens: int = 1024
     temperature: float = 1
     top_p: float = 1
-
+    api_key: str|None = None
+    
     def __post_init__(self):
-        self.client = Cerebras()
+        self.client = Cerebras(api_key=self.api_key)
 
     def generate_response(self, prompt: str) -> str | None:
         messages = [
