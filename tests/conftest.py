@@ -20,7 +20,8 @@ class Dummy(Model):
 
 @pytest.fixture
 def default_config():
-    config = {'acrobot': {'max_history': 5,
+    config = {'acrobot': {'telegram_key': 'dummy_key',
+                          'max_history': 5,
                           'max_word_length': 12,
                           'throttle_interval': 5,
                           'keywords': ['beer', 'hash']},
