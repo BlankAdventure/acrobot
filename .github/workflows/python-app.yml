@@ -39,4 +39,4 @@ jobs:
         pytest
     - name: Test with mypy
       run: |
-        mypy acrobot\.
+        mypy ./acrobot
