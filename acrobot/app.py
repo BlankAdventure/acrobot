@@ -31,7 +31,7 @@ from telegram import Update
 from fastapi import FastAPI, Request, Response, APIRouter
 
 logger = logging.getLogger(__name__)
-TELEGRAM_BOT_TOKEN = os.environ.get("telegram_bot")
+
 
 def match_words(message: str, keywords: Iterable[str]) -> list[str]:
     """
@@ -59,7 +59,9 @@ class Acrobot:
         
         if start_telegram == True:
             logger.info("Configuring telegram app.")
-            self.telegram_app = ApplicationBuilder().token(TELEGRAM_BOT_TOKEN).build()
+            self.telegram_app = ApplicationBuilder().token(
+                os.environ.get(self.settings.acrobot.telegram_key,"")
+                ).build()
             self.telegram_app.add_handler(CommandHandler("start", self.command_start))
             self.telegram_app.add_handler(CommandHandler("info", self.command_info))
             self.telegram_app.add_handler(CommandHandler("add_message", self.command_add_message))

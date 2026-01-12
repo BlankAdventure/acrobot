@@ -1,4 +1,5 @@
 acrobot:
+    telegram_key: telegram_bot
     max_history: 5    
     max_word_length: 12
     throttle_interval: 5

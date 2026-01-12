@@ -14,6 +14,7 @@ path = pathlib.Path(__file__).parent / 'config.yaml'
 
 class Acrobot(BaseModel):
     """Bot config class."""
+    telegram_key: str
     max_history: int = Field(default=5, ge=0)
     max_word_length: int = Field(default=12, ge=1)
     throttle_interval: int = Field(default=5, ge=0)
@@ -52,7 +53,7 @@ class Config(BaseModel):
             raise KeyError (f"{self.model.use_config} must include 'provider' parameter!")           
         return self    
     
-def load_yaml_config(path: pathlib.Path) -> Config:    
+def load_yaml_config(path: pathlib.Path) -> dict:    
     """Returns YAML config"""    
     try:
         return yaml.safe_load(path.read_text())
