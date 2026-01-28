@@ -40,7 +40,7 @@ In webhhok mode, a running http server is required to handle `POST` requests ori
 1. If installed, run the CLI command `acrobot -a <IP_ADDR> -p <PORT> -w <WEBHOOK_URL>`
 2. Otherwise, navigate to `acrobot\acrobot` and run `python -m runner.py -a <IP_ADDR> -p <PORT> -w <WEBHOOK_URL>`
 
-If running locally, ngrok can be used to obtain ah https forwarding url. In this case, you would substitute WEBHOOK_URL for the provided ngrok url, and similarly for the port. IP_ADDR can be set to 0.0.0.0. 
+If running locally, ngrok can be used to obtain an https forwarding url. In this case, you would substitute WEBHOOK_URL for the provided ngrok url and PORT with your chosen port. IP_ADDR can (usually) be set to 0.0.0.0.
 
 Note that webhook mode is preferred over polling as it only induces network traffic when updates are actually available.
 
@@ -122,3 +122,4 @@ When acrobat is started, it will simply pass any fields listed under `custom` (i
     - [ ] Log to file or other data sink
 - [ ] Implement LLM 'referee' to review acronym quality
     
+
