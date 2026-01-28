@@ -22,7 +22,7 @@ For now, acrobot is only able to access keys via these environment variables. Al
 2. Install locally via pip: `pip install . -e`
 3. Or with uv, navigate to `acrobot` and run: `uv sync`
 
-## Running It
+### Running It
 
 Acrobot can run in either polling mode or webhook mode.
 
@@ -44,7 +44,7 @@ If running locally, ngrok can be used to obtain ah https forwarding url. In this
 
 Note that webhook mode is preferred over polling as it only induces network traffic when updates are actually available.
 
-## Usage
+### Usage
 
 *IMPORTANT!* Don't forget to add the bot to your chat - remember you named it back when you obtained your telegram bot API key.
 
@@ -64,6 +64,61 @@ Add a fake message to the chat context. This can be fun for secretly steering th
 
 `/add_message username add this message!`
 
-## Settings / Configuration
+### Settings / Configuration
 
 A number of basic settings can be modified by the user via the `/acrobot/acrobot/config.yaml` file. See the file for details.
+
+### Models
+
+The code includes support for Gemini and Cerebras models (though not necessarily all model configuration options are exposed). Custom models can be provided by inheriting from the `models.Model` ABC class:
+
+```python
+from acrobot.models import Model
+
+class Custom(Model):
+    def __init__(self, x=0, y=0):
+        self.x=x
+        self.y=y
+    def generate_response(self, prompt:str) -> str:            
+        ...
+```
+Or dataclasses can be used instead:
+```python
+from dataclasses import dataclass
+from acrobot.models import Model
+
+@dataclass
+class Custom(Model):
+    x: int = 0
+    y: int = 0
+    def generate_response(self, prompt:str) -> str:            
+        ...
+```
+To invoke your model, add a custom configuration block to `config.yaml`:
+```yaml
+model:
+    use_config: custom # This must match a configuration block below.
+
+# model config block
+custom: 
+    provider: Custom # name of class
+    x: 10
+    y: 20
+```
+When acrobat is started, it will simply pass any fields listed under `custom` (in this case `x` and `y`) into your model as kwargs.
+
+
+### Roadmap
+
+(in no particular order)
+
+- [ ] Use protocol instead of inheritance for model plug-in system
+- [ ] Move exception-handling to async event loop (prevent crashes; provide in-chat feedback)
+- [ ] Streamline app configuration handling:
+    - [ ] Provide API keys via command line, config file, or environment variables
+    - [ ] Consolidate settings in one location
+- [ ] Improve logging:
+    - [ ] Log token usage / total API calls
+    - [ ] Log to file or other data sink
+- [ ] Implement LLM 'referee' to review acronym quality
+    
