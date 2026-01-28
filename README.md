@@ -57,10 +57,10 @@ Acronym generation can be triggered in three ways:
 | Command | Description |
 | --- | --- |
 | `@acro` | Generates an acronym from a random word in the conversation history. |
-| `@acro/acro word` | Generate an acronym (technically an expansion) for the `word`. |
-| `@acro/add_keyword keyword1 keyword2 keyword3 ...` | Add keywords to the trigger list. |
-| `@acro/del_keyword keyword1 keyword2 keyword3 ...` | Remove keywords from the trigger list. |
-| `@acro/add_message username add this message!` | Add a fake message to the chat context. This can be fun for secretly steering the bot's responses in a particular direction. |
+| `@acro /acro word` | Generate an acronym (technically an expansion) for the `word`. |
+| `@acro /add_keyword keyword1 keyword2 keyword3 ...` | Add keywords to the trigger list. |
+| `@acro /del_keyword keyword1 keyword2 keyword3 ...` | Remove keywords from the trigger list. |
+| `@acro /add_message username add this message!` | Add a fake message to the chat context. This can be fun for secretly steering the bot's responses in a particular direction. |
 
 Note that the `@acro` prefix can be removed if its the only bot in the channel.
 
@@ -122,5 +122,6 @@ When acrobat is started, it will simply pass any fields listed under `custom` (i
     - [ ] Log to file or other data sink
 - [ ] Implement LLM 'referee' to review acronym quality
     
+
 
 
