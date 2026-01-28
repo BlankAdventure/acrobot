@@ -30,7 +30,7 @@ Acrobot can run in either polling mode or webhook mode.
 
 In polling mode, the code runs a loop polling the telegram API periodically for new chat updates. It is straightforward to launch, in one of two ways.
 
-1. If installed, simply run the CLI command `acrobot`.
+1. If installed, simply run the CLI command `acrobot`
 2. Otherwise, navigate to `acrobot\acrobot` and run `python -m runner.py`
 
 **Webhook Mode**
@@ -47,3 +47,23 @@ Note that webhook mode is preferred over polling as it only induces network traf
 ## Usage
 
 *IMPORTANT!* Don't forget to add the bot to your chat - remember you named it back when you obtained your telegram bot API key.
+
+Acronym generation can be triggered in three ways:
+
+1. Detecting a keyword appearing in the chat (this can be configured).
+2. If invoked via `@acro`, it will pick a random word from the conversation history.
+3. Directly via the command: `/acro word` -> `"wonderful oils require drinking"`
+
+Add or remove keywords:
+
+`/add_keyword keyword1 keyword2 keyword3 ...`
+
+`/del_keyword keyword1 keyword2 keyword3 ...`
+
+Add a fake message to the chat context. This can be fun for secretly steering the bot's responses in a particular direction.
+
+`/add_message username add this message!`
+
+## Settings / Configuration
+
+A number of basic settings can be modified by the user via the `/acrobot/acrobot/config.yaml` file. See the file for details.
