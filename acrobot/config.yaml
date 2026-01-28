@@ -1,17 +1,26 @@
 acrobot:
-    telegram_key: telegram_bot
-    max_history: 5    
-    max_word_length: 12
-    throttle_interval: 5
-    keywords:
+    telegram_key: telegram_bot # Name of environment variable holding telegram API key.
+    max_history: 5 # Max number of messages to retain in bot message context.
+    max_word_length: 12 # Maximum allowed length of word to acronymize.
+    throttle_interval: 5 # Delay in seconds between subsequent API requests (use to limit spamming).
+    keywords: # These keywords will auto-trigger an acronym response.
         - beer
         - sister
         - drunk
         - hash
 model:
-    use_config: config0
-    retries: 1
+    use_config: config0 # This must match a configuration block below.
+    retries: 1 # Number of LLM API retries in case of failure.
 logging:
     level: INFO
-config0:
+# ***** List of model configurations *****
+config0: #use default settings
     provider: CerebrasModel
+config1: #use default settings
+    provider: GeminiModel
+config2: # use custom settings
+    provider: GeminiModel        
+    thinking_budget: 2000 #num tokens
+    temperature: 0.8
+    top_p: 0.65
+    
