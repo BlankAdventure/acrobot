@@ -57,7 +57,7 @@ class Acrobot:
         self.keywords = self.settings.acrobot.keywords
         self.llm = build_model(self.settings.use_config)
         
-        if start_telegram == True:
+        if start_telegram:
             logger.info("Configuring telegram app.")
             self.telegram_app = ApplicationBuilder().token(
                 os.environ.get(self.settings.acrobot.telegram_key,"")

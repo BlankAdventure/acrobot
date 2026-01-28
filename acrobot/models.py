@@ -6,7 +6,7 @@ Created on Fri Dec 19 14:23:33 2025
 """
 import logging
 from abc import ABC, abstractmethod
-from typing import cast, Type
+from typing import cast, Type, Literal
 from cerebras.cloud.sdk import Cerebras
 from google import genai
 from google.genai import types
@@ -50,6 +50,7 @@ class GeminiModel(Model):
     
     thinking_budget: int = 0
     temperature: float = 1.1
+    top_p: float = 0.95
     model_name: str = "gemini-2.5-flash"
     api_key: str|None = None
     
@@ -61,6 +62,7 @@ class GeminiModel(Model):
         self.config = types.GenerateContentConfig(
             system_instruction=SYS_INSTRUCTION,
             temperature=self.temperature,
+            top_p=self.top_p,
             thinking_config=thinking_config,
             automatic_function_calling=func_calling,
         )
@@ -77,10 +79,11 @@ class CerebrasModel(Model):
     """Use this class for configuring Cerebras models"""
 
     model_name: str = "gpt-oss-120b"
-    max_completion_tokens: int = 1024
+    max_completion_tokens: int = 2048
     temperature: float = 1
     top_p: float = 1
     api_key: str|None = None
+    reasoning_effort: Literal["low","medium","high"] = "low"
     
     def __post_init__(self):
         self.client = Cerebras(api_key=self.api_key)
@@ -97,6 +100,7 @@ class CerebrasModel(Model):
             max_completion_tokens=self.max_completion_tokens,
             temperature=self.temperature,
             top_p=self.top_p,
+            reasoning_effort=self.reasoning_effort,
             stream=False,
         )
         return completion.choices[0].message.content.strip()
@@ -151,7 +155,8 @@ def get_acro(
         count -= 1
         
         is_valid_acro = validate_format(word, expansion)
-        if is_valid_acro: break
+        if is_valid_acro: 
+            break
     
         sleep(0.25)
         
