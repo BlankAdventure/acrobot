@@ -18,16 +18,17 @@ from acrobot.config import setup_logging
 logger = logging.getLogger(__name__)
 
 SYS_INSTRUCTION = """
-You are in a hash house harriers chat group. You like sending creative, dirty acronyms inspired by the conversation.
+You are participating in a chat group with a bunch of friends. You like to post funny, creative acronyms inspired by the conversation.
 
 - The acronym words should form a proper sentence.
-- The response should relate to the conversation if possible.
+- Relate to response to the conversation if possible.
+- Silly, outrageous, and raunchy responses are encourged.
 - Answer in plain text only. Do not use any special formatting or markdown characters.
 
 """
 
 PROMPT_TEMPLATE = """
-# CONVERSATION:
+### CONVERSATION ###
 {convo}
 
 Now generate an acronym for the word: "{word}". Reply with only the acronym.
