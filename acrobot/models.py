@@ -4,6 +4,7 @@ Created on Fri Dec 19 14:23:33 2025
 
 @author: BlankAdventure
 """
+
 import logging
 from abc import ABC, abstractmethod
 from typing import cast, Type, Literal
@@ -34,27 +35,31 @@ PROMPT_TEMPLATE = """
 Now generate an acronym for the word: "{word}". Reply with only the acronym.
 """
 
+
 class AcroError(Exception):
     """Exception raised for specific application errors."""
+
     def __init__(self, message):
         super().__init__(message)
         logger.critical(message)
+
 
 class Model(ABC):
     @abstractmethod
     def generate_response(self, prompt: str) -> str | None:
         pass
 
+
 @dataclass
 class GeminiModel(Model):
     """Use this class for configuring Gemini models"""
-    
+
     thinking_budget: int = 0
     temperature: float = 1.1
     top_p: float = 0.95
     model_name: str = "gemini-2.5-flash"
-    api_key: str|None = None
-    
+    api_key: str | None = None
+
     def __post_init__(self):
         thinking_config = types.ThinkingConfig(
             thinking_budget=self.thinking_budget, include_thoughts=False
@@ -75,6 +80,7 @@ class GeminiModel(Model):
         )
         return response.text.strip()
 
+
 @dataclass
 class CerebrasModel(Model):
     """Use this class for configuring Cerebras models"""
@@ -83,9 +89,9 @@ class CerebrasModel(Model):
     max_completion_tokens: int = 2048
     temperature: float = 1
     top_p: float = 1
-    api_key: str|None = None
-    reasoning_effort: Literal["low","medium","high"] = "low"
-    
+    api_key: str | None = None
+    reasoning_effort: Literal["low", "medium", "high"] = "low"
+
     def __post_init__(self):
         self.client = Cerebras(api_key=self.api_key)
 
@@ -97,7 +103,7 @@ class CerebrasModel(Model):
 
         completion = self.client.chat.completions.create(
             messages=messages,
-            model=self.model_name, 
+            model=self.model_name,
             max_completion_tokens=self.max_completion_tokens,
             temperature=self.temperature,
             top_p=self.top_p,
@@ -107,7 +113,7 @@ class CerebrasModel(Model):
         return completion.choices[0].message.content.strip()
 
 
-def validate_format(word: str, expansion: str|None) -> bool:
+def validate_format(word: str, expansion: str | None) -> bool:
     """
     Checks if the word is a valid acronym for the expansion (word count
     matches letter count; first letter matches each letter in word)
@@ -120,9 +126,12 @@ def validate_format(word: str, expansion: str|None) -> bool:
         return False
 
 
-
 def get_acro(
-    model: Model, word: str, convo: str = "", retries: int = 0, hard_fail=False,
+    model: Model,
+    word: str,
+    convo: str = "",
+    retries: int = 0,
+    hard_fail=False,
 ) -> tuple[str | None, bool, str]:
     """
     Interprets word as an acronym and generates an expansion for it (yes this
@@ -132,13 +141,12 @@ def get_acro(
     prompt = PROMPT_TEMPLATE.format(convo=convo, word=word)
     logger.info(f"Requested: '{word}'")
     logger.debug(f"PROMPT:\n{prompt}")
-    
-    
-    expansion: str|None = None
+
+    expansion: str | None = None
     is_valid_acro: bool = False
-    
+
     count = retries
-    while count >= 0:        
+    while count >= 0:
         try:
             expansion = model.generate_response(prompt)
         except Exception as e:
@@ -146,57 +154,62 @@ def get_acro(
                 raise AcroError(f"LLM response failure: {e}")
             else:
                 expansion = None
-                
+
         if not isinstance(expansion, str):
             if hard_fail:
                 raise AcroError("LLM response must be a string.")
             else:
                 expansion = None
-        
+
         count -= 1
-        
+
         is_valid_acro = validate_format(word, expansion)
-        if is_valid_acro: 
+        if is_valid_acro:
             break
-    
+
         sleep(0.25)
-        
+
     if hard_fail and not is_valid_acro:
         raise AcroError("Invalid expansion.")
-    
-    logger.info(f"Generated: '{expansion}' (retries: {retries-count-1}, valid: {is_valid_acro})")
+
+    logger.info(
+        f"Generated: '{expansion}' (retries: {retries - count - 1}, valid: {is_valid_acro})"
+    )
     return (expansion, is_valid_acro, prompt)
 
-def build_model(config: str|dict[str,Any]) -> Model:
-    
+
+def build_model(config: str | dict[str, Any]) -> Model:
+
     if isinstance(config, str):
-        config = {'provider': config}
-    
+        config = {"provider": config}
+
     logger.debug(f"Building model with settings:\n{config}")
-    
+
     try:
-        provider = config['provider']
+        provider = config["provider"]
     except KeyError as e:
-        err_string = "build_model: config_dict must include 'provider' key with model name."
+        err_string = (
+            "build_model: config_dict must include 'provider' key with model name."
+        )
         e.add_note(err_string)
         logger.critical(err_string)
-        raise            
-        
+        raise
+
     look_up = {x.__name__: x for x in Model.__subclasses__()}
-    
+
     try:
         cls = cast(Type[Model], look_up[provider])
-        return cls( **{k: v for k, v in config.items() if k != 'provider'} )
+        return cls(**{k: v for k, v in config.items() if k != "provider"})
     except KeyError as e:
         err_string = f"get_model: {provider} not found. Valid options are: {', '.join(look_up.keys())}"
         e.add_note(err_string)
         logger.critical(err_string)
         raise
-    
+
+
 if __name__ == "__main__":
     setup_logging("INFO")
     logger.info("running standalone")
 
-    llm = build_model('GeminiModel')
-    print ( get_acro(llm, "beer", retries=0) )
-    
+    llm = build_model("GeminiModel")
+    print(get_acro(llm, "beer", retries=0))
