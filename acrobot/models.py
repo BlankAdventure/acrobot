@@ -15,7 +15,7 @@ from cerebras.cloud.sdk import APIConnectionError, RateLimitError
 from google import genai
 from google.genai import types, errors
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Optional
 from time import sleep
 from acrobot.config import setup_logging
 
@@ -69,7 +69,7 @@ def catch(exception: type[Exception],  message: str) -> Callable:
 
 class Model(ABC):
     @abstractmethod
-    def generate_response(self, prompt: str) -> str | None:
+    def generate_response(self, prompt: str) -> Optional[str]:
         pass
 
 
@@ -161,55 +161,36 @@ def get_acro(
     model: Model,
     word: str,
     convo: str = "",
-    retries: int = 0,
-    hard_fail=False,
-) -> tuple[str | None, bool]:
+    retries: int = 0    
+) -> tuple[str, bool]:
     """
     Interprets word as an acronym and generates an expansion for it (yes this
     function name is rather backwards).
     """
 
+    is_valid_acro: bool = False    
+
     prompt = build_prompt(convo=convo, word=word)
     logger.info(f"Requested: '{word}'")
     logger.debug(f"PROMPT:\n{prompt}")
 
-    expansion: str | None = None
-    is_valid_acro: bool = False
-
     count = retries
     while count >= 0:  
-        try:
-            expansion = model.generate_response(prompt)
-        except AcroError as e:
-            if hard_fail:
-                raise
-            else:
-                return (e(), False)                
-        except Exception as e:
-            if hard_fail:
-                raise
-            else:
-                logger.error(f"{type(e).__name__} caught.", exc_info=False)
-                return (None, False)
-
-        if not isinstance(expansion, str):
-           if hard_fail:
-               raise TypeError("LLM response must be a string.")
-           else:
-                logger.error("LLM response must be a string.", exc_info=False)
-                return (None, False)
-        
-        count -= 1        
+        expansion = model.generate_response(prompt)                
         is_valid_acro = validate_format(word, expansion)               
+        count -= 1
         if is_valid_acro:
             break
+        sleep(1) 
 
-        sleep(0.25)
+    if not isinstance(expansion, str):
+        raise TypeError("LLM response must be a string.")
 
     logger.info(
         f"Generated: '{expansion}' (retries: {retries - count - 1}, valid: {is_valid_acro})"
     )
-    return (expansion, is_valid_acro)
+    
+    return (expansion, is_valid_acro)    
 
 
 def build_model(config: str | dict[str, Any]) -> Model:
@@ -246,23 +227,5 @@ if __name__ == "__main__":
     logger.info("running standalone")
 
     llm = build_model("GeminiModel")
-    print(get_acro(llm, "beer", retries=0,hard_fail=True))
+    print(get_acro(llm, "beer", retries=0))
 
-
-    # if hard_fail and not is_valid_acro:
-    #     raise AcroError("Invalid expansion.")
-
-        # try:
-        #     expansion = model.generate_response(prompt)
-        # except Exception as e:
-        #     if hard_fail:
-        #         raise AcroError(f"LLM response failure: {e}")
-        #     else:
-        #         expansion = None
-
-
-        #if not isinstance(expansion, str):
-        #    if hard_fail:
-        #        raise AcroError("LLM response must be a string.")
-        #    else:
-        #        expansion = None
