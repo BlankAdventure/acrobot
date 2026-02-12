@@ -4,6 +4,8 @@ Created on Fri Dec 19 14:23:33 2025
 
 @author: BlankAdventure
 """
+import functools
+from collections.abc import Callable
 
 import logging
 from abc import ABC, abstractmethod
@@ -35,13 +37,31 @@ PROMPT_TEMPLATE = """
 Now generate an acronym for the word: "{word}". Reply with only the acronym.
 """
 
-
+        
 class AcroError(Exception):
     """Exception raised for specific application errors."""
 
-    def __init__(self, message):
-        super().__init__(message)
-        logger.critical(message)
+    def __init__(self, chat_message: str):
+        super().__init__()
+        self.chat_message = chat_message
+
+
+def catch(exception: type[Exception],  message: str) -> Callable:
+    """Decorator function for handling failed model API calls"""
+
+    def decorator(func: Callable) -> Callable:
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs) -> str | None:
+            result = None
+            try:
+                result = func(*args, **kwargs)
+            except exception as e:
+                logger.error(f"CATCH : {type(e).__name__} : {e}", exc_info=False)
+                raise AcroError(message)
+            return result
+        return wrapper
+    return decorator
+
 
 
 class Model(ABC):
@@ -147,20 +167,15 @@ def get_acro(
 
     count = retries
     while count >= 0:
-        try:
-            expansion = model.generate_response(prompt)
-        except Exception as e:
-            if hard_fail:
-                raise AcroError(f"LLM response failure: {e}")
-            else:
-                expansion = None
+        
+        expansion = model.generate_response(prompt)
 
         if not isinstance(expansion, str):
             if hard_fail:
                 raise AcroError("LLM response must be a string.")
             else:
                 expansion = None
-
+                
         count -= 1
 
         is_valid_acro = validate_format(word, expansion)
@@ -213,3 +228,12 @@ if __name__ == "__main__":
 
     llm = build_model("GeminiModel")
     print(get_acro(llm, "beer", retries=0))
+
+
+        # try:
+        #     expansion = model.generate_response(prompt)
+        # except Exception as e:
+        #     if hard_fail:
+        #         raise AcroError(f"LLM response failure: {e}")
+        #     else:
+        #         expansion = None
