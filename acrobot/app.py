@@ -134,7 +134,7 @@ class Acrobot:
             except AcroError as e:
                 await update.message.reply_text(e(), do_quote=True)
             except Exception as e:                
-                logger.error(f"caught:{type(e).__name__}:{e}", exc_info=False)
+                logger.error(f"caught: {type(e).__name__}: {e}", exc_info=False)
                 await update.message.reply_text ("dammit, you broke something!", do_quote=True)
             else:
                 await update.message.reply_text(
@@ -150,11 +150,11 @@ class Acrobot:
             try:
                 response = await self.generate_acro(word)
             except AcroError as e:
-                response = e()
+                await update.message.reply_text(e(), do_quote=True)
             except Exception as e:                
-                logger.error(f"caught:{type(e).__name__}:{e}", exc_info=False)
-                response = "dammit, you broke something!"            
-            if response:
+                logger.error(f"caught: {type(e).__name__}: {e}", exc_info=False)
+                await update.message.reply_text("dammit, you broke something!", do_quote=True)
+            else:
                 await update.message.reply_text(response, do_quote=True)
 
 
