@@ -163,7 +163,7 @@ def get_acro(
     convo: str = "",
     retries: int = 0,
     hard_fail=False,
-) -> tuple[str | None, bool, str]:
+) -> tuple[str | None, bool]:
     """
     Interprets word as an acronym and generates an expansion for it (yes this
     function name is rather backwards).
