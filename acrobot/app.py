@@ -17,7 +17,7 @@ from http import HTTPStatus
 from typing import AsyncIterator
 from contextlib import asynccontextmanager
 
-from acrobot.models import get_acro, build_model
+from acrobot.models import get_acro, build_model, AcroError
 from acrobot.config import get_settings, setup_logging, Config
 
 from telegram.ext import (
@@ -104,13 +104,13 @@ class Acrobot:
             await asyncio.sleep(self.settings.acrobot.throttle_interval)
             self.queue.task_done()
 
-    async def generate_acro(self, word: str) -> None | str:
+    async def generate_acro(self, word: str) -> str:
         """
         Forms the complete acronym prompt and gets the model's response.
         """
 
         convo = "\n".join(f"{u}: {m}" for u, m in self.history)
-        response, _, _ = await asyncio.to_thread(
+        response, _ = await asyncio.to_thread(
             get_acro,
             model=self.llm,
             word=word,
@@ -129,15 +129,17 @@ class Acrobot:
         """
 
         if update.message:
-            response = await self.generate_acro(word)
-            if response:
-                await update.message.reply_text(
-                    f"{word}? Who said {word}!?\n" + response, do_quote=False
-                )
+            try:
+                response = await self.generate_acro(word)
+            except AcroError as e:
+                await update.message.reply_text(e(), do_quote=True)
+            except Exception as e:                
+                logger.error(f"caught:{type(e).__name__}:{e}", exc_info=False)
+                await update.message.reply_text ("dammit, you broke something!", do_quote=True)
             else:
                 await update.message.reply_text(
-                    "Dammit you broke something", do_quote=True
-                )
+                    f"{word}? Who said {word}!?\n" + response, do_quote=False
+                )                
 
     async def acro_task(self, update: Update, word: str) -> None:
         """
@@ -145,13 +147,16 @@ class Acrobot:
         """
 
         if update.message:
-            response = await self.generate_acro(word)
+            try:
+                response = await self.generate_acro(word)
+            except AcroError as e:
+                response = e()
+            except Exception as e:                
+                logger.error(f"caught:{type(e).__name__}:{e}", exc_info=False)
+                response = "dammit, you broke something!"            
             if response:
-                await update.message.reply_text(response, do_quote=False)
-            else:
-                await update.message.reply_text(
-                    "Dammit you broke something", do_quote=True
-                )
+                await update.message.reply_text(response, do_quote=True)
+
 
     # === COMMAND HANDLERS ===
     # These are the callback functions that get invoked when the associated
