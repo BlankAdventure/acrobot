@@ -6,21 +6,19 @@ Created on Fri Dec 19 14:23:33 2025
 """
 
 import functools
-from collections.abc import Callable
-
 import logging
 from abc import ABC, abstractmethod
-from typing import cast, Type, Literal
-from cerebras.cloud.sdk import Cerebras
-from cerebras.cloud.sdk import APIConnectionError, RateLimitError
-from google import genai
-from google.genai import types, errors
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any, Optional
 from time import sleep
-from acrobot.config import setup_logging
+from typing import Any, Literal, Optional, Type, cast
 
+from cerebras.cloud.sdk import APIConnectionError, Cerebras, RateLimitError
+from google import genai
+from google.genai import errors, types
 from httpx import ConnectError
+
+from acrobot.config import setup_logging
 
 logger = logging.getLogger(__name__)
 
@@ -157,8 +155,7 @@ def validate_format(word: str, expansion: str | None) -> bool:
         word_letters = word.lower()
         acro_letters = "".join(w[0] for w in expansion.lower().split())
         return word_letters == acro_letters
-    else:
-        return False
+    return False
 
 
 def build_prompt(word: str, convo: str = "") -> str:

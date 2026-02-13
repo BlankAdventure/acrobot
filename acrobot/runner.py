@@ -5,8 +5,8 @@ Created on Mon Sep 15 23:05:44 2025
 @author: BlankAdventure
 """
 
-import logging
 import argparse
+import logging
 
 from acrobot import app
 from acrobot.config import setup_logging

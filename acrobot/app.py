@@ -5,30 +5,28 @@ Created on Fri Aug  8 21:39:33 2025
 @author: BlankAdventure
 """
 
-import re
+import asyncio
+import logging
 import os
 import random
-import logging
-import asyncio
-from typing import Iterable
+import re
 from collections.abc import Callable
-
-from http import HTTPStatus
-from typing import AsyncIterator
 from contextlib import asynccontextmanager
+from http import HTTPStatus
+from typing import AsyncIterator, Iterable
 
-from acrobot.models import get_acro, build_model, AcroError
-from acrobot.config import get_settings, setup_logging, Config
-
+from fastapi import APIRouter, FastAPI, Request, Response
+from telegram import Update
 from telegram.ext import (
     ApplicationBuilder,
     CommandHandler,
-    MessageHandler,
     ContextTypes,
+    MessageHandler,
     filters,
 )
-from telegram import Update
-from fastapi import FastAPI, Request, Response, APIRouter
+
+from acrobot.config import Config, get_settings, setup_logging
+from acrobot.models import AcroError, build_model, get_acro
 
 logger = logging.getLogger(__name__)
 
@@ -79,12 +77,12 @@ class Acrobot:
             )
             self.telegram_app.add_handler(CommandHandler("acro", self.command_acro))
             self.telegram_app.add_handler(
-                MessageHandler(filters.TEXT & ~filters.COMMAND, self.handle_message)
+                MessageHandler(filters.TEXT & ~filters.COMMAND, self._handle_message)
             )
         else:
             logger.info("Telegram app not configured.")
 
-    async def queue_processor(self) -> None:
+    async def _queue_processor(self) -> None:
         """
         Async loop implementing a leaky bucket rate limiter. Acro requests
         get added to the event queue and processed every THROTTLE_INTERVAL seconds.
@@ -104,7 +102,7 @@ class Acrobot:
             await asyncio.sleep(self.settings.acrobot.throttle_interval)
             self.queue.task_done()
 
-    async def generate_acro(self, word: str) -> str:
+    async def _generate_acro(self, word: str) -> str:
         """
         Forms the complete acronym prompt and gets the model's response.
         """
@@ -123,14 +121,14 @@ class Acrobot:
     # The following functions are tasks that arise from command requests and
     # which get added to the processing queue for execution.
 
-    async def keyword_task(self, update: Update, word: str) -> None:
+    async def _keyword_task(self, update: Update, word: str) -> None:
         """
         Form the bot's reply to a keyword hit.
         """
 
         if update.message:
             try:
-                response = await self.generate_acro(word)
+                response = await self._generate_acro(word)
             except AcroError as e:
                 await update.message.reply_text(e(), do_quote=True)
             except Exception as e:
@@ -143,14 +141,14 @@ class Acrobot:
                     f"{word}? Who said {word}!?\n" + response, do_quote=False
                 )
 
-    async def acro_task(self, update: Update, word: str) -> None:
+    async def _acro_task(self, update: Update, word: str) -> None:
         """
         Form the bot's reply to an acronym request.
         """
 
         if update.message:
             try:
-                response = await self.generate_acro(word)
+                response = await self._generate_acro(word)
             except AcroError as e:
                 await update.message.reply_text(e(), do_quote=True)
             except Exception as e:
@@ -174,9 +172,7 @@ class Acrobot:
                 "Hi, I'm Acrobot. Use /acro WORD to generate an acronym."
             )
 
-    async def command_info(
-        self, update: Update, context: ContextTypes.DEFAULT_TYPE
-    ) -> None:
+    async def command_info(self, update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
         """
         Relays info about the self of the bot.
         """
@@ -276,14 +272,14 @@ class Acrobot:
             ]
 
             if word:
-                await self.queue.put(lambda: self.acro_task(update, word))
+                await self.queue.put(lambda: self._acro_task(update, word))
             else:
                 await update.message.reply_text("Not allowed boyo!", do_quote=True)
 
     # === MESSAGE HANDLER ===
     # General-purpose chat message handler.
 
-    async def handle_message(
+    async def _handle_message(
         self, update: Update, _: ContextTypes.DEFAULT_TYPE
     ) -> None:
         """
@@ -301,7 +297,7 @@ class Acrobot:
             found = match_words(message, self.keywords)
             if len(found) > 0:
                 await self.queue.put(
-                    lambda: self.keyword_task(update, random.choice(found))
+                    lambda: self._keyword_task(update, random.choice(found))
                 )
 
     def _update_history(self, sender: str, message: str) -> None:
@@ -319,7 +315,7 @@ class Acrobot:
         """
 
         async def go() -> None:
-            self.task_qp = asyncio.create_task(self.queue_processor())
+            self.task_qp = asyncio.create_task(self._queue_processor())
 
         try:
             loop = asyncio.get_event_loop()
