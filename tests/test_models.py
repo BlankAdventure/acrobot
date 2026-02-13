@@ -8,6 +8,10 @@ import pytest
 from unittest.mock import patch
 from acrobot.models import validate_format, get_acro, build_model, AcroError, catch
 
+# test helper function
+def api_call():
+    pass
+
 
 
 @pytest.mark.parametrize(
@@ -75,9 +79,6 @@ def test_catch_functionality():
    with pytest.raises(TypeError):
        test_func(TypeError)   
       
-def api_call():
-    pass
-
 
 def test_get_acro_throws_errors():
     
@@ -85,33 +86,68 @@ def test_get_acro_throws_errors():
         @catch(ValueError, "user_message")
         def generate_response(self, x):
             return api_call()    
-    model = Fake()
+    model = Fake()    
     
-    
-    with patch('test_models.api_call') as b:
+    with patch('test_models.api_call') as mock_call:
     
         # sanity check correct behaviour
-        b.return_value = "call all trucks"
+        mock_call.return_value = "call all trucks"
         acro, is_valid = get_acro(model, word="cat")
         assert is_valid
         assert acro == "call all trucks"
 
         # incorrect return type throws TypeError
-        b.return_value = 10
+        mock_call.return_value = 10
         with pytest.raises(TypeError):
             _,_ = get_acro(model, word="cat")
 
         # decorated error re-raised as AcroError
-        b.side_effect = ValueError('naked')
+        mock_call.side_effect = ValueError('naked')
         with pytest.raises(AcroError, match="user_message"):
             _,_ = get_acro(model, word="cat")
         
         # 'other' error bubble up
-        b.side_effect = IndexError('naked')
+        mock_call.side_effect = IndexError('naked')
         with pytest.raises(IndexError):
             _,_ = get_acro(model, word="cat")
             
-            
+def test_get_acro_safe():    
+    
+    class Fake():
+        @catch(ValueError, "user_message")
+        def generate_response(self, x):
+            return api_call()    
+    model = Fake()    
+    
+    with patch('test_models.api_call') as mock_call:
+    
+        # sanity check correct behaviour
+        mock_call.return_value = "call all trucks"
+        acro, is_valid = get_acro(model, word="cat")
+        assert acro == "call all trucks"
+        assert is_valid        
+
+        # incorrect return type throws TypeError
+        mock_call.return_value = 10
+        with pytest.raises(TypeError):
+            acro, is_valid = get_acro(model, word="cat")
+            assert acro == None
+            assert not is_valid
+
+        # decorated error re-raised as AcroError
+        mock_call.side_effect = ValueError('naked')
+        with pytest.raises(AcroError, match="user_message"):
+            acro, is_valid = get_acro(model, word="cat")
+            assert acro == "user_message"
+            assert not is_valid        
+        
+        # 'other' error bubble up
+        mock_call.side_effect = IndexError('naked')
+        with pytest.raises(IndexError):
+            acro, is_valid = get_acro(model, word="cat")
+            assert acro == "user_message"
+            assert not is_valid        
+    
     
 def test_get_model_success_dict(dummy_model):
     config = {'provider': 'Dummy', 'x': 10}    
