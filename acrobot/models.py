@@ -60,7 +60,7 @@ def catch(exception: type[Exception], message: str) -> Callable:
             try:
                 result = func(*args, **kwargs)
             except exception as e:
-                logger.error(f"CATCH : {type(e).__name__} : {e}", exc_info=False)
+                logger.error(f"Raising AcroError <{type(e).__name__} : {e}>",exc_info=False)                
                 raise AcroError(message) from e
             return result
 
@@ -159,7 +159,39 @@ def validate_format(word: str, expansion: str | None) -> bool:
 
 
 def build_prompt(word: str, convo: str = "") -> str:
+    """
+    Helper function for assembling the complete prompt. Provided as a 
+    separate function for testing purposes.
+    """
     return PROMPT_TEMPLATE.format(convo=convo, word=word)
+
+
+def get_acro_safe(
+    model: Model, word: str, convo: str = "", retries: int = 0
+) -> tuple[str|None, bool]:
+    
+    response: str|None = None
+    is_valid: bool = False
+
+    try:
+        response, is_valid = get_acro(model, word, convo, retries)
+    except AcroError as e:        
+        logger.error(f"CAUGHT: {type(e).__name__}", exc_info=False)
+        response = e()
+        is_valid = False
+    except TypeError:
+        logger.error("CAUGHT: LLM response must be a string.", exc_info=False)
+        response = None
+        is_valid = False
+    except Exception as e:
+        logger.error(f"CAUGHT: {e}", exc_info=True)
+        response = None
+        is_valid = False        
+
+    return response, is_valid
+        
+
+
 
 
 def get_acro(
@@ -229,4 +261,4 @@ if __name__ == "__main__":
     logger.info("running standalone")
 
     llm = build_model("GeminiModel")
-    print(get_acro(llm, "beer", retries=0))
+    print(get_acro_safe(llm, "beer", retries=0))
