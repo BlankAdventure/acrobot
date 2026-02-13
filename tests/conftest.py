@@ -8,15 +8,16 @@ Created on Sat Jan  3 17:49:58 2026
 import pytest
 from unittest.mock import AsyncMock, MagicMock
 
-from acrobot.models import Model
+from acrobot.models import Model, catch
 from acrobot.app import Acrobot
 
-class Dummy(Model):
+class Dummy(Model):    
     def __init__(self, x=0):
         self.x=x
+        self.api_call = MagicMock()
+    @catch(ValueError,"user_message")
     def generate_response(self, prompt:str):            
-        pass
-
+        return self.api_call()
 
 @pytest.fixture
 def default_config():

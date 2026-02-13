@@ -84,29 +84,36 @@ async def test_command_acro_soft_fail(default_config, mock_update, mock_context)
     
     bot = Acrobot(default_config, start_telegram=False)    
     mock_context.args = ["cow"]
-    with patch.object(bot.llm, 'generate_response') as mock_func:
-        bot.start(run_polling=False) #start bot without polling    
+    
+    bot.start(run_polling=False) #start bot without polling    
+    
+    # one call
+    bot.llm.api_call.configure_mock(return_value = "call on weeds")    
+    await bot.command_acro(mock_update, mock_context)            
+    await bot.complete(stop=False)
+    mock_update.message.reply_text.assert_awaited_once_with('call on weeds', do_quote=True)
 
-        # correct execution -> valid response   
-        mock_func.configure_mock(return_value = "call on weeds")    
-        await bot.command_acro(mock_update, mock_context)            
-        await bot.complete(stop=False)
-        mock_update.message.reply_text.assert_awaited_once_with('call on weeds', do_quote=False)
+    # two calls - bad acro
+    bot.llm.api_call.configure_mock(return_value = "invalid acronym") 
+    await bot.command_acro(mock_update, mock_context)            
+    await bot.complete(stop=False)
+    mock_update.message.reply_text.assert_awaited_with("invalid acronym", do_quote=True)
 
-        # quality failure -> returns response anyway
-        mock_func.configure_mock(return_value = "invalid acronym") 
-        await bot.command_acro(mock_update, mock_context)            
-        await bot.complete(stop=False)
-        mock_update.message.reply_text.assert_awaited_with("invalid acronym", do_quote=False)
+    # one call - exception triggered
+    bot.llm.api_call.configure_mock(side_effect=ValueError("naked")) 
+    await bot.command_acro(mock_update, mock_context)            
+    await bot.complete(stop=False)
+    mock_update.message.reply_text.assert_awaited_with('user_message', do_quote=True)
 
-        # error failure -> handles None return
-        mock_func.configure_mock(side_effect=ValueError) 
-        await bot.command_acro(mock_update, mock_context)            
-        await bot.complete(stop=True)
-        mock_update.message.reply_text.assert_awaited_with('Dammit you broke something', do_quote=True)
+    # one call - exception triggered
+    bot.llm.api_call.configure_mock(side_effect=IndexError("naked")) 
+    await bot.command_acro(mock_update, mock_context)            
+    await bot.complete(stop=True)
+    mock_update.message.reply_text.assert_awaited_with("dammit, you broke something!", do_quote=True)
+    
+    assert len(bot.llm.api_call.mock_calls) == 5
+    assert len(mock_update.message.reply_text.mock_calls) == 4
 
-        assert len(mock_func.mock_calls) == 5
-        assert len(mock_update.message.reply_text.mock_calls) == 3
 
 # This tests for prpoer async event loop behaviour. Slow tasks (command_acro)
 # should not block fast tasks (command_info). The test confirms command_info
@@ -118,32 +125,34 @@ async def test_command_acro_timing(default_config, mock_update, mock_context):
     
     bot = Acrobot(default_config, start_telegram=False)    
     
-    with patch.object(bot.llm, 'generate_response') as mock_func:
+    #with patch.object(bot.llm, 'generate_response') as mock_func:
+    bot.llm.api_call.reset_mock()        
+    bot.llm.api_call.configure_mock(return_value = "call on weeds")    
+    mock_context.args = ["cow"]    
+        
+    bot.start(run_polling=False) 
+        
+    start_time = time.perf_counter()
+        
+    await bot.command_acro(mock_update, mock_context) #long; should run in background      
+    await bot.command_info(mock_update, mock_context) 
 
-        mock_func.configure_mock(return_value = "call on weeds")    
-        mock_context.args = ["cow"]    
+    mock_context.args = ["dog"]    
+    await bot.command_acro(mock_update, mock_context) #long; should run in background
+    await bot.complete(stop=True)
         
-        bot.start(run_polling=False) 
-        
-        start_time = time.perf_counter()
-        
-        await bot.command_acro(mock_update, mock_context) #long; should run in background      
-        await bot.command_info(mock_update, mock_context) 
-
-        mock_context.args = ["dog"]    
-        await bot.command_acro(mock_update, mock_context) #long; should run in background
-        await bot.complete(stop=True)
-        
-        duration = time.perf_counter() - start_time        
+    duration = time.perf_counter() - start_time        
+    
     
     # the info call should come first, as the other two long tasks run to
     # completion in the background.
+    
     expected = [call('INFO INFO INFO!'),
-                call('call on weeds', do_quote=False),
-                call('call on weeds', do_quote=False)]
+                call('call on weeds', do_quote=True),
+                call('call on weeds', do_quote=True)]
 
     assert mock_update.message.reply_text.mock_calls == expected
     
-    # 2 second throttle interval x 2 + 0.25 retry loop delay.
-    assert duration == pytest.approx(4.25, abs=0.15)        
+    # 2 second throttle interval x 2 + 1 sec retry loop delay.
+    assert duration == pytest.approx(5, abs=0.15)        
     
