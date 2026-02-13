@@ -4,6 +4,7 @@ Created on Fri Dec 19 14:23:33 2025
 
 @author: BlankAdventure
 """
+
 import functools
 from collections.abc import Callable
 
@@ -40,17 +41,18 @@ PROMPT_TEMPLATE = """
 Now generate an acronym for the word: "{word}". Reply with only the acronym.
 """
 
+
 class AcroError(Exception):
     """Exception raised for specific application errors."""
 
     def __init__(self, message: str):
         super().__init__(message)
-        
+
     def __call__(self) -> str:
         return self.__str__()
 
 
-def catch(exception: type[Exception],  message: str) -> Callable:
+def catch(exception: type[Exception], message: str) -> Callable:
     """Decorator function for handling failed model API calls"""
 
     def decorator(func: Callable) -> Callable:
@@ -63,7 +65,9 @@ def catch(exception: type[Exception],  message: str) -> Callable:
                 logger.error(f"CATCH : {type(e).__name__} : {e}", exc_info=False)
                 raise AcroError(message) from e
             return result
+
         return wrapper
+
     return decorator
 
 
@@ -97,8 +101,8 @@ class GeminiModel(Model):
         )
         self.client = genai.Client(api_key=self.api_key)
 
-    @catch(ConnectError,"your internet is busted.")
-    @catch(errors.APIError,"dammit, you broke something!")
+    @catch(ConnectError, "your internet is busted.")
+    @catch(errors.APIError, "dammit, you broke something!")
     def generate_response(self, prompt: str) -> str | None:
         response = self.client.models.generate_content(
             model=self.model_name, contents=prompt, config=self.config
@@ -120,10 +124,12 @@ class CerebrasModel(Model):
     def __post_init__(self):
         self.client = Cerebras(api_key=self.api_key)
 
-    
-    @catch(RateLimitError, "slow down there buddy.",)
+    @catch(
+        RateLimitError,
+        "slow down there buddy.",
+    )
     @catch(APIConnectionError, "your internet is busted.")
-    @catch(ConnectError,"your internet is busted.")
+    @catch(ConnectError, "your internet is busted.")
     def generate_response(self, prompt: str) -> str | None:
         messages = [
             {"role": "system", "content": SYS_INSTRUCTION},
@@ -154,34 +160,33 @@ def validate_format(word: str, expansion: str | None) -> bool:
     else:
         return False
 
-def build_prompt(word: str, convo: str="") -> str:
+
+def build_prompt(word: str, convo: str = "") -> str:
     return PROMPT_TEMPLATE.format(convo=convo, word=word)
 
+
 def get_acro(
-    model: Model,
-    word: str,
-    convo: str = "",
-    retries: int = 0    
+    model: Model, word: str, convo: str = "", retries: int = 0
 ) -> tuple[str, bool]:
     """
     Interprets word as an acronym and generates an expansion for it (yes this
     function name is rather backwards).
     """
 
-    is_valid_acro: bool = False    
+    is_valid_acro: bool = False
 
     prompt = build_prompt(convo=convo, word=word)
     logger.info(f"Requested: '{word}'")
     logger.debug(f"PROMPT:\n{prompt}")
 
     count = retries
-    while count >= 0:  
-        expansion = model.generate_response(prompt)                
-        is_valid_acro = validate_format(word, expansion)               
+    while count >= 0:
+        expansion = model.generate_response(prompt)
+        is_valid_acro = validate_format(word, expansion)
         count -= 1
         if is_valid_acro:
             break
-        sleep(1) 
+        sleep(1)
 
     if not isinstance(expansion, str):
         raise TypeError("LLM response must be a string.")
@@ -189,8 +194,8 @@ def get_acro(
     logger.info(
         f"Generated: '{expansion}' (retries: {retries - count - 1}, valid: {is_valid_acro})"
     )
-    
-    return (expansion, is_valid_acro)    
+
+    return (expansion, is_valid_acro)
 
 
 def build_model(config: str | dict[str, Any]) -> Model:
@@ -228,4 +233,3 @@ if __name__ == "__main__":
 
     llm = build_model("GeminiModel")
     print(get_acro(llm, "beer", retries=0))
-

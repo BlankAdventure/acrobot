@@ -133,13 +133,15 @@ class Acrobot:
                 response = await self.generate_acro(word)
             except AcroError as e:
                 await update.message.reply_text(e(), do_quote=True)
-            except Exception as e:                
+            except Exception as e:
                 logger.error(f"caught: {type(e).__name__}: {e}", exc_info=False)
-                await update.message.reply_text ("dammit, you broke something!", do_quote=True)
+                await update.message.reply_text(
+                    "dammit, you broke something!", do_quote=True
+                )
             else:
                 await update.message.reply_text(
                     f"{word}? Who said {word}!?\n" + response, do_quote=False
-                )                
+                )
 
     async def acro_task(self, update: Update, word: str) -> None:
         """
@@ -151,12 +153,13 @@ class Acrobot:
                 response = await self.generate_acro(word)
             except AcroError as e:
                 await update.message.reply_text(e(), do_quote=True)
-            except Exception as e:                
+            except Exception as e:
                 logger.error(f"caught: {type(e).__name__}: {e}", exc_info=False)
-                await update.message.reply_text("dammit, you broke something!", do_quote=True)
+                await update.message.reply_text(
+                    "dammit, you broke something!", do_quote=True
+                )
             else:
                 await update.message.reply_text(response, do_quote=True)
-
 
     # === COMMAND HANDLERS ===
     # These are the callback functions that get invoked when the associated

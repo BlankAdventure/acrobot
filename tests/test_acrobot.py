@@ -6,7 +6,7 @@ Created on Fri Sep 19 16:48:10 2025
 """
 import time
 import pytest
-from unittest.mock import MagicMock, patch, call
+from unittest.mock import MagicMock, call
 from acrobot.app import match_words, Acrobot
 
 def test_match_words_found():
