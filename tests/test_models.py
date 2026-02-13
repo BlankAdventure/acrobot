@@ -74,7 +74,45 @@ def test_catch_functionality():
    # Confirm non-specified exception re-raised as self
    with pytest.raises(TypeError):
        test_func(TypeError)   
+      
+def api_call():
+    pass
 
+
+def test_get_acro_throws_errors():
+    
+    class Fake():
+        @catch(ValueError, "user_message")
+        def generate_response(self, x):
+            return api_call()    
+    model = Fake()
+    
+    
+    with patch('test_models.api_call') as b:
+    
+        # sanity check correct behaviour
+        b.return_value = "call all trucks"
+        acro, is_valid = get_acro(model, word="cat")
+        assert is_valid
+        assert acro == "call all trucks"
+
+        # incorrect return type throws TypeError
+        b.return_value = 10
+        with pytest.raises(TypeError):
+            _,_ = get_acro(model, word="cat")
+
+        # decorated error re-raised as AcroError
+        b.side_effect = ValueError('naked')
+        with pytest.raises(AcroError, match="user_message"):
+            _,_ = get_acro(model, word="cat")
+        
+        # 'other' error bubble up
+        b.side_effect = IndexError('naked')
+        with pytest.raises(IndexError):
+            _,_ = get_acro(model, word="cat")
+            
+            
+    
 def test_get_model_success_dict(dummy_model):
     config = {'provider': 'Dummy', 'x': 10}    
     model = build_model(config)    
