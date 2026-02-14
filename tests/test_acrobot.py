@@ -6,7 +6,7 @@ Created on Fri Sep 19 16:48:10 2025
 """
 import time
 import pytest
-from unittest.mock import MagicMock, call, ANY
+from unittest.mock import MagicMock, call, ANY, patch
 from acrobot.app import match_words, Acrobot
 
 def test_match_words_found():
@@ -77,7 +77,8 @@ async def test_add_message_command_updates_history(dummy_bot, mock_update):
     
 # Checks that under certain failure conditions, soft fail ensures that erros
 # are all caught and handled.
-async def test_command_acro_soft_fail(default_config, mock_update, mock_context):
+@patch('conftest.api_call')
+async def test_command_acro_soft_fail(mock_call, default_config, mock_update, mock_context):
     
     default_config['acrobot']['throttle_interval'] = 1
     default_config['model']['retries'] = 1
@@ -88,46 +89,45 @@ async def test_command_acro_soft_fail(default_config, mock_update, mock_context)
     bot.start(run_polling=False) #start bot without polling    
     
     # one call
-    bot.llm.api_call.configure_mock(return_value = "call on weeds")    
+    mock_call.configure_mock(return_value = "call on weeds")    
     await bot.command_acro(mock_update, mock_context)            
     await bot.complete(stop=False)
     mock_update.message.reply_text.assert_awaited_once_with('call on weeds', do_quote=True)
 
     # two calls - bad acro
-    bot.llm.api_call.configure_mock(return_value = "invalid acronym") 
+    mock_call.configure_mock(return_value = "invalid acronym") 
     await bot.command_acro(mock_update, mock_context)            
     await bot.complete(stop=False)
     mock_update.message.reply_text.assert_awaited_with("invalid acronym", do_quote=True)
 
     # one call - exception triggered
-    bot.llm.api_call.configure_mock(side_effect=ValueError("naked")) 
+    mock_call.configure_mock(side_effect=ValueError("naked")) 
     await bot.command_acro(mock_update, mock_context)            
     await bot.complete(stop=False)
     mock_update.message.reply_text.assert_awaited_with('user_message', do_quote=True)
 
     # one call - exception triggered
-    bot.llm.api_call.configure_mock(side_effect=IndexError("naked")) 
+    mock_call.configure_mock(side_effect=IndexError("naked")) 
     await bot.command_acro(mock_update, mock_context)            
     await bot.complete(stop=True)
     mock_update.message.reply_text.assert_awaited_with("dammit, you broke something!", do_quote=True)
     
-    assert len(bot.llm.api_call.mock_calls) == 5
+    assert len(mock_call.mock_calls) == 5
     assert len(mock_update.message.reply_text.mock_calls) == 4
 
 
 # This tests for prpoer async event loop behaviour. Slow tasks (command_acro)
 # should not block fast tasks (command_info). The test confirms command_info
 # is executed, while command_acro runs in the background.
-async def test_command_acro_timing(default_config, mock_update, mock_context):
+@patch('conftest.api_call')
+async def test_command_acro_timing(mock_call, default_config, mock_update, mock_context):
     
     default_config['acrobot']['throttle_interval'] = 2
     default_config['model']['retries'] = 0
     
     bot = Acrobot(default_config, start_telegram=False)    
     
-    #with patch.object(bot.llm, 'generate_response') as mock_func:
-    bot.llm.api_call.reset_mock()        
-    bot.llm.api_call.configure_mock(return_value = "call on weeds")    
+    mock_call.configure_mock(return_value = "call on weeds")    
     mock_context.args = ["cow"]    
         
     bot.start(run_polling=False) 
