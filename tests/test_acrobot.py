@@ -6,7 +6,7 @@ Created on Fri Sep 19 16:48:10 2025
 """
 import time
 import pytest
-from unittest.mock import MagicMock, call
+from unittest.mock import MagicMock, call, ANY
 from acrobot.app import match_words, Acrobot
 
 def test_match_words_found():
@@ -147,7 +147,7 @@ async def test_command_acro_timing(default_config, mock_update, mock_context):
     # the info call should come first, as the other two long tasks run to
     # completion in the background.
     
-    expected = [call('INFO INFO INFO!'),
+    expected = [call(ANY),
                 call('call on weeds', do_quote=True),
                 call('call on weeds', do_quote=True)]
 

@@ -176,14 +176,12 @@ class Acrobot:
         """
         Relays info about the self of the bot.
         """
-        # logger.info("Chat History:\n" + "\n".join(f"{u}: {m}" for u, m in self.history))
-        # logger.info(f"Keywords: {self.keywords}\n")
-        # logger.info(
-        #    f"Queue length: {len(self.event_queue)} | API calls: {self.call_count}"
-        # )
+        logger.info("\n--CHAT HISTORY--\n" + "\n".join(f"{u}: {m}" for u, m in self.history))
+        logger.info(f"\n--SETTINGS--\n{self.settings}")
+
         if update.message:
-            await update.message.reply_text("INFO INFO INFO!")
-            # f"Queue length: {len(self.queue)} | API calls: {self.call_count} | KW: {self.keywords} "
+            await update.message.reply_text(f"--SETTINGS--\n{self.settings}")
+
 
     async def command_add_keywords(
         self, update: Update, context: ContextTypes.DEFAULT_TYPE

@@ -8,7 +8,8 @@ import pytest
 from unittest.mock import patch
 from acrobot.models import validate_format, get_acro, build_model, AcroError, catch
 
-# test helper function
+# test helper function. Suggest to move to conftest and incorporate into 
+# existing Dummy fixture. Update tests below as necessary.   
 def api_call():
     pass
 
