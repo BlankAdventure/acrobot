@@ -11,13 +11,17 @@ from unittest.mock import AsyncMock, MagicMock
 from acrobot.models import Model, catch
 from acrobot.app import Acrobot
 
+# This is a dummy function intended to be patched/mocked as needed in the actual
+# test code.
+def api_call():
+    pass
+
 class Dummy(Model):    
     def __init__(self, x=0):
-        self.x=x
-        self.api_call = MagicMock()
+        self.x=x        
     @catch(ValueError,"user_message")
     def generate_response(self, prompt:str):            
-        return self.api_call()
+        return api_call()
 
 @pytest.fixture
 def default_config():
@@ -34,6 +38,13 @@ def default_config():
 @pytest.fixture
 def dummy_model():
     return Dummy
+
+# experimenting for future use
+#@pytest.fixture
+#def dummy_model():
+#    model = Dummy()
+#    with patch('conftest.api_call') as mock_call:
+#       yield model, mock_call
 
 @pytest.fixture
 def dummy_bot(default_config):
