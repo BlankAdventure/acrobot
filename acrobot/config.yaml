@@ -16,11 +16,7 @@ logging:
 # ***** List of model configurations *****
 config0: #use default settings
     provider: CerebrasModel
+    reasoning_effort: medium
 config1: #use default settings
     provider: GeminiModel
-config2: # use custom settings
-    provider: GeminiModel        
-    thinking_budget: 2000 #num tokens
-    temperature: 0.8
-    top_p: 0.65
     

@@ -23,14 +23,14 @@ from acrobot.config import setup_logging
 logger = logging.getLogger(__name__)
 
 SYS_INSTRUCTION = """
-You are participating in a chat group with a bunch of friends. You like to post funny, creative acronyms inspired by the conversation.
+You are in a hash house harriers chat group. You like sending creative, dirty acronyms inspired by the conversation.
 
 - The acronym words should form a proper sentence.
-- Relate your response to the conversation if possible.
-- Silly, outrageous, and raunchy responses are encouraged.
+- The response should relate to the conversation if possible.
 - Answer in plain text only. Do not use any special formatting or markdown characters.
 
 """
+
 
 PROMPT_TEMPLATE = """
 ### CONVERSATION ###
