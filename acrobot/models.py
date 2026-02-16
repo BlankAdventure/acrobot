@@ -122,10 +122,7 @@ class CerebrasModel(Model):
     def __post_init__(self):
         self.client = Cerebras(api_key=self.api_key)
 
-    @catch(
-        RateLimitError,
-        "slow down there buddy.",
-    )
+    @catch(RateLimitError, "slow down there buddy.")
     @catch(APIConnectionError, "your internet is busted.")
     @catch(ConnectError, "your internet is busted.")
     def generate_response(self, prompt: str) -> str | None:
