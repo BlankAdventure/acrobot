@@ -37,6 +37,7 @@ def default_config():
             "throttle_interval": 5,
             "keywords": ["beer", "hash"],
         },
+        "prompt": {"system": "abc", "user": "xyz"},
         "model": {"retries": 1, "use_config": "testconf"},
         "logging": {"level": "INFO"},
         "testconf": {"provider": "Dummy"},
