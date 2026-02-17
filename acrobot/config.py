@@ -25,6 +25,13 @@ class Acrobot(BaseModel):
     keywords: set[str] = set()
     model_config = ConfigDict(extra="forbid")
 
+class Prompt(BaseModel):
+    """Bot config class."""
+
+    system: str
+    user: str
+    model_config = ConfigDict(extra="forbid")
+
 
 class Model(BaseModel):
     """Model config class."""
@@ -44,7 +51,7 @@ class Logging(BaseModel):
 class Config(BaseModel):
     """CLI config class."""
 
-    acrobot: Acrobot
+    acrobot: Acrobot    
     model: Model
     logging: Logging
 
@@ -78,6 +85,12 @@ def get_settings() -> Config:
     settings = Config(**load_yaml_config(path))
     return settings
 
+def get_prompt() -> Prompt:
+    """"Returns only the prompt portion of the config file"""
+    
+    all_settings = load_yaml_config(path)    
+    prompt = Prompt(**all_settings['prompt'])
+    return prompt
 
 # level=settings.logging.level
 def setup_logging(level: str) -> None:

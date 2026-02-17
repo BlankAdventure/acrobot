@@ -36,7 +36,7 @@ def default_config():
             "max_word_length": 12,
             "throttle_interval": 5,
             "keywords": ["beer", "hash"],
-        },
+        },        
         "model": {"retries": 1, "use_config": "testconf"},
         "logging": {"level": "INFO"},
         "testconf": {"provider": "Dummy"},

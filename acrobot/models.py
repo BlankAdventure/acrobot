@@ -18,27 +18,13 @@ from google import genai
 from google.genai import errors, types
 from httpx import ConnectError
 
-from acrobot.config import setup_logging
+from acrobot.config import setup_logging, get_prompt
 
 logger = logging.getLogger(__name__)
 
-SYS_INSTRUCTION = """
-You are in a hash house harriers chat group. You like sending creative, dirty acronyms inspired by the conversation.
-
-- The acronym words should form a proper sentence.
-- The response should relate to the conversation if possible.
-- Answer in plain text only. Do not use any special formatting or markdown characters.
-
-"""
-
-
-PROMPT_TEMPLATE = """
-### CONVERSATION ###
-{convo}
-
-Now generate an acronym for the word: "{word}". Reply with only the acronym.
-"""
-
+# Load in the system and user prompt components. For now we'll preserve
+# SYS_INSTRUCTION and PROMPT_TEMPLATE as module-level constants.
+SYS_INSTRUCTION, PROMPT_TEMPLATE = (lambda temp: (temp.system, temp.user))(get_prompt())
 
 class AcroError(Exception):
     """Exception raised for specific application errors."""
@@ -186,9 +172,6 @@ def get_acro_safe(
         is_valid = False        
 
     return response, is_valid
-        
-
-
 
 
 def get_acro(
@@ -256,6 +239,6 @@ def build_model(config: str | dict[str, Any]) -> Model:
 if __name__ == "__main__":
     setup_logging("INFO")
     logger.info("running standalone")
-
+    
     llm = build_model("GeminiModel")
     print(get_acro_safe(llm, "beer", retries=0))
