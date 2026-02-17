@@ -51,8 +51,7 @@ class Logging(BaseModel):
 class Config(BaseModel):
     """CLI config class."""
 
-    acrobot: Acrobot
-    prompt: Prompt
+    acrobot: Acrobot    
     model: Model
     logging: Logging
 

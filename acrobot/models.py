@@ -172,9 +172,6 @@ def get_acro_safe(
         is_valid = False        
 
     return response, is_valid
-        
-
-
 
 
 def get_acro(
@@ -242,6 +239,6 @@ def build_model(config: str | dict[str, Any]) -> Model:
 if __name__ == "__main__":
     setup_logging("INFO")
     logger.info("running standalone")
-
+    
     llm = build_model("GeminiModel")
     print(get_acro_safe(llm, "beer", retries=0))
