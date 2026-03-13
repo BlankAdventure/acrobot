@@ -1,0 +1,573 @@
+,0,1,2,3,4
+0,gpt-oss-120b,0.4,0.25,beer,Bouncing Enthusiastic Elephants Roaring
+1,gpt-oss-120b,0.4,0.25,beer,Bouncing Enthusiastic Elephants Roaring
+2,gpt-oss-120b,0.4,0.25,beer,Bouncing Enthusiastic Elephants Roaring
+3,gpt-oss-120b,0.4,0.25,beer,Bouncing Enthusiastic Elephants Roaring
+4,gpt-oss-120b,0.4,0.25,beer,Bouncing Enthusiastic Elephants Roaring
+5,gpt-oss-120b,0.4,0.25,hash,Hilarious Aardvarks Scream Hysterically
+6,gpt-oss-120b,0.4,0.25,hash,Hilarious Aardvarks Scream Hysterically
+7,gpt-oss-120b,0.4,0.25,hash,Hilarious Aardvarks Scream Hysterically
+8,gpt-oss-120b,0.4,0.25,hash,Hilarious Aardvarks Scream Hysterically
+9,gpt-oss-120b,0.4,0.25,hash,Hilarious Aardvarks Scream Hysterically
+10,gpt-oss-120b,0.4,0.25,drunk,Dancing Rabbits Usually Nibble Kaleberries
+11,gpt-oss-120b,0.4,0.25,drunk,Dancing Rabbits Usually Nibble Kaleberries
+12,gpt-oss-120b,0.4,0.25,drunk,Dancing Rabbits Usually Nibble Kaleberries
+13,gpt-oss-120b,0.4,0.25,drunk,Dancing Rabbits Usually Nibble Kaleberries
+14,gpt-oss-120b,0.4,0.25,drunk,Dancing Rabbits Usually Nibble Kaleberries
+15,gpt-oss-120b,0.4,0.25,sister,"Silly Iguanas Sipping Tea, Eating Raspberry‑flavored ice‑cream, Totally!"
+16,gpt-oss-120b,0.4,0.25,sister,"Silly Iguanas Sipping Tea, Eating Raspberry‑flavored ice‑cream, Totally!"
+17,gpt-oss-120b,0.4,0.25,sister,"Silly Iguanas Sipping Tea, Eating Raspberry‑flavored ice‑cream, Totally!"
+18,gpt-oss-120b,0.4,0.25,sister,"Silly Iguanas Sipping Tea, Eating Raspberry‑flavored ice‑cream, Totally!"
+19,gpt-oss-120b,0.4,0.25,sister,"Silly Iguanas Sipping Tea, Eating Raspberry‑flavored ice‑cream, Totally!"
+20,gpt-oss-120b,0.4,0.25,tomorrow,"T O M O R R O W: Take One Massive Omelette, Relish Radiant Rinds, Or Whine."
+21,gpt-oss-120b,0.4,0.25,tomorrow,"T O M O R R O W: Take One Massive Omelette, Relish Radiant Rinds, Or Whine."
+22,gpt-oss-120b,0.4,0.25,tomorrow,"T O M O R R O W: Take One Massive Omelette, Relish Radiant Rinds, Or Whine."
+23,gpt-oss-120b,0.4,0.25,tomorrow,"T O M O R R O W: Take One Massive Omelette, Relish Radiant Rinds, Or Whine."
+24,gpt-oss-120b,0.4,0.25,tomorrow,"T O M O R R O W: Take One Massive Omelette, Relish Radiant Rinds, Or Whine."
+25,gpt-oss-120b,0.4,0.25,yesterday,"Yodeling Elephants Sing Tunes, Everyone Roars, Dancing Aardvarks Yodel"
+26,gpt-oss-120b,0.4,0.25,yesterday,"Yodeling Elephants Sing Tunes, Everyone Roars, Dancing Aardvarks Yodel"
+27,gpt-oss-120b,0.4,0.25,yesterday,"Yodeling Elephants Sing Tunes, Everyone Roars, Dancing Aardvarks Yodel"
+28,gpt-oss-120b,0.4,0.25,yesterday,"Yodeling Elephants Sing Tunes, Everyone Roars, Dancing Aardvarks Yodel"
+29,gpt-oss-120b,0.4,0.25,yesterday,"Yodeling Elephants Sing Tunes, Everyone Roars, Dancing Aardvarks Yodel"
+30,gpt-oss-120b,0.4,0.5,beer,Bouncing Enthusiastic Elephants Roaring
+31,gpt-oss-120b,0.4,0.5,beer,Bouncing Elephants Enjoying Rumblings
+32,gpt-oss-120b,0.4,0.5,beer,Bouncing Enthusiastic Elephants Roaring
+33,gpt-oss-120b,0.4,0.5,beer,Bouncing Enthusiastic Elephants Roaring
+34,gpt-oss-120b,0.4,0.5,beer,Bouncing Elephants Enjoying Rumblings
+35,gpt-oss-120b,0.4,0.5,hash,Hilarious Aardvarks Scream Hysterically
+36,gpt-oss-120b,0.4,0.5,hash,Hilarious Aardvarks Scream Hysterically
+37,gpt-oss-120b,0.4,0.5,hash,Hilarious Aardvarks Scream Hysterically
+38,gpt-oss-120b,0.4,0.5,hash,Hilarious Aardvarks Scream Hysterically
+39,gpt-oss-120b,0.4,0.5,hash,Hilarious Aardvarks Scream Hysterically
+40,gpt-oss-120b,0.4,0.5,drunk,Dancing Rabbits Usually Nibble Kaleberries
+41,gpt-oss-120b,0.4,0.5,drunk,Daringly Roaring Unicorns Nibble Kegs
+42,gpt-oss-120b,0.4,0.5,drunk,Daringly Roaring Unicorns Nibble Kegs
+43,gpt-oss-120b,0.4,0.5,drunk,Dancing Rabbits Usually Nibble Kaleberries
+44,gpt-oss-120b,0.4,0.5,drunk,Daringly Roaring Unicorns Nibble Kegs
+45,gpt-oss-120b,0.4,0.5,sister,"Sassy Iguana Sings Tacos, Erupting Raucously"
+46,gpt-oss-120b,0.4,0.5,sister,"Silly Iguanas Sipping Tea, Eating Raspberry‑flavored ice‑cream, Totally!"
+47,gpt-oss-120b,0.4,0.5,sister,"Silly Iguanas Sipping Tea, Eating Raspberry‑flavored ice‑cream, Totally!"
+48,gpt-oss-120b,0.4,0.5,sister,"Sassy Iguana Sings Tacos, Erupting Raucously"
+49,gpt-oss-120b,0.4,0.5,sister,"Silly Iguanas Sipping Tea, Eating Raspberry‑flavored ice‑cream, Totally!"
+50,gpt-oss-120b,0.4,0.5,tomorrow,"T O M O R R O W: Take One Massive Omelette, Relish Radiant Rinds, Or Whine."
+51,gpt-oss-120b,0.4,0.5,tomorrow,"T O M O R R O W: Take One Massive Omelette, Relish Radiant Rinds, Or Whine."
+52,gpt-oss-120b,0.4,0.5,tomorrow,"T O M O R R O W: Take One Massive Omelette, Relish Radiant Ribs, Or Whine."
+53,gpt-oss-120b,0.4,0.5,tomorrow,"T O M O R R O W: Take One Massive Omelette, Relish Radiant Rinds, Or Whine."
+54,gpt-oss-120b,0.4,0.5,tomorrow,"T O M O R R O W: Take One Massive Omelette, Relish Ridiculously Overcooked Waffles."
+55,gpt-oss-120b,0.4,0.5,yesterday,"Yodeling Elephants Sing Tunes, Everyone Roars, Dancing Aardvarks Yodel"
+56,gpt-oss-120b,0.4,0.5,yesterday,"Yodeling Elephants Sing Tunes, Everyone Roars, Dancing Aardvarks Yodel"
+57,gpt-oss-120b,0.4,0.5,yesterday,"Yodeling Elephants Sing Tunes, Everyone Roars, Dancing Aardvarks Yodel"
+58,gpt-oss-120b,0.4,0.5,yesterday,"Yodeling Elephants Sing Tunes, Everyone Roars, Dancing Aardvarks Yodel"
+59,gpt-oss-120b,0.4,0.5,yesterday,"Yodeling Elephants Sing Tunes, Everyone Roars, Dancing Aardvarks Yodel"
+60,gpt-oss-120b,0.4,0.75,beer,Bubbles Elevate Everyone's Relaxation
+61,gpt-oss-120b,0.4,0.75,beer,Bubbly Elixir Elevating Revelry
+62,gpt-oss-120b,0.4,0.75,beer,Bubbles Elevate Everyone's Relaxation
+63,gpt-oss-120b,0.4,0.75,beer,Bubbles Elevate Everyone’s Relaxation
+64,gpt-oss-120b,0.4,0.75,beer,Bubbles Elevate Everyone's Relaxation
+65,gpt-oss-120b,0.4,0.75,hash,Hilariously Awkward Squirrels Hurl
+66,gpt-oss-120b,0.4,0.75,hash,Hilariously Awkward Squirrels Hurl
+67,gpt-oss-120b,0.4,0.75,hash,Hilariously Awkward Squirrels Hurl
+68,gpt-oss-120b,0.4,0.75,hash,Hilariously Awkward Squirrels Hurl
+69,gpt-oss-120b,0.4,0.75,hash,Hilariously Awkward Squirrels Hurl
+70,gpt-oss-120b,0.4,0.75,drunk,Dancing Rabbits Usually Nibble Kaleberries
+71,gpt-oss-120b,0.4,0.75,drunk,Dancing Rabbits Usually Nibble Kale
+72,gpt-oss-120b,0.4,0.75,drunk,Dancing Rabbits Usually Need Keg
+73,gpt-oss-120b,0.4,0.75,drunk,Dancing Rabbits Usually Nibble Kaleberries
+74,gpt-oss-120b,0.4,0.75,drunk,Dancing Rabbits Usually Nibble Kaleberries
+75,gpt-oss-120b,0.4,0.75,sister,"Sassy Iguana Sings Tango, Erupting Rumba"
+76,gpt-oss-120b,0.4,0.75,sister,"Sassy Iguana Sings Tango, Erupting Raucously"
+77,gpt-oss-120b,0.4,0.75,sister,"Sassy Iguana Sings Tacos, Erupting Raucously"
+78,gpt-oss-120b,0.4,0.75,sister,"Silly Iguanas Steal Tacos, Eating Radishes."
+79,gpt-oss-120b,0.4,0.75,sister,"Silly Iguanas Sipping Tea, Eating Raspberry"
+80,gpt-oss-120b,0.4,0.75,tomorrow,"T O M O R R O W: Take One Minute, Omit Regrets, Relax, Own Whatever"
+81,gpt-oss-120b,0.4,0.75,tomorrow,"Take Oatmeal, Make Ogres Roar, Rude Rabbits Ogle Waffles"
+82,gpt-oss-120b,0.4,0.75,tomorrow,"Take Out My Oatmeal, Really Rude, Or Whine"
+83,gpt-oss-120b,0.4,0.75,tomorrow,"T O M O R R O W:  
+Take  
+One  
+Mischievous  
+Octopus,  
+Riding  
+Raspberry  
+Orange  
+Waffles."
+84,gpt-oss-120b,0.4,0.75,tomorrow,"T O M O R R O W: Take One Minute, Or Rest, Relax, Or Wander."
+85,gpt-oss-120b,0.4,0.75,yesterday,Y O U R S E L F   W A S   E X T R E M E L Y   D I S T R A C T E D   Y O U   R E A L L Y   T O T A L L Y.
+86,gpt-oss-120b,0.4,0.75,yesterday,"Yodeling Elephants Sing To Everyone, Really Dancing And Yawning"
+87,gpt-oss-120b,0.4,0.75,yesterday,"Yodeling Elephants Sing Tunes, Everyone Roars, Dancing Aardvarks Yodel"
+88,gpt-oss-120b,0.4,0.75,yesterday,Y O U R S E L F   E V E N   D A Y   R E M E M B E R S   T H E   I N S A N E   T R A V E L.
+89,gpt-oss-120b,0.4,0.75,yesterday,"Yodeling Elephants Sing Tunes, Everyone Roars, Dancing Aardvarks Yodel"
+90,gpt-oss-120b,0.4,1.0,beer,Bouncing Enthusiastic Elephants Roaring
+91,gpt-oss-120b,0.4,1.0,beer,Bouncing Elephants Enjoy Rum
+92,gpt-oss-120b,0.4,1.0,beer,Bubbles Elevate Everyone's Revelry
+93,gpt-oss-120b,0.4,1.0,beer,Bouncing Elephants Enjoying Rumblings
+94,gpt-oss-120b,0.4,1.0,beer,"Binge Every Evening, Rejoice"
+95,gpt-oss-120b,0.4,1.0,hash,Hilariously Awkward Squirrels Hurl
+96,gpt-oss-120b,0.4,1.0,hash,Hilariously Awkward Squirrels Huddle
+97,gpt-oss-120b,0.4,1.0,hash,Hilarious Antics Spark Hilarity
+98,gpt-oss-120b,0.4,1.0,hash,Hilariously Awkward Squirrels Hurl
+99,gpt-oss-120b,0.4,1.0,hash,Hilarious Ants Sing Hysterically
+100,gpt-oss-120b,0.4,1.0,drunk,Dancing Rabbits Usually Nibble Kale
+101,gpt-oss-120b,0.4,1.0,drunk,Dude Really Unleashes Nasty Karaoke
+102,gpt-oss-120b,0.4,1.0,drunk,Dancing Rabbits Usually Nibble Kale
+103,gpt-oss-120b,0.4,1.0,drunk,"Definitely Regrettable, Unpleasant, Nasty, Kooky"
+104,gpt-oss-120b,0.4,1.0,drunk,"Daringly, Rude Unicorns Nibble Kegs"
+105,gpt-oss-120b,0.4,1.0,sister,"Sassy Iguana Sings Tango, Erupting Rumba"
+106,gpt-oss-120b,0.4,1.0,sister,"Silly Iguanas Salsa Together, Eating Radishes"
+107,gpt-oss-120b,0.4,1.0,sister,"Silly Iguanas Sipping Tea, Eating Raspberry Sorbet"
+108,gpt-oss-120b,0.4,1.0,sister,"Silly Iguanas Steal Tacos, Eating Radishes"
+109,gpt-oss-120b,0.4,1.0,sister,"S I S T E R: Silly Iguanas Secretly Tango, Eating Radishes."
+110,gpt-oss-120b,0.4,1.0,tomorrow,"Take Oatmeal, Make Ogres Roar, Rabbits Offer Waffles"
+111,gpt-oss-120b,0.4,1.0,tomorrow,TAKE OFF MY OCELOT RUN RAPIDLY OR WAIL
+112,gpt-oss-120b,0.4,1.0,tomorrow,"T O M O R R O W: Take One Moment, Or Really, Rest, Or Wander."
+113,gpt-oss-120b,0.4,1.0,tomorrow,"Take Out My Omelette, Really, Really, Or Wait"
+114,gpt-oss-120b,0.4,1.0,tomorrow,"T O M O R R O W: Take Out My Overcooked Ramen, Really Omit the Worries."
+115,gpt-oss-120b,0.4,1.0,yesterday,"Y: You  
+E: Everyone  
+S: Should  
+T: Take  
+E: Extra  
+R: Rest,  
+D: Drink  
+A: A  
+Y: Yummy  
+!"
+116,gpt-oss-120b,0.4,1.0,yesterday,Yelling Elephants Sing The Entirely Ridiculous Dance At Yawning
+117,gpt-oss-120b,0.4,1.0,yesterday,"Yelling Elephants Sing Tango Everywhere, While Drunk Alpacas Yodel"
+118,gpt-oss-120b,0.4,1.0,yesterday,"Y: You  
+E: Everyone  
+S: Should  
+T: Try  
+E: Eating  
+R: Really  
+D: Delicious  
+A: Avocado  
+Y: Yogurt"
+119,gpt-oss-120b,0.4,1.0,yesterday,"Y: You  
+E: Everyone  
+S: Said  
+T: That  
+E: Everyone  
+R: Really  
+D: Danced  
+A: After  
+Y: Yawning
+
+(Note: This spells ""YESTERDAY"")"
+120,gpt-oss-120b,0.8,0.25,beer,Bouncing Enthusiastic Elephants Roaring
+121,gpt-oss-120b,0.8,0.25,beer,Bouncing Enthusiastic Elephants Roaring
+122,gpt-oss-120b,0.8,0.25,beer,Bouncing Eccentric Elephants Roaring
+123,gpt-oss-120b,0.8,0.25,beer,Bouncing Eccentric Elephants Roaring
+124,gpt-oss-120b,0.8,0.25,beer,Bouncing Eccentric Elephants Roaring
+125,gpt-oss-120b,0.8,0.25,hash,Hilarious Aardvarks Scream Hysterically
+126,gpt-oss-120b,0.8,0.25,hash,Hilarious Aardvarks Scream Hysterically
+127,gpt-oss-120b,0.8,0.25,hash,Hilarious Aardvarks Scream Hysterically
+128,gpt-oss-120b,0.8,0.25,hash,Hilarious Aardvarks Scream Hysterically
+129,gpt-oss-120b,0.8,0.25,hash,Hilarious Aardvarks Scream Hysterically
+130,gpt-oss-120b,0.8,0.25,drunk,Dancing Rabbits Usually Nibble Kaleberries
+131,gpt-oss-120b,0.8,0.25,drunk,Dancing Rabbits Usually Nibble Kaleberries
+132,gpt-oss-120b,0.8,0.25,drunk,Dancing Rabbits Usually Nibble Kaleberries
+133,gpt-oss-120b,0.8,0.25,drunk,Dancing Rabbits Usually Nibble Kaleberries
+134,gpt-oss-120b,0.8,0.25,drunk,Dancing Rabbits Usually Nibble Kaleberries
+135,gpt-oss-120b,0.8,0.25,sister,"Silly Iguanas Sipping Tea, Eating Raspberry‑flavored ice‑cream, Totally!"
+136,gpt-oss-120b,0.8,0.25,sister,"Silly Iguanas Sipping Tea, Eating Raspberry‑flavored ice‑cream, Totally!"
+137,gpt-oss-120b,0.8,0.25,sister,"Silly Iguanas Sipping Tea, Eating Raspberry‑flavored ice‑cream, Totally!"
+138,gpt-oss-120b,0.8,0.25,sister,"Silly Iguanas Sipping Tea, Eating Raspberry‑flavored ice‑cream, Totally!"
+139,gpt-oss-120b,0.8,0.25,sister,"Silly Iguanas Sipping Tea, Eating Raspberry‑flavored ice‑cream, Totally!"
+140,gpt-oss-120b,0.8,0.25,tomorrow,"T O M O R R O W: Take One Massive Omelette, Relish Radiant Rinds, Or Whine."
+141,gpt-oss-120b,0.8,0.25,tomorrow,"T O M O R R O W: Take One Massive Omelette, Relish Radiant Rinds, Or Whine."
+142,gpt-oss-120b,0.8,0.25,tomorrow,"T O M O R R O W: Take One Massive Omelette, Relish Radiant Rinds, Or Whine."
+143,gpt-oss-120b,0.8,0.25,tomorrow,"T O M O R R O W: Take One Massive Omelette, Relish Radiant Rinds, Or Whine."
+144,gpt-oss-120b,0.8,0.25,tomorrow,"T O M O R R O W: Take One Massive Omelette, Relish Radiant Rinds, Or Whine."
+145,gpt-oss-120b,0.8,0.25,yesterday,"Yodeling Elephants Sing Tunes, Everyone Roars, Dancing Aardvarks Yodel"
+146,gpt-oss-120b,0.8,0.25,yesterday,"Yodeling Elephants Sing Tunes, Everyone Roars, Dancing Aardvarks Yodel"
+147,gpt-oss-120b,0.8,0.25,yesterday,"Yodeling Elephants Sing Tunes, Everyone Roars, Dancing Aardvarks Yodel"
+148,gpt-oss-120b,0.8,0.25,yesterday,"Yodeling Elephants Sing Tunes, Everyone Roars, Dancing Aardvarks Yodel"
+149,gpt-oss-120b,0.8,0.25,yesterday,"Yodeling Elephants Sing Tunes, Everyone Roars, Dancing Aardvarks Yodel"
+150,gpt-oss-120b,0.8,0.5,beer,Bouncing Eccentric Elephants Roaring
+151,gpt-oss-120b,0.8,0.5,beer,Bouncing Elephants Enjoying Rumblings
+152,gpt-oss-120b,0.8,0.5,beer,Bubbles Elevate Everyone’s Relaxation
+153,gpt-oss-120b,0.8,0.5,beer,Bouncing Elephants Enjoying Rumblings
+154,gpt-oss-120b,0.8,0.5,beer,Bouncing Elephants Enjoying Rumblings
+155,gpt-oss-120b,0.8,0.5,hash,Hilariously Awkward Squirrels Hurl
+156,gpt-oss-120b,0.8,0.5,hash,Hilarious Ants Sing Hysterically
+157,gpt-oss-120b,0.8,0.5,hash,Hilariously Awkward Squirrels Hurl
+158,gpt-oss-120b,0.8,0.5,hash,Hilarious Ants Sing Hysterically
+159,gpt-oss-120b,0.8,0.5,hash,Hilarious Aardvarks Sing Hysterically
+160,gpt-oss-120b,0.8,0.5,drunk,Dancing Rabbits Usually Nibble Kaleberries
+161,gpt-oss-120b,0.8,0.5,drunk,Dancing Rude Unicorns Nibble Keg
+162,gpt-oss-120b,0.8,0.5,drunk,Dancing Rabbits Usually Nibble Kaleberries
+163,gpt-oss-120b,0.8,0.5,drunk,Dancing Really Uncouth Nymphs Kegged
+164,gpt-oss-120b,0.8,0.5,drunk,Dancing Rabbits Usually Nibble Kaleberries
+165,gpt-oss-120b,0.8,0.5,sister,"Sassy Iguana Sings Tacos, Erupting Raucously"
+166,gpt-oss-120b,0.8,0.5,sister,"Sassy Iguana Sings Tango, Everyone Raves"
+167,gpt-oss-120b,0.8,0.5,sister,"Silly Iguanas Steal Tacos, Eating Radishes."
+168,gpt-oss-120b,0.8,0.5,sister,"Sassy Iguana Sings Tacos, Erupting Raucously"
+169,gpt-oss-120b,0.8,0.5,sister,"Sassy Iguana Sings Tango, Erupting Raucously"
+170,gpt-oss-120b,0.8,0.5,tomorrow,"T O M O R R O W: Take One Minute, Or Rest, Relax, Or Wander."
+171,gpt-oss-120b,0.8,0.5,tomorrow,"Take Oatmeal, Make Ogres Run, Roar, Rumble, Ogle Waffles"
+172,gpt-oss-120b,0.8,0.5,tomorrow,"TAKE OFF, MY OAF, RUN RAPIDLY, OR WEEP"
+173,gpt-oss-120b,0.8,0.5,tomorrow,"T O M O R R O W: Take One Minute, Or Rest, Relax, Or Wander."
+174,gpt-oss-120b,0.8,0.5,tomorrow,"T O M O R R O W: Take One Minute, Or Rest, Relax, Or Wander."
+175,gpt-oss-120b,0.8,0.5,yesterday,"Yodeling Elephants Sing Tunes, Even Rabbits Dance And Yodel"
+176,gpt-oss-120b,0.8,0.5,yesterday,Y O U R  S I L L Y  E X C I T E D  T A L K  E V E N T S  R O C K  S O  H A P P Y
+177,gpt-oss-120b,0.8,0.5,yesterday,"Yodeling Elephants Sing Tunes, Everyone Roars, Dancing Aardvarks Yodel"
+178,gpt-oss-120b,0.8,0.5,yesterday,"Yodeling Elephants Sing Tunes, Even Rabbits Dance Awhile, Yawning."
+179,gpt-oss-120b,0.8,0.5,yesterday,"Yodeling Elephants Sing Tunes, Everyone Roars, Dancing Antelopes Yodel"
+180,gpt-oss-120b,0.8,0.75,beer,"Binge Every Evening, Really!"
+181,gpt-oss-120b,0.8,0.75,beer,"Bubbles Erupting, Everyone Revels"
+182,gpt-oss-120b,0.8,0.75,beer,Bubbles Elevate Every Relaxation
+183,gpt-oss-120b,0.8,0.75,beer,Bubbles Escalate Every Raucousness
+184,gpt-oss-120b,0.8,0.75,beer,Bouncing Enthusiastic Elves Revel
+185,gpt-oss-120b,0.8,0.75,hash,Hilariously Awkward Squirrels Hurl
+186,gpt-oss-120b,0.8,0.75,hash,Hilariously Awkward Squirrels Huddle
+187,gpt-oss-120b,0.8,0.75,hash,Hilariously Awkward Squirrels Hurl
+188,gpt-oss-120b,0.8,0.75,hash,Hilariously Awkward Squirrels Huddle.
+189,gpt-oss-120b,0.8,0.75,hash,Hilariously Awkward Squirrels Hurl
+190,gpt-oss-120b,0.8,0.75,drunk,Dancing Rabbits Usually Nibble Ketchup
+191,gpt-oss-120b,0.8,0.75,drunk,Dancing Really Uninhibited Nonsense Kicks
+192,gpt-oss-120b,0.8,0.75,drunk,Dancing Rabbits Usually Need Kegs
+193,gpt-oss-120b,0.8,0.75,drunk,Dancing Rabbits Usually Nibble Ketchup
+194,gpt-oss-120b,0.8,0.75,drunk,Don't Run Under Neon Kegs
+195,gpt-oss-120b,0.8,0.75,sister,"Silly Iguanas Steal Tacos, Eating Radishes"
+196,gpt-oss-120b,0.8,0.75,sister,"Silly Iguanas Steal Tacos, Eating Radishes"
+197,gpt-oss-120b,0.8,0.75,sister,"Silly Iguanas Sipping Tea, Enjoying Relaxation."
+198,gpt-oss-120b,0.8,0.75,sister,"Silly Iguanas Sipping Tea, Enjoying Relaxedness"
+199,gpt-oss-120b,0.8,0.75,sister,"Sassy Iguanas Sing Tacos, Eating Radishes"
+200,gpt-oss-120b,0.8,0.75,tomorrow,"T O M O R R O W: Take One Massive Omelette, Relish Radiant Roasted Onions, Wow!"
+201,gpt-oss-120b,0.8,0.75,tomorrow,"Totally Overcooked Meatball Omelettes Require Ridiculous, Overly Wildness"
+202,gpt-oss-120b,0.8,0.75,tomorrow,"Take One Massive Oatmeal, Really Rude, Overly Wild"
+203,gpt-oss-120b,0.8,0.75,tomorrow,"T – Take  
+O – Outlandish  
+M – Marshmallows,  
+O – Over  
+R – Ridiculous  
+R – Raves,  
+O – Orchestrating  
+W – Wildness"
+204,gpt-oss-120b,0.8,0.75,tomorrow,"Take One Minute, Or Rest, Relax, Or Wander"
+205,gpt-oss-120b,0.8,0.75,yesterday,"Yelling Elephants Sing Theoretically, Everyone's Rabbits Dance Awhile, Yawning"
+206,gpt-oss-120b,0.8,0.75,yesterday,"Yelling Elephants Scream, Twerking, Eating Raspberries, Dancing Amidst Yawns"
+207,gpt-oss-120b,0.8,0.75,yesterday,"Yodeling Elephants Sing To Everyone, Really Dancing And Yawning."
+208,gpt-oss-120b,0.8,0.75,yesterday,"Y: You  
+E: Ever  
+S: Said  
+T: That  
+E: Everyone  
+R: Really  
+D: Dares  
+A: All  
+Y: Yodelers
+
+You Ever Said That Everyone Really Dares All Yodelers."
+209,gpt-oss-120b,0.8,0.75,yesterday,"Y - You  
+E - Earned  
+S - Some  
+T - Terrific  
+E - Extra  
+R - Really  
+D - Delicious  
+A - Apple  
+Y - Yogurt"
+210,gpt-oss-120b,0.8,1.0,beer,Bouncing Enthusiastic Elephants Roaring
+211,gpt-oss-120b,0.8,1.0,beer,Bubbly Elixirs Encourage Revelry
+212,gpt-oss-120b,0.8,1.0,beer,"Bouncing Every Evening, Revelry."
+213,gpt-oss-120b,0.8,1.0,beer,Bouncing Everyone’s Excitement Rapidly
+214,gpt-oss-120b,0.8,1.0,beer,Bubbly Elixir Encouraging Revelry
+215,gpt-oss-120b,0.8,1.0,hash,Hilariously Amusing Stories Happen
+216,gpt-oss-120b,0.8,1.0,hash,Hilarious Ants Skate Home
+217,gpt-oss-120b,0.8,1.0,hash,Hilariously Awesome Snack Happens.
+218,gpt-oss-120b,0.8,1.0,hash,Hilariously Awkward Squirrels Hover
+219,gpt-oss-120b,0.8,1.0,hash,Hilariously Awkward Squirrels Hype
+220,gpt-oss-120b,0.8,1.0,drunk,Daringly Rambunctious Undercover Nighttime Keg‑fest
+221,gpt-oss-120b,0.8,1.0,drunk,"D - Dancing  
+R - Randomly  
+U - Uncorking  
+N - Noisy  
+K - Karaoke"
+222,gpt-oss-120b,0.8,1.0,drunk,Dancing Rabbits Usually Nibble Kale
+223,gpt-oss-120b,0.8,1.0,drunk,"D—Dancing  
+R—Rambunctiously  
+U—Under  
+N—Neon  
+K—Karaoke."
+224,gpt-oss-120b,0.8,1.0,drunk,"Dancing Really Unpredictably, No Keg-needed"
+225,gpt-oss-120b,0.8,1.0,sister,"S – Sassy  
+I – Irreverent  
+S – Silly  
+T – Tongue‑in‑cheek  
+E – Energetic  
+R – Remarkable"
+226,gpt-oss-120b,0.8,1.0,sister,"Silly Iguanas Scream, Telling Everyone, “Raspberry!”"
+227,gpt-oss-120b,0.8,1.0,sister,Silly Iguanas Sing Tremendous Epic Rap
+228,gpt-oss-120b,0.8,1.0,sister,"Silly Iguanas Sing Tunes, Entertaining Rabbits."
+229,gpt-oss-120b,0.8,1.0,sister,"Silly Iguanas Steal Tacos, Eating Radishes"
+230,gpt-oss-120b,0.8,1.0,tomorrow,"TROLLING OINKS MAKING OUR REPTILES REJOICE, OBLIVIOUS WANDERERST H E R E   I S   N O   J U S T   A   D A Y   B U T   A   N I G H T   O F   W O N D E R
+
+(Note: This is the acronym for ""tomorrow"" as requested.)"
+231,gpt-oss-120b,0.8,1.0,tomorrow,"T O M O R R O W: Take One Massive Omelette, Relish, Repeat, Or Wait."
+232,gpt-oss-120b,0.8,1.0,tomorrow,"T O M O R R O W: Take Out My Old Rubber, Really Overcooked Waffles."
+233,gpt-oss-120b,0.8,1.0,tomorrow,"T O M O R R O W: Take One Margarita, Omit Regrets, Relish Oblivious Whimsy."
+234,gpt-oss-120b,0.8,1.0,tomorrow,"T O M O R R O W: Take One Margarita, Or Reboot, Relax, Or Whine."
+235,gpt-oss-120b,0.8,1.0,yesterday,Yodeling Elephants Silently Taped Every Rugged Dolphin’s Aquatic Yodel.
+236,gpt-oss-120b,0.8,1.0,yesterday,Y O U  G O T  T H E  E X T R A  S T R A N G E  D E L I C I O U S  Y O G A  R O L L  S H O N E.
+237,gpt-oss-120b,0.8,1.0,yesterday,"Y: You  
+E: Even  
+S: Said  
+T: That  
+E: Everyone  
+R: Really  
+D: Desired  
+A: A  
+Y: Yodeling  
+S: Session."
+238,gpt-oss-120b,0.8,1.0,yesterday,"Y - Yodeling  
+E - Elephants  
+S - Sip  
+T - Tea  
+E - Eagerly  
+R - While  
+D - Dancing  
+A - Amid  
+Y - Yawning  
+```"
+239,gpt-oss-120b,0.8,1.0,yesterday,"Yodeling Elephants Sipped Tea, Yawning, Eating Raspberry Donuts And Tasting Yogurt."
+240,gpt-oss-120b,1.2,0.25,beer,Bouncing Enthusiastic Elephants Roaring
+241,gpt-oss-120b,1.2,0.25,beer,Bouncing Enthusiastic Elephants Roaring
+242,gpt-oss-120b,1.2,0.25,beer,Bouncing Enthusiastic Elephants Roaring
+243,gpt-oss-120b,1.2,0.25,beer,Bouncing Eccentric Elephants Roaring
+244,gpt-oss-120b,1.2,0.25,beer,Bouncing Eccentric Elephants Roaring
+245,gpt-oss-120b,1.2,0.25,hash,Hilarious Aardvarks Scream Hysterically
+246,gpt-oss-120b,1.2,0.25,hash,Hilarious Aardvarks Scream Hysterically
+247,gpt-oss-120b,1.2,0.25,hash,Hilarious Aardvarks Scream Hysterically
+248,gpt-oss-120b,1.2,0.25,hash,Hilarious Aardvarks Scream Hysterically
+249,gpt-oss-120b,1.2,0.25,hash,Hilarious Aardvarks Scream Hysterically
+250,gpt-oss-120b,1.2,0.25,drunk,Dancing Rabbits Usually Nibble Kaleberries
+251,gpt-oss-120b,1.2,0.25,drunk,Dancing Rabbits Usually Nibble Kaleberries
+252,gpt-oss-120b,1.2,0.25,drunk,Dancing Rabbits Usually Nibble Kaleberries
+253,gpt-oss-120b,1.2,0.25,drunk,Dancing Rabbits Usually Nibble Kaleberries
+254,gpt-oss-120b,1.2,0.25,drunk,Dancing Rabbits Usually Nibble Kaleberries
+255,gpt-oss-120b,1.2,0.25,sister,"Silly Iguanas Sipping Tea, Eating Raspberry‑flavored ice‑cream, Totally!"
+256,gpt-oss-120b,1.2,0.25,sister,"Silly Iguanas Sipping Tea, Eating Raspberry‑flavored ice‑cream, Totally!"
+257,gpt-oss-120b,1.2,0.25,sister,"Silly Iguanas Sipping Tea, Eating Raspberry‑flavored ice‑cream, Totally!"
+258,gpt-oss-120b,1.2,0.25,sister,"Silly Iguanas Sipping Tea, Eating Raspberry‑flavored ice‑cream, Totally!"
+259,gpt-oss-120b,1.2,0.25,sister,"Silly Iguanas Sipping Tea, Eating Raspberry‑flavored ice‑cream, Totally!"
+260,gpt-oss-120b,1.2,0.25,tomorrow,"T O M O R R O W: Take One Massive Omelette, Relish Radiant Rinds, Or Whine."
+261,gpt-oss-120b,1.2,0.25,tomorrow,"T O M O R R O W: Take One Massive Omelette, Relish Radiant Rinds, Or Whine."
+262,gpt-oss-120b,1.2,0.25,tomorrow,"T O M O R R O W: Take One Massive Omelette, Relish Radiant Ribs, Or Whine."
+263,gpt-oss-120b,1.2,0.25,tomorrow,"T O M O R R O W: Take One Massive Omelette, Relish Ridiculously Overcooked Waffles."
+264,gpt-oss-120b,1.2,0.25,tomorrow,"T O M O R R O W: Take One Massive Omelette, Relish Ridiculously Overcooked Waffles."
+265,gpt-oss-120b,1.2,0.25,yesterday,"Yodeling Elephants Sing Tunes, Everyone Roars, Dancing Aardvarks Yodel"
+266,gpt-oss-120b,1.2,0.25,yesterday,"Yodeling Elephants Sing Tunes, Everyone Roars, Dancing Aardvarks Yodel"
+267,gpt-oss-120b,1.2,0.25,yesterday,"Yodeling Elephants Sing Tunes, Everyone Roars, Dancing Aardvarks Yodel"
+268,gpt-oss-120b,1.2,0.25,yesterday,"Yodeling Elephants Sing Tunes, Everyone Roars, Dancing Aardvarks Yodel"
+269,gpt-oss-120b,1.2,0.25,yesterday,"Yodeling Elephants Sing Tunes, Everyone Roars, Dancing Aardvarks Yodel"
+270,gpt-oss-120b,1.2,0.5,beer,Bubbly Elixir Elevating Revelry
+271,gpt-oss-120b,1.2,0.5,beer,"Bubbles Erupting, Everyone Revels"
+272,gpt-oss-120b,1.2,0.5,beer,Bouncing Elephants Enjoying Rumbling
+273,gpt-oss-120b,1.2,0.5,beer,Bouncing Elephants Enjoying Rumblings
+274,gpt-oss-120b,1.2,0.5,beer,Bubbly Elves Enjoying Rowdyness
+275,gpt-oss-120b,1.2,0.5,hash,Humans Absolutely Scream Hysterically
+276,gpt-oss-120b,1.2,0.5,hash,Hilariously Awkward Squirrels Hurl
+277,gpt-oss-120b,1.2,0.5,hash,Hilariously Awkward Squirrels Hurl
+278,gpt-oss-120b,1.2,0.5,hash,Hilarious Ants Sing Hysterically
+279,gpt-oss-120b,1.2,0.5,hash,Hilariously Awkward Squirrels Hurl
+280,gpt-oss-120b,1.2,0.5,drunk,Dancing Rabbits Usually Nibble Kale 🍸
+281,gpt-oss-120b,1.2,0.5,drunk,"Daringly
+Rambunctious
+Uninhibited
+Nonsensical
+Kegger"
+282,gpt-oss-120b,1.2,0.5,drunk,Dancing Rascally Unicorns Nibble Kaleidoscopic 🍸
+283,gpt-oss-120b,1.2,0.5,drunk,Dancing Rascals Unleash Nasty Karaoke
+284,gpt-oss-120b,1.2,0.5,drunk,Dancing Rabbits Usually Nibble Kaleberries
+285,gpt-oss-120b,1.2,0.5,sister,"Silly Iguanas Sipping Tea, Enjoying Relaxation."
+286,gpt-oss-120b,1.2,0.5,sister,"Sassy Iguana Sings Tacos, Erupting Raucously"
+287,gpt-oss-120b,1.2,0.5,sister,"Sassy Iguana Sings Tacos, Erupting Raucously"
+288,gpt-oss-120b,1.2,0.5,sister,"Sassy Iguanas Scream, Twerking, Eating Radishes"
+289,gpt-oss-120b,1.2,0.5,sister,"Sassy Iguana Sings Tacos, Erupting Raucously"
+290,gpt-oss-120b,1.2,0.5,tomorrow,"Take Off My Overly Ridiculous, Racy, Outrageous Waffles."
+291,gpt-oss-120b,1.2,0.5,tomorrow,"Taco obliviously marries octopus, riding raucous ogre waltz."
+292,gpt-oss-120b,1.2,0.5,tomorrow,"T O M O R R O W: Take One Margarita, Omit Regrets, Relax, Own Whatever."
+293,gpt-oss-120b,1.2,0.5,tomorrow,"Take Out Massive Oatmeal, Really Rude, Overly Wacky"
+294,gpt-oss-120b,1.2,0.5,tomorrow,Take Off My Overly Ridiculous Raccoons Obliterating Wi-Fi
+295,gpt-oss-120b,1.2,0.5,yesterday,"Yodeling Elephants Sipped Tequila, Enjoying Ridiculous Dance Amid Yawns"
+296,gpt-oss-120b,1.2,0.5,yesterday,"Yodeling Elephants Sing Tunes, Entertaining Rabbits, Dancing And Yawning."
+297,gpt-oss-120b,1.2,0.5,yesterday,"Y: Yodeling  
+E: Elephants  
+S: Sip  
+T: Tequila  
+E: While  
+R: Riding  
+D: Disco  
+A: Alpacas  
+Y: Yawning
+
+Y: Yodeling Elephants Sip Tequila While Riding Disco Alpacas Yawning."
+298,gpt-oss-120b,1.2,0.5,yesterday,"Yodeling Elephants Sing Tunes, Everyone Roars, Dancing Aardvarks Yodel."
+299,gpt-oss-120b,1.2,0.5,yesterday,"Y: You  
+E: Even  
+S: Said  
+T: That  
+E: Everyone  
+R: Really  
+D: Danced  
+A: After  
+Y: Yawning."
+300,gpt-oss-120b,1.2,0.75,beer,Bouncing Enthusiastic Elves Roaring
+301,gpt-oss-120b,1.2,0.75,beer,Bouncing Elephants Enjoyed Rumbling
+302,gpt-oss-120b,1.2,0.75,beer,Bouncing Energetic Enthusiasts Regularly
+303,gpt-oss-120b,1.2,0.75,beer,Bubbly Elves Enjoy Roaring
+304,gpt-oss-120b,1.2,0.75,beer,Bubbles Elevate Everyone’s Revelry
+305,gpt-oss-120b,1.2,0.75,hash,Hilariously Awkward Silly Hype
+306,gpt-oss-120b,1.2,0.75,hash,Hilariously Awkward Squirrels Hurl
+307,gpt-oss-120b,1.2,0.75,hash,Hilariously Awkward Squirrels Hurl
+308,gpt-oss-120b,1.2,0.75,hash,Hilariously Awkward Squirrels Hype
+309,gpt-oss-120b,1.2,0.75,hash,Hilariously Awkward Silly Humor
+310,gpt-oss-120b,1.2,0.75,drunk,Daringly Roaring Under Neon Kegs
+311,gpt-oss-120b,1.2,0.75,drunk,"D.R.U.N.K. – Definitely *Really* Uncorked, Not Kidding."
+312,gpt-oss-120b,1.2,0.75,drunk,"Daringly Reveling, Uninhibited, Nonsensical Keg-fests"
+313,gpt-oss-120b,1.2,0.75,drunk,"D - Daring  
+R - Revelry  
+U - Unhinged  
+N - Nonsense  
+K - Kegger"
+314,gpt-oss-120b,1.2,0.75,drunk,"D - Don't  
+R - Run  
+U - Under  
+N - Nasty  
+K - Karaoke"
+315,gpt-oss-120b,1.2,0.75,sister,"Sassy Iguanas Sashay Through Elegant, Risqué"
+316,gpt-oss-120b,1.2,0.75,sister,"Silly Individuals Sharing Tales, Enjoying Ridiculousness"
+317,gpt-oss-120b,1.2,0.75,sister,"Silly Iguanas Salsa Together, Eating Radishes"
+318,gpt-oss-120b,1.2,0.75,sister,Silly Inquisitive Sisters Totally Enjoy Rambunctiousness
+319,gpt-oss-120b,1.2,0.75,sister,"S - Supportive  
+I - Inspiring  
+S - Silly  
+T - Trustworthy  
+E - Energetic  
+R - Remarkable"
+320,gpt-oss-120b,1.2,0.75,tomorrow,TAKE OUT MY OLD RUBBER ROPES OR WORRY
+321,gpt-oss-120b,1.2,0.75,tomorrow,"Take Off, My Oaf, Run Rapidly Or Wait"
+322,gpt-oss-120b,1.2,0.75,tomorrow,"Take
+One
+Muffin,
+Or
+Raspberry
+Rage,
+On
+Willy‑Nilly
+
+( TOMORROW )"
+323,gpt-oss-120b,1.2,0.75,tomorrow,"Totally Overcooked Muffins Obliterate Regularly, Resulting Outrageous Waffles"
+324,gpt-oss-120b,1.2,0.75,tomorrow,"T O M O R R O W: Take One Margarita, Or Relax, Really? Or Wait..."
+325,gpt-oss-120b,1.2,0.75,yesterday,"Yelling Elephants Sipped Tequila, Enjoying Relaxed Dancing, And Yawning."
+326,gpt-oss-120b,1.2,0.75,yesterday,Yelling   Everyone   Silly   Tales   Even   Rabbits   Dance   After   Yodeling
+327,gpt-oss-120b,1.2,0.75,yesterday,Y O U N G   E L E P H A N T S   S T A N D   Y O U R   D O O R S   E V E R Y   R O U N D   T I M E   R E D.
+328,gpt-oss-120b,1.2,0.75,yesterday,"Y - Yawning  
+E - Everyone  
+S - Sips  
+T - Tea,  
+E - Eats  
+R - Raisins,  
+D - Delighting  
+A - All  
+Y - Yodelers."
+329,gpt-oss-120b,1.2,0.75,yesterday,"Y: You
+E: Ever
+S: Said
+T: That
+E: Everyone's
+R: Really
+D: Dazzling
+A: And
+Y: Yawns
+
+You Ever Said That Everyone's Really Dazzling And Yawns."
+330,gpt-oss-120b,1.2,1.0,beer,"Bouncing Everywhere, Escaping Responsibilities."
+331,gpt-oss-120b,1.2,1.0,beer,Bouncing Elephants Enjoyed Rumbling
+332,gpt-oss-120b,1.2,1.0,beer,Bouncing Eagerly Egos Rage.
+333,gpt-oss-120b,1.2,1.0,beer,Bouncing Elves Enjoying Rum‑laced bubbles
+334,gpt-oss-120b,1.2,1.0,beer,Bubbles Elevate Everyone’s Radiant moods
+335,gpt-oss-120b,1.2,1.0,hash,Hold All Silly Haters
+336,gpt-oss-120b,1.2,1.0,hash,Hilariously Awkward Sassy Humor
+337,gpt-oss-120b,1.2,1.0,hash,Hilariously Awkward Squirrels Huddle
+338,gpt-oss-120b,1.2,1.0,hash,Heavenly Apples Sizzle Hysterically
+339,gpt-oss-120b,1.2,1.0,hash,Hilariously Awkward Silly Humor
+340,gpt-oss-120b,1.2,1.0,drunk,"Deliberately Raising Unstable Nonsense, Kidding."
+341,gpt-oss-120b,1.2,1.0,drunk,Dancing Really Under Neon Karaoke
+342,gpt-oss-120b,1.2,1.0,drunk,"D—Don't
+R—Rattle
+U—Uncontrolled
+N—Nose
+K—Kiss
+
+Don't rattle uncontrolled nose kiss."
+343,gpt-oss-120b,1.2,1.0,drunk,"Dancing, Reckless Unicorns Need Kegshots."
+344,gpt-oss-120b,1.2,1.0,drunk,Dancing Recklessly Under Nighttime Kegs
+345,gpt-oss-120b,1.2,1.0,sister,Silly Iguanas Stole The Emerald Ring
+346,gpt-oss-120b,1.2,1.0,sister,"Silly Iguanas Sip Tea, Eat Radishes"
+347,gpt-oss-120b,1.2,1.0,sister,Silly Iguanas Salsa Twerking Eating Radishes
+348,gpt-oss-120b,1.2,1.0,sister,Silly Ideas Solve The Endless Realities.
+349,gpt-oss-120b,1.2,1.0,sister,Sassy Iguanas Scream “Turn‑Off Every Rude‑talk!”
+350,gpt-oss-120b,1.2,1.0,tomorrow,"T O M O R R O W  
+Tickle   Overgrown   Monkeys   Offering   Ribbit‑filled   Raves   Occasionally   Wobbling"
+351,gpt-oss-120b,1.2,1.0,tomorrow,"Totally Oblivious Monkeys Occupy Rooftops, Eating Raspberries On Wednesdays"
+352,gpt-oss-120b,1.2,1.0,tomorrow,"T: Take  
+O: One  
+M: Massive  
+O: Opportunity  
+R: Really  
+R: Repeating  
+O: Over  
+W: Wildly"
+353,gpt-oss-120b,1.2,1.0,tomorrow,"Tomorrow 
+Offers
+Marvelous
+Opportunities,
+Rising
+Rascal
+Over
+Waffles"
+354,gpt-oss-120b,1.2,1.0,tomorrow,"Tactical Optimists Mastering Opportunities, Racing Rapidly Over Waking Worlds"
+355,gpt-oss-120b,1.2,1.0,yesterday,"Young  
+Eagerly  
+Singing  
+Eternal  
+Tales,  
+Yesterday’s  
+Echoes  
+Radiate  
+Dreams."
+356,gpt-oss-120b,1.2,1.0,yesterday,"Y: You  
+E: Even  
+S: Said  
+T: That  
+E: Everyone's  
+R: Really  
+D: Drinking  
+A: Alcohol  
+Y: Yeah
+
+(Note: This forms a sentence: ""You even said that everyone's really drinking alcohol yeah."")"
+357,gpt-oss-120b,1.2,1.0,yesterday,"Y: You  
+E: Ever  
+S: Said  
+T: ""That's  
+E: Extremely  
+R: Ridiculous,""  
+D: Donning  
+A: A  
+Y: Yeti costume."
+358,gpt-oss-120b,1.2,1.0,yesterday,"Y: Yodeling  
+E: Elephants  
+S: Salsa‑dancing  
+T: Turtles  
+E: Eating  
+R: Rainbow  
+D: Donuts  
+A: While  
+Y: Yawning
+
+(Note: ""Yodeling Elephants Salsa‑dancing Turtles Eating Rainbow Donuts While Yawning."")"
+359,gpt-oss-120b,1.2,1.0,yesterday,"Y E S T E R D A Y → Your Eager Siblings Try Excellent Riddles, Don’t Argue Yodeling."
