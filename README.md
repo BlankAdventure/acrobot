@@ -94,6 +94,16 @@ class Custom(Model):
     def generate_response(self, prompt:str) -> str:            
         ...
 ```
+A special `@catch` decorator is provided to enable relaying a message to the chat should a specified exception occur. For example, if `AnException` occurs, it will be caught, logged, and "hey you broke something" will be posted to the chat. The decorator can be applied multiple times. 
+
+```python
+    @catch(ADifferentException, "hey you broke something else!")
+    @catch(AnException, "hey you broke something!")
+    def generate_response(self, prompt:str) -> str:            
+        ...
+```
+
+
 To invoke your model, add a custom configuration block to `config.yaml`:
 ```yaml
 model:
@@ -108,12 +118,15 @@ custom:
 When acrobat is started, it will simply pass any fields listed under `custom` (in this case `x` and `y`) into your model as kwargs.
 
 
+
+
+
 ### Roadmap
 
 (in no particular order)
 
 - [ ] Use protocol instead of inheritance for model plug-in system
-- [ ] Move exception-handling to async event loop (prevent crashes; provide in-chat feedback)
+- [x] Move exception-handling to async event loop (prevent crashes; provide in-chat feedback)
 - [ ] Streamline app configuration handling:
     - [ ] Provide API keys via command line, config file, or environment variables
     - [ ] Consolidate settings in one location
@@ -121,6 +134,7 @@ When acrobat is started, it will simply pass any fields listed under `custom` (i
     - [ ] Log token usage / total API calls
     - [ ] Log to file or other data sink
 - [ ] Implement LLM 'referee' to review acronym quality
+- [ ] Use `tenacity` for retry logic
     
 
 
