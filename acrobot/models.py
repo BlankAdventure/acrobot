@@ -208,7 +208,13 @@ def get_acro(
 
 
 def build_model(config: str | dict[str, Any]) -> Model:
-
+    """
+    Builds a Model instance. If a string is provided, it will interpret this
+    as a class name and instantiate it directly. Otherwise, to provide configuration
+    options, a dictionary can be supplied, whose keys will be unpacked into the
+    class specified by the 'provider' field.
+    """
+    
     if isinstance(config, str):
         config = {"provider": config}
 
