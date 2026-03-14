@@ -124,7 +124,7 @@ When acrobat is started, it will simply pass any fields listed under `custom` (i
 ### Roadmap
 
 (in no particular order)
-
+- [ ] Allow in-chat model switching (high priority)
 - [ ] Use protocol instead of inheritance for model plug-in system
 - [x] Move exception-handling to async event loop (prevent crashes; provide in-chat feedback)
 - [ ] Streamline app configuration handling:
