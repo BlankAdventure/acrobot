@@ -35,5 +35,5 @@ config1: #use default settings
 config2: #gpt-oss alternative
     provider: CerebrasModel
     model_name: qwen-3-235b-a22b-instruct-2507
-    reasoning_effort: medium    
+    reasoning_effort: null
     
