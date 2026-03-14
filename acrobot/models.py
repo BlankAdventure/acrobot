@@ -239,6 +239,13 @@ def build_model(config: str | dict[str, Any]) -> Model:
 if __name__ == "__main__":
     setup_logging("INFO")
     logger.info("running standalone")
+
+    config = {
+    'provider': 'CerebrasModel',
+    'model_name': 'qwen-3-235b-a22b-instruct-2507',
+    'reasoning_effort': None
+    }
+
     
-    llm = build_model("GeminiModel")
+    llm = build_model(config)
     print(get_acro_safe(llm, "beer", retries=0))
