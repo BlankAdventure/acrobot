@@ -135,6 +135,7 @@ When acrobat is started, it will simply pass any fields listed under `custom` (i
     - [ ] Log to file or other data sink
 - [ ] Implement LLM 'referee' to review acronym quality
 - [ ] Use `tenacity` for retry logic
+- [ ] Add CLI entry point for acronym generationg (useful for sanity checking)
     
 
 
