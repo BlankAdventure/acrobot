@@ -247,16 +247,7 @@ def build_model(config: str | dict[str, Any]) -> Model:
 
 if __name__ == "__main__":
     setup_logging("INFO")
-    logger.info("running standalone")
- 
-    config = {
-   'provider': 'GeminiModel',
-   'model_name': 'gemini-3-flash-preview',
-   'thinking_level': "low",
-   'thinking_budget': None
-   
-   }
-    
- 
+    logger.info("running standalone") 
+    config = {"provider": "GeminiModel", 'thinking_level': None, "thinking_budget": 0 }
     llm = build_model(config)
     print(get_acro_safe(llm, "sister", retries=0))
