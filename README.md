@@ -30,8 +30,8 @@ Acrobot can be run in either polling mode or webhook mode, described below.
 
 In polling mode, the code runs a loop polling the telegram API periodically for new chat updates. It is straightforward to launch, in one of two ways:
 
-1. If installed, simply run the CLI command: `acrobot`
-2. Otherwise, navigate to `acrobot\acrobot` and run: `python -m runner.py`
+1. If installed, simply run the CLI command: `acrobot polling`
+2. Otherwise, navigate to `acrobot\acrobot` and run: `python -m runner.py polling`
 
 **Webhook Mode**
 
@@ -43,6 +43,15 @@ In webhhok mode, a running http server is required to handle `POST` requests ori
 If running locally, ngrok can be used to obtain an https forwarding url. In this case, you would substitute WEBHOOK_URL for the provided ngrok url and PORT with your chosen port. IP_ADDR can (usually) be set to 0.0.0.0.
 
 Note that webhook mode is preferred over polling as it only induces network traffic when updates are actually available.
+
+**CLI/Test Mode**
+
+You can generate one-off acronyms directly from the command line as follows (telegram not needed):
+
+`acrobot test "word" [config_name]`
+
+where `config_name` can be any model config block specified in the `config.yaml` file. If unset, it defaults to the use_config block. This can be useful for quick tests when trying new models/settings. 
+
 
 ### Usage
 
@@ -66,7 +75,7 @@ Note that the `@acro` prefix can be removed if its the only bot in the channel.
 
 ### Settings / Configuration
 
-A number of basic settings can be modified by the user via the `/acrobot/acrobot/config.yaml` file. See the file for details.
+A number of basic settings can be modified by the user via the `/acrobot/acrobot/config.yaml' file. They are largely self-explanatory - see the file for details.
 
 ### Models
 
