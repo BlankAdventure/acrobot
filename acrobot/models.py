@@ -65,15 +65,18 @@ class Model(ABC):
 class GeminiModel(Model):
     """Use this class for configuring Gemini models"""
 
-    thinking_budget: int = 0
-    temperature: float = 1.1
+    thinking_budget: int|None = 0
+    thinking_level: Literal["minimal", "low", "medium", "high"] = "low"
+    temperature: float = 1.5
     top_p: float = 0.95
     model_name: str = "gemini-2.5-flash"
     api_key: str | None = None
 
     def __post_init__(self):
         thinking_config = types.ThinkingConfig(
-            thinking_budget=self.thinking_budget, include_thoughts=False
+            thinking_budget=self.thinking_budget, 
+            thinking_level=self.thinking_level,
+            include_thoughts=False            
         )
         func_calling = types.AutomaticFunctionCallingConfig(disable=True)
         self.config = types.GenerateContentConfig(
@@ -245,6 +248,15 @@ def build_model(config: str | dict[str, Any]) -> Model:
 if __name__ == "__main__":
     setup_logging("INFO")
     logger.info("running standalone")
+ 
+    config = {
+   'provider': 'GeminiModel',
+   'model_name': 'gemini-3-flash-preview',
+   'thinking_level': "low",
+   'thinking_budget': None
+   
+   }
     
-    llm = build_model("GeminiModel")
-    print(get_acro_safe(llm, "beer", retries=0))
+ 
+    llm = build_model(config)
+    print(get_acro_safe(llm, "sister", retries=0))
