@@ -4,10 +4,10 @@ acrobot:
     max_word_length: 12 # Maximum allowed length of word to acronymize.
     throttle_interval: 5 # Delay in seconds between subsequent API requests (use to limit spamming).
     keywords: # These keywords will auto-trigger an acronym response.
+        - weekend
         - beer
-        - sister
-        - drunk
-        - hash
+        - party
+        - tonight
 prompt:
     system: |
         You are participating in a chat group with a bunch of friends. You like to post funny, creative acronyms inspired by the conversation.
@@ -29,11 +29,24 @@ logging:
 # ***** List of model configurations *****
 config0: #use default settings
     provider: CerebrasModel
-config1: #use default settings
+config1: 
     provider: GeminiModel
-config2: # use custom settings
+    thinking_budget: 0 # No thinking!
+    thinking_level: ~ # Must turn off thinking_level    
+config2:
     provider: GeminiModel        
-    thinking_budget: 2000 #num tokens
+    thinking_budget: -1 # use dynamic thinking budget
+    thinking_level: ~ # Must turn off thinking_level
     temperature: 0.8
     top_p: 0.65
+config3:
+    provider: GeminiModel
+    model_name: gemini-3-flash-preview
+    thinking_budget: ~ # Must turn off thinking_budget
+config4:
+    provider: GeminiModel
+    model_name: gemini-3.1-flash-lite-preview
+    thinking_budget: ~ # Must turn off thinking_budget
+    thinking_level: "medium" 
+
     

@@ -66,7 +66,7 @@ class GeminiModel(Model):
     """Use this class for configuring Gemini models"""
 
     thinking_budget: int|None = 0
-    thinking_level: Literal["minimal", "low", "medium", "high"] = "low"
+    thinking_level: None|Literal["minimal", "low", "medium", "high"] = "low"
     temperature: float = 1.5
     top_p: float = 0.95
     model_name: str = "gemini-2.5-flash"
