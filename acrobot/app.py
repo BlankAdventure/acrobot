@@ -75,6 +75,9 @@ class Acrobot:
             self.telegram_app.add_handler(
                 CommandHandler("del_keywords", self.command_del_keywords)
             )
+            self.telegram_app.add_handler(
+                CommandHandler("set", self.command_set)
+            )            
             self.telegram_app.add_handler(CommandHandler("acro", self.command_acro))
             self.telegram_app.add_handler(
                 MessageHandler(filters.TEXT & ~filters.COMMAND, self._handle_message)
@@ -273,6 +276,25 @@ class Acrobot:
                 await self.queue.put(lambda: self._acro_task(update, word))
             else:
                 await update.message.reply_text("Not allowed boyo!", do_quote=True)
+                
+    async def command_set(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+        """
+        Updates the LLM model with a new config.
+        usage: /set config_name
+        config_name must be a valid config block listed config.yaml.
+        """
+        
+        if update.message:
+            if context.args:
+                try:
+                    new_config = getattr(self.settings, context.args[0])
+                except:
+                    await update.message.reply_text(f"Could not find {context.args[0]}")                    
+                else:
+                    self.llm = build_model(new_config)
+                    await update.message.reply_text("Model config updated.")
+                    logger.info(f"llm config set to {context.args[0]}")
+                
 
     # === MESSAGE HANDLER ===
     # General-purpose chat message handler.
