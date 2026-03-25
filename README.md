@@ -69,6 +69,7 @@ Acronym generation can be triggered in three ways:
 | `@acro /acro word` | Generate an acronym (technically an expansion) for the `word`. |
 | `@acro /add_keyword keyword1 keyword2 keyword3 ...` | Add keywords to the trigger list. |
 | `@acro /del_keyword keyword1 keyword2 keyword3 ...` | Remove keywords from the trigger list. |
+| `@acro /set config_name` | Set the LLM model to use config_name, a config block in `config.yaml file`. This command can be useful for experimenting with different settings, or swapping models if you (e.g.,) hit a usage limit.|
 | `@acro /add_message username add this message!` | Add a fake message to the chat context. This can be fun for secretly steering the bot's responses in a particular direction. |
 
 Note that the `@acro` prefix can be removed if its the only bot in the channel.
@@ -133,9 +134,8 @@ When acrobat is started, it will simply pass any fields listed under `custom` (i
 ### Roadmap
 
 (in no particular order)
-- [ ] Allow in-chat model switching (high priority)
+
 - [ ] Use protocol instead of inheritance for model plug-in system
-- [x] Move exception-handling to async event loop (prevent crashes; provide in-chat feedback)
 - [ ] Streamline app configuration handling:
     - [ ] Provide API keys via command line, config file, or environment variables
     - [ ] Consolidate settings in one location
@@ -144,8 +144,9 @@ When acrobat is started, it will simply pass any fields listed under `custom` (i
     - [ ] Log to file or other data sink
 - [ ] Implement LLM 'referee' to review acronym quality
 - [ ] Use `tenacity` for retry logic
-- [x] Add CLI entry point for acronym generation (useful for sanity checking)
-    
+- [x] Move exception-handling to async event loop (prevent crashes; provide in-chat feedback)
+- [x] Add CLI entry point for acronym generation (useful for sanity checking) (needs testing)
+- [x] Allow in-chat model switching (high priority) (needs testing)
 
 
 
