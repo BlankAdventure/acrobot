@@ -145,8 +145,8 @@ When acrobat is started, it will simply pass any fields listed under `custom` (i
 - [ ] Implement LLM 'referee' to review acronym quality
 - [ ] Use `tenacity` for retry logic
 - [x] Move exception-handling to async event loop (prevent crashes; provide in-chat feedback)
-- [x] Add CLI entry point for acronym generation (useful for sanity checking) (needs testing)
-- [x] Allow in-chat model switching (high priority) (needs testing)
+- [x] Add CLI entry point for acronym generation (useful for sanity checking)
+- [x] Allow in-chat model switching 
 
 
 
