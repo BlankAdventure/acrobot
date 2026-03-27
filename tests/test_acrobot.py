@@ -84,6 +84,25 @@ async def test_add_message_command_updates_history(dummy_bot, mock_update):
     )
 
 
+async def test_command_set(dummy_bot, mock_update):
+    context = MagicMock()
+    
+    # Test invalid config choice
+    context.args = ['invalid_choice']
+    await dummy_bot.command_set(mock_update, context)
+    mock_update.message.reply_text.assert_awaited_once_with("Could not find invalid_choice")
+    
+    # Test invalid model name
+    context.args = ['config_1']
+    await dummy_bot.command_set(mock_update, context)
+    mock_update.message.reply_text.assert_awaited_with("Invalid setting in config_1")
+    
+    # Test valid path
+    context.args = ['config_2']
+    await dummy_bot.command_set(mock_update, context)
+    mock_update.message.reply_text.assert_awaited_with("Model config updated.")
+
+    
 # Checks that under certain failure conditions, soft fail ensures that erros
 # are all caught and handled.
 @patch("conftest.api_call")

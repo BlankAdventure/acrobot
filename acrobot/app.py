@@ -288,12 +288,18 @@ class Acrobot:
             if context.args:
                 try:
                     new_config = getattr(self.settings, context.args[0])
-                except:
+                except AttributeError as e:
+                    logger.error(f"command_set failed: {e}")
                     await update.message.reply_text(f"Could not find {context.args[0]}")                    
                 else:
-                    self.llm = build_model(new_config)
-                    await update.message.reply_text("Model config updated.")
-                    logger.info(f"llm config set to {context.args[0]}")
+                    try:
+                        self.llm = build_model(new_config)
+                    except KeyError as e:
+                        logger.error(f"command_set failed: {e}")
+                        await update.message.reply_text(f"Invalid setting in {context.args[0]}")
+                    else:
+                        await update.message.reply_text("Model config updated.")
+                        logger.info(f"llm config set to {context.args[0]}")
                 
 
     # === MESSAGE HANDLER ===
