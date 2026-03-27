@@ -40,6 +40,8 @@ def default_config():
         "model": {"retries": 1, "use_config": "testconf"},
         "logging": {"level": "INFO"},
         "testconf": {"provider": "Dummy"},
+        "config_1": {"provider": "Bla"},
+        "config_2": {"provider": "Dummy"}
     }
     return config
 

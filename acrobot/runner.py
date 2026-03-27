@@ -4,7 +4,7 @@ Created on Mon Sep 15 23:05:44 2025
 
 @author: BlankAdventure
 """
-
+import sys
 import argparse
 import logging
 
@@ -14,14 +14,14 @@ from acrobot.config import setup_logging
 logger = logging.getLogger(__name__)
 setup_logging("INFO")
 
-def single_word(value: str):
+def single_word(value: str) -> str:
     if " " in value:
         raise argparse.ArgumentTypeError(
             "value must be a single word (no spaces)"
         )
     return value
 
-def cli(word: str, config_name: str):
+def cli(word: str, config_name: str) -> None:
     
     from acrobot.config import get_settings
     from acrobot.models import get_acro_safe, build_model
@@ -59,7 +59,7 @@ def run_polling() -> None:
     bot.start(True)  # this will block
 
 
-def main():
+def main(argv=None):
     
     parser = argparse.ArgumentParser(prog="acrobot")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -80,7 +80,7 @@ def main():
     test.add_argument("word", type=single_word, help='A single word to acronymize')
     test.add_argument("config", nargs="?", help="optional config from config.yaml")    
 
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     if args.command == "webhook":
         run_webhook(args.w, args.a, args.p)
@@ -91,3 +91,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+    #sys.exit(main())
+    #sys.exit(main(sys.argv[1:]))

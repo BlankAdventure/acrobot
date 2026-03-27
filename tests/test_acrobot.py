@@ -84,6 +84,19 @@ async def test_add_message_command_updates_history(dummy_bot, mock_update):
     )
 
 
+@pytest.mark.parametrize("config_name, chat_message", [
+                             ("invalid_choice", "Could not find invalid_choice"),
+                             ("config_1", "Invalid setting in config_1"),
+                             ("config_2", "Model config updated."),
+                         ])
+async def test_command_set(dummy_bot, mock_update, config_name, chat_message):
+    context = MagicMock()
+    context.args = [config_name]
+    await dummy_bot.command_set(mock_update, context)
+    mock_update.message.reply_text.assert_awaited_once_with(chat_message)
+    
+
+    
 # Checks that under certain failure conditions, soft fail ensures that erros
 # are all caught and handled.
 @patch("conftest.api_call")
