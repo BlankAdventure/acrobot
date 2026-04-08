@@ -135,6 +135,7 @@ When acrobat is started, it will simply pass any fields listed under `custom` (i
 
 (in no particular order)
 
+- [ ] Option to auto-swap models in case of API errors (time-outs, rate limits, etc)
 - [ ] Use protocol instead of inheritance for model plug-in system
 - [ ] Streamline app configuration handling:
     - [ ] Provide API keys via command line, config file, or environment variables
