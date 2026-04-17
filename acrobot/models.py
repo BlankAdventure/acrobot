@@ -65,15 +65,18 @@ class Model(ABC):
 class GeminiModel(Model):
     """Use this class for configuring Gemini models"""
 
-    thinking_budget: int = 0
-    temperature: float = 1.1
+    thinking_budget: int|None = 0
+    thinking_level: None|Literal["minimal", "low", "medium", "high"] = "low"
+    temperature: float = 1.5
     top_p: float = 0.95
     model_name: str = "gemini-2.5-flash"
     api_key: str | None = None
 
     def __post_init__(self):
         thinking_config = types.ThinkingConfig(
-            thinking_budget=self.thinking_budget, include_thoughts=False
+            thinking_budget=self.thinking_budget, 
+            thinking_level=self.thinking_level,
+            include_thoughts=False            
         )
         func_calling = types.AutomaticFunctionCallingConfig(disable=True)
         self.config = types.GenerateContentConfig(
@@ -208,7 +211,13 @@ def get_acro(
 
 
 def build_model(config: str | dict[str, Any]) -> Model:
-
+    """
+    Builds a Model instance. If a string is provided, it will interpret this
+    as a class name and instantiate it directly. Otherwise, to provide configuration
+    options, a dictionary can be supplied, whose keys will be unpacked into the
+    class specified by the 'provider' field.
+    """
+    
     if isinstance(config, str):
         config = {"provider": config}
 
@@ -238,14 +247,7 @@ def build_model(config: str | dict[str, Any]) -> Model:
 
 if __name__ == "__main__":
     setup_logging("INFO")
-    logger.info("running standalone")
-
-    config = {
-    'provider': 'CerebrasModel',
-    'model_name': 'qwen-3-235b-a22b-instruct-2507',
-    'reasoning_effort': None
-    }
-
-    
+    logger.info("running standalone") 
+    config = {"provider": "GeminiModel", 'thinking_level': None, "thinking_budget": 0 }
     llm = build_model(config)
-    print(get_acro_safe(llm, "beer", retries=0))
+    print(get_acro_safe(llm, "sister", retries=0))
