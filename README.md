@@ -56,7 +56,7 @@ Quick summary of CLI options:
 
 | Command | Description |
 | --- | --- |
-| `acrobot polling` | Launch Acrobot in pollig mode. |
+| `acrobot polling` | Launch Acrobot in polling mode. |
 | `acrobot webhook -p <PORT> -a [IP_ADDR] -w [WEBHOOK_URL]` | Launch Acrobot in webhook mode. |
 | `acrobot test "word" [config_name]` | Generate one-off acronym for "word". |
 
