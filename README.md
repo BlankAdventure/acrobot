@@ -37,8 +37,8 @@ In polling mode, the code runs a loop polling the telegram API periodically for 
 
 In webhhok mode, a running http server is required to handle `POST` requests originating from the telegram server. Acrobot will handle launching a uvicorn server instance when this mode is invoked. Telegram must be provided with a *webhook address*, that is, an https url to send chat updates to. 
 
-1. If installed, run the CLI command: `acrobot webhook -a <IP_ADDR> -p <PORT> -w <WEBHOOK_URL>`
-2. Otherwise, navigate to `acrobot\acrobot` and run: `python -m runner.py webhook -a <IP_ADDR> -p <PORT> -w <WEBHOOK_URL>`
+1. If installed, run the CLI command: `acrobot webhook -p <PORT> -a [IP_ADDR] -w [WEBHOOK_URL]`
+2. Otherwise, navigate to `acrobot\acrobot` and run: `python -m runner.py webhook -p <PORT> -a [IP_ADDR] -w [WEBHOOK_URL]`
 
 If running locally, ngrok can be used to obtain an https forwarding url. In this case, you would substitute WEBHOOK_URL for the provided ngrok url and PORT with your chosen port. IP_ADDR can (usually) be set to 0.0.0.0.
 
@@ -51,6 +51,14 @@ You can generate one-off acronyms directly from the command line, without telegr
 `acrobot test "word" [config_name]`
 
 where `config_name` can be any model config block specified in the `config.yaml` file. If unset, it defaults to the use_config block. This can be useful for quick tests when trying new models/settings. 
+
+Quick summary of CLI options:
+
+| Command | Description |
+| --- | --- |
+| `acrobot polling` | Launch Acrobot in pollig mode. |
+| `acrobot webhook -p <PORT> -a [IP_ADDR] -w [WEBHOOK_URL]` | Launch Acrobot in webhook mode. |
+| `acrobot test "word" [config_name]` | Generate one-off acronym for "word". |
 
 
 ### Usage
