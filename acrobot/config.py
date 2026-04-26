@@ -4,15 +4,27 @@ Created on Sun Dec 21 14:48:23 2025
 
 @author: BlankAdventure
 """
-
+import os
 import logging
 import pathlib
+import requests
+from urllib.parse import urlparse
 from typing import Any, Dict, Self
 
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-path = pathlib.Path(__file__).parent / "config.yaml"
+logger = logging.getLogger(__name__)
+
+def is_url(path_or_url: str) -> bool:
+    """ Determines if path_or_url is a local file path or a URL """
+    try:
+        result = urlparse(path_or_url)        
+        if result.netloc:
+            return True
+        return False        
+    except AttributeError:
+        return False
 
 
 class Acrobot(BaseModel):
@@ -73,22 +85,42 @@ class Config(BaseModel):
         return self
 
 
-def load_yaml_config(path: pathlib.Path) -> dict:
-    """Returns YAML config"""
-    try:
-        return yaml.safe_load(path.read_text())
-    except FileNotFoundError as error:
-        raise FileNotFoundError(error, "Could not load yaml config file.") from error
+def load_yaml_local(path: pathlib.Path) -> dict:
+    """Returns YAML config from a file"""
+    
+    return yaml.safe_load(path.read_text())
+
+def load_yaml_url(url: str) -> dict:
+    """Returns YAML config from a URL"""
+    
+    response = requests.get(url)
+    response.raise_for_status()
+    return yaml.safe_load(response.content)
 
 
-def get_settings() -> Config:
-    settings = Config(**load_yaml_config(path))
+
+def load_yaml() -> dict:
+    path_or_url = os.environ.get('ACROBOT_CONFIG_YAML', "./config.yaml" )
+    
+    if is_url(path_or_url):        
+        logger.info(f"loading yaml from url: {path_or_url}")        
+        yaml_content = load_yaml_url(path_or_url)
+    else:
+        logger.info(f"loading yaml from file: {path_or_url}")        
+        yaml_content = load_yaml_local(pathlib.Path(path_or_url))
+    return yaml_content
+
+def get_settings() -> Config:    
+    
+    yaml_content = load_yaml()    
+    settings = Config(**yaml_content)   
+    
     return settings
 
 def get_prompt() -> Prompt:
     """"Returns only the prompt portion of the config file"""
     
-    all_settings = load_yaml_config(path)    
+    all_settings = load_yaml()
     prompt = Prompt(**all_settings['prompt'])
     return prompt
 
@@ -111,3 +143,8 @@ def setup_logging(level: str) -> None:
 
     logging.getLogger("httpx").setLevel(logging.WARNING)
     logging.getLogger("cerebras").setLevel(logging.WARNING)
+
+if __name__ == "__main__":
+    setup_logging("INFO")
+    logger.info("running standalone") 
+    print ( get_settings() )
