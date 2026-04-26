@@ -101,7 +101,7 @@ def load_yaml_url(url: str) -> dict:
 
 #todo: add testing
 def load_yaml() -> dict:
-    path_or_url = os.environ.get('ACROBOT_CONFIG_YAML', pathlib.Path(__file__).parent / "config.yaml" )
+    path_or_url = os.environ.get('ACROBOT_CONFIG_YAML', str(pathlib.Path(__file__).parent / "config.yaml") )
     
     if is_url(path_or_url):        
         logger.info(f"loading yaml from url: {path_or_url}")        
