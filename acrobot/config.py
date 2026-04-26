@@ -16,6 +16,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 logger = logging.getLogger(__name__)
 
+#todo: add testing
 def is_url(path_or_url: str) -> bool:
     """ Determines if path_or_url is a local file path or a URL """
     try:
@@ -84,12 +85,13 @@ class Config(BaseModel):
             )
         return self
 
-
+#todo: add testing
 def load_yaml_local(path: pathlib.Path) -> dict:
     """Returns YAML config from a file"""
     
     return yaml.safe_load(path.read_text())
 
+#todo: add testing
 def load_yaml_url(url: str) -> dict:
     """Returns YAML config from a URL"""
     
@@ -97,10 +99,9 @@ def load_yaml_url(url: str) -> dict:
     response.raise_for_status()
     return yaml.safe_load(response.content)
 
-
-
+#todo: add testing
 def load_yaml() -> dict:
-    path_or_url = os.environ.get('ACROBOT_CONFIG_YAML', "./config.yaml" )
+    path_or_url = os.environ.get('ACROBOT_CONFIG_YAML', pathlib.Path(__file__).parent / "config.yaml" )
     
     if is_url(path_or_url):        
         logger.info(f"loading yaml from url: {path_or_url}")        
@@ -111,10 +112,10 @@ def load_yaml() -> dict:
     return yaml_content
 
 def get_settings() -> Config:    
+    """ Returns validated configuration settings """
     
     yaml_content = load_yaml()    
-    settings = Config(**yaml_content)   
-    
+    settings = Config(**yaml_content)       
     return settings
 
 def get_prompt() -> Prompt:
