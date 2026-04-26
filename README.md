@@ -84,7 +84,7 @@ Note that the `@acro` prefix can be removed if its the only bot in the channel.
 
 ### Settings / Configuration
 
-A number of basic settings can be modified by the user via the `/acrobot/acrobot/config.yaml' file. They are largely self-explanatory - see the file for details.
+A number of basic settings can be modified by the user via the `/acrobot/acrobot/config.yaml` file. They are largely self-explanatory - see the file for details. Additionally, the optional environment variable `ACROBOT_CONFIG_YAML` may be used to point to a custom file. A file path or URL may be specified.
 
 ### Models
 
@@ -143,6 +143,7 @@ When acrobat is started, it will simply pass any fields listed under `custom` (i
 
 (in no particular order)
 
+- [ ] Add testing for config.py
 - [ ] Option to auto-swap models in case of API errors (time-outs, rate limits, etc)
 - [ ] Use protocol instead of inheritance for model plug-in system
 - [ ] Streamline app configuration handling:
@@ -155,7 +156,8 @@ When acrobat is started, it will simply pass any fields listed under `custom` (i
 - [ ] Use `tenacity` for retry logic
 - [x] Move exception-handling to async event loop (prevent crashes; provide in-chat feedback)
 - [x] Add CLI entry point for acronym generation (useful for sanity checking)
-- [x] Allow in-chat model switching 
+- [x] Allow in-chat model switching
+- [x] Specify optional path/url for alternate yaml file via environment variable
 
 
 
