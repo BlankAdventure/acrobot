@@ -8,24 +8,22 @@ import os
 import logging
 import pathlib
 import requests
-from urllib.parse import urlparse
 from typing import Any, Dict, Self
 
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+DEFAULT_PATH = str(pathlib.Path(__file__).parent / "config.yaml")
+
 logger = logging.getLogger(__name__)
 
-#todo: add testing
+
 def is_url(path_or_url: str) -> bool:
     """ Determines if path_or_url is a local file path or a URL """
-    try:
-        result = urlparse(path_or_url)        
-        if result.netloc:
-            return True
-        return False        
-    except AttributeError:
-        return False
+    
+    if path_or_url.startswith(('http://', 'https://')):
+        return True
+    return False
 
 
 class Acrobot(BaseModel):
@@ -85,36 +83,37 @@ class Config(BaseModel):
             )
         return self
 
-#todo: add testing
-def load_yaml_local(path: pathlib.Path) -> dict:
-    """Returns YAML config from a file"""
-    
-    return yaml.safe_load(path.read_text())
 
-#todo: add testing
+def load_yaml_local(path: str) -> dict:
+    """Returns YAML config from a file"""
+    return yaml.safe_load(pathlib.Path(path).read_text())
+
+
+
 def load_yaml_url(url: str) -> dict:
     """Returns YAML config from a URL"""
     
     response = requests.get(url)
     response.raise_for_status()
-    return yaml.safe_load(response.content)
+    return yaml.safe_load(response.text)
 
-#todo: add testing
+
 def load_yaml() -> dict:
-    path_or_url = os.environ.get('ACROBOT_CONFIG_YAML', str(pathlib.Path(__file__).parent / "config.yaml") )
-    
+    path_or_url = os.environ.get('ACROBOT_CONFIG_YAML', DEFAULT_PATH )
+    print(path_or_url)
     if is_url(path_or_url):        
         logger.info(f"loading yaml from url: {path_or_url}")        
         yaml_content = load_yaml_url(path_or_url)
     else:
         logger.info(f"loading yaml from file: {path_or_url}")        
-        yaml_content = load_yaml_local(pathlib.Path(path_or_url))
+        yaml_content = load_yaml_local(path_or_url)
     return yaml_content
 
 def get_settings() -> Config:    
     """ Returns validated configuration settings """
     
     yaml_content = load_yaml()    
+    print(yaml_content)
     settings = Config(**yaml_content)       
     return settings
 
