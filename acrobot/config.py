@@ -17,7 +17,6 @@ DEFAULT_PATH = str(pathlib.Path(__file__).parent / "config.yaml")
 
 logger = logging.getLogger(__name__)
 
-
 def is_url(path_or_url: str) -> bool:
     """ Determines if path_or_url is a local file path or a URL """
     
@@ -99,8 +98,7 @@ def load_yaml_url(url: str) -> dict:
 
 
 def load_yaml() -> dict:
-    path_or_url = os.environ.get('ACROBOT_CONFIG_YAML', DEFAULT_PATH )
-    print(path_or_url)
+    path_or_url = os.environ.get('ACROBOT_CONFIG_YAML', DEFAULT_PATH )    
     if is_url(path_or_url):        
         logger.info(f"loading yaml from url: {path_or_url}")        
         yaml_content = load_yaml_url(path_or_url)
@@ -112,8 +110,7 @@ def load_yaml() -> dict:
 def get_settings() -> Config:    
     """ Returns validated configuration settings """
     
-    yaml_content = load_yaml()    
-    print(yaml_content)
+    yaml_content = load_yaml()        
     settings = Config(**yaml_content)       
     return settings
 
