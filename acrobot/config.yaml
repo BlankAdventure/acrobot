@@ -22,18 +22,36 @@ prompt:
 
         Now generate an acronym for the word: "{word}". Reply with only the acronym.
 model:
-    use_config: config2 # This must match a configuration block below.
-    retries: 1 # Number of LLM API retries in case of failure.
+    use_config: config3 # This must match a configuration block below.
+    retries: 2 # Number of LLM API retries in case of failure.
 logging:
     level: INFO
 # ***** List of model configurations *****
 config0: #use default settings
-    provider: CerebrasModel
-    reasoning_effort: medium
-config1: #use default settings
     provider: GeminiModel
-config2: #gpt-oss alternative
+    thinking_budget: 0 # Turn off thinking
+config1: 
+    provider: GeminiModel
+    thinking_budget: -1 # Default thinking
+config2:
+    provider: GeminiModel        
+    thinking_budget: 0 # Turn off thinking
+    temperature: 0.8
+    top_p: 0.65
+config3:
+    provider: GeminiModel
+    model_name: gemini-3-flash-preview    
+    thinking_level: "low"     
+config4:
+    provider: GeminiModel    
+    model_name: gemini-3.1-flash-lite-preview    
+    thinking_level: "low"     
+config5: 
     provider: CerebrasModel
     model_name: qwen-3-235b-a22b-instruct-2507
-    reasoning_effort: null
+    reasoning_effort: ~
+config6: 
+    provider: CerebrasModel
+    model_name: llama3.1-8b
+    reasoning_effort: ~
     
