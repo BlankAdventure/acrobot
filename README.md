@@ -143,7 +143,7 @@ When acrobat is started, it will simply pass any fields listed under `custom` (i
 
 (in no particular order)
 
-- [ ] Add testing for config.py
+- [ ] Beautify this readme
 - [ ] Option to auto-swap models in case of API errors (time-outs, rate limits, etc)
 - [ ] Use protocol instead of inheritance for model plug-in system
 - [ ] Streamline app configuration handling:
@@ -158,6 +158,6 @@ When acrobat is started, it will simply pass any fields listed under `custom` (i
 - [x] Add CLI entry point for acronym generation (useful for sanity checking)
 - [x] Allow in-chat model switching
 - [x] Specify optional path/url for alternate yaml file via environment variable
-
+- [x] Add testing for config.py
 
 
